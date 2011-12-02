@@ -1,5 +1,5 @@
 <?php
-// $Id: block.admin.inc 120 2011-09-16 13:28:00Z yd2004 $
+// $Id$
 
 function block_admin_default() {
   dd_goto('admin/blocks/settings/' .$GLOBALS['conf']['default_theme']);

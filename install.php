@@ -1,5 +1,5 @@
 <?php
-// $Id: install.php 114 2011-09-05 08:58:09Z yd2004 $
+// $Id$
 
 error_reporting(E_ALL ^ E_NOTICE);
 

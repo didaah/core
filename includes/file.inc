@@ -1,5 +1,5 @@
 <?php
-// $Id: file.inc 124 2011-10-08 08:06:47Z yd2004 $
+// $Id$
 /*
   '#enctype' => 'multipart/form-data'
   $form['fields']['file'] = array(

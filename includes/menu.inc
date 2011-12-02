@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc 120 2011-09-16 13:28:00Z yd2004 $
+// $Id$
 
 define('MENU_NOT_FOUND', 1);//404错误
 define('MENU_ACCESS_DENIED', 2);//403错误

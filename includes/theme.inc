@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc 128 2011-10-17 06:36:59Z yd2004 $
+// $Id$
 
 function theme_init() {
   global $conf, $base_path, $base_theme_name, $base_theme_info;

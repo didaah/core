@@ -1,4 +1,4 @@
-// $Id: system.js 43 2010-08-20 14:02:46Z yd2004 $
+// $Id$
 $(function() {
   var adminMenu = Dida.getck('admin_menu');
   if (adminMenu) {

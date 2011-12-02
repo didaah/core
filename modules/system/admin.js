@@ -1,4 +1,4 @@
-// $Id: admin.js 120 2011-09-16 13:28:00Z yd2004 $
+// $Id$
 $(function() {
   $('#field_admin_list select[name="field_list_required"]').change(function() {
     $.ajax({

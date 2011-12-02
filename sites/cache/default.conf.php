@@ -1,5 +1,5 @@
 <?php
-// $Id: default.conf.php 2 2010-04-27 13:41:44Z yd2004 $
+// $Id$
 
 // 请不要删除本文件
 $conf = array(

@@ -1,5 +1,5 @@
 <?php
-// $Id: user.install 89 2011-03-20 13:36:44Z yd2004 $
+// $Id$
 
 /**
  * @Implement of hook_update_x()

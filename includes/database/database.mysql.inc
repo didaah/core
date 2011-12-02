@@ -1,5 +1,5 @@
 <?php
-// $Id: database.mysql.inc 117 2011-09-08 06:32:18Z yd2004 $
+// $Id$
 
 /**
  * @Implement of hook_db_info()

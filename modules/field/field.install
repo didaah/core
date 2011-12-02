@@ -1,5 +1,5 @@
 <?php
-// $Id: field.install 25 2010-06-12 07:18:02Z yd2004 $
+// $Id$
 
 function field_schema(){
   $schema['fields'] = array(

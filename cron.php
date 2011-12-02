@@ -1,5 +1,5 @@
 <?php
-// $Id: cron.php 93 2011-04-05 15:53:12Z yd2004 $
+// $Id$
 
 /**
  * @方法 dd_save_cron()

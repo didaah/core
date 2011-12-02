@@ -1,4 +1,4 @@
-// $Id: ahah.js 27 2010-06-23 06:39:46Z yd2004 $
+// $Id$
 $(function() {
   for (var attr in settings.ahah) {
     var element = settings.ahah[attr];

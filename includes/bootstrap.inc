@@ -1,5 +1,5 @@
 <?php
-// $Id: bootstrap.inc 139 2011-12-02 11:07:32Z yd2004@gmail.com $
+// $Id$
 
 define('DIDA_VERSION', '1.0 alpha 3');
 
@@ -3409,7 +3409,7 @@ function dd_decode_ascii($str, $imp = '.') {
  * @return (bool)
  */
 function cache_system_set_file($filename, $var_name, $value, $path = 1) {
-  $info = '//$Id: bootstrap.inc 139 2011-12-02 11:07:32Z yd2004@gmail.com $' . "\n\n";
+  $info = '//$Id$' . "\n\n";
 
   if (!is_string($value)) {
     $value = var_export($value, true);

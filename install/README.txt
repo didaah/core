@@ -1,4 +1,4 @@
-// $Id: README.txt 2 2010-04-27 13:41:44Z yd2004 $
+// $Id$
 
 自定义安装：
 1、若 install/install.php 文件存在，且 install() 存在，将包含此文件，并调用 install() 来安装系统

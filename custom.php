@@ -1,5 +1,5 @@
 <?php
-// $Id: custom.php 59 2010-10-03 02:48:24Z yd2004 $
+// $Id$
 
 if (!isset($_GET['module'])) die('byebye');
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: system.captcha.inc 27 2010-06-23 06:39:46Z yd2004 $
+// $Id$
 
 function captcha_page() {
   if ($_GET['form_id']) {

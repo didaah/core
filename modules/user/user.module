@@ -1,5 +1,5 @@
 <?php
-// $Id: user.module 132 2011-11-07 08:36:18Z yd2004 $
+// $Id$
 
 /**
  * 权限注册：hook_perm();

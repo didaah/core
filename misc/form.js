@@ -1,4 +1,4 @@
-// $Id: form.js 27 2010-06-23 06:39:46Z yd2004 $
+// $Id$
 $(function() {
   $("input@[type='text'], input@[type='password']").hover(function() {
     $(this).addClass('inputhover');

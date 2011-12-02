@@ -1,5 +1,5 @@
 <?php
-// $Id: user.admin.inc 107 2011-08-17 16:52:38Z yd2004 $
+// $Id$
 
 function _user_admin_tabs() {
   dd_set_tabs(array(

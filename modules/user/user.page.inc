@@ -1,5 +1,5 @@
 <?php
-// $Id: user.page.inc 89 2011-03-20 13:36:44Z yd2004 $
+// $Id$
 
 function user_default() {
   global $user;

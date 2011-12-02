@@ -1,4 +1,4 @@
-// $Id: field.js 27 2010-06-23 06:39:46Z yd2004 $
+// $Id$
 var fields = {ajaxCache: []};
 fields.option_count = 0;
 

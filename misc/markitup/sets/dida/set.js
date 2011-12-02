@@ -1,4 +1,4 @@
-// $Id: set.js 97 2011-05-09 10:48:30Z yd2004 $
+// $Id$
 
 Dida.markitup = {html: {}, tools: {}, cache: {}};
 

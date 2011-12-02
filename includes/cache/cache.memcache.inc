@@ -1,5 +1,5 @@
 <?php
-//$Id: cache.memcache.inc 106 2011-08-12 14:19:13Z yd2004 $
+//$Id$
 
 if (cache_memcache_onnect()) {
   /**

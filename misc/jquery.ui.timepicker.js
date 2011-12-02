@@ -1,4 +1,4 @@
-//$Id: jquery.ui.timepicker.js 84 2011-02-24 04:08:55Z yd2004 $
+//$Id$
 
 /*
 * jQuery timepicker addon

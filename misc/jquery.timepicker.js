@@ -114,4 +114,4 @@
 
 
 
-/* SVN: $Id: jquery.timepicker.js 27 2010-06-23 06:39:46Z yd2004 $ */
+/* SVN: $Id$ */

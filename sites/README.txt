@@ -1,4 +1,4 @@
-// $Id: README.txt 74 2011-01-04 14:59:05Z yd2004 $
+// $Id$
 
 ./sites/modules：非核心模块
 ./sites/themes：自定义主题

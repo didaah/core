@@ -1,5 +1,5 @@
 <?php
-// $Id: user.tpl.php 65 2010-11-10 09:20:40Z yd2004 $
+// $Id$
 // print_r($account);
 ?>
 

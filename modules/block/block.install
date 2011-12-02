@@ -1,5 +1,5 @@
 <?php
-// $Id: block.install 76 2011-01-13 03:00:56Z yd2004 $
+// $Id$
 function block_schema() {
   $schema['blocks'] = array(
     'description' => '区块',

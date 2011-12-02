@@ -1,4 +1,4 @@
-// $Id: dida.js 136 2011-11-22 03:45:20Z yd2004@gmail.com $
+// $Id$
 var Dida = {cache: {}};
 Dida.dejson = function(data) {
   if ((data.substring(0, 1) != '{') && (data.substring(0, 1) != '[')) {

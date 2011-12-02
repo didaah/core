@@ -1,5 +1,5 @@
 <?php
-// $Id: default.setting.php 92 2011-03-24 07:12:48Z yd2004 $
+// $Id$
 
 // 请不要修改和删除本文件
 // 复制本文件到 sites/ 或 sites/demo.mysite.com 目录，并重命名为 setting.php

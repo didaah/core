@@ -1,5 +1,5 @@
 <?php
-// $Id: form.inc 135 2011-11-16 08:34:19Z yd2004 $
+// $Id$
 
 /**
   $form['fields']['account'] = array(

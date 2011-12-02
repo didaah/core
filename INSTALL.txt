@@ -1,4 +1,4 @@
-// $Id: INSTALL.txt 2 2010-04-27 13:41:44Z yd2004 $
+// $Id$
 
 环境需求：mysql 5+ php 5.2+  PDO mb json
 目录权限，以下目录必须可读写：

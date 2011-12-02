@@ -1,5 +1,5 @@
 <?php
-// $Id: system.admin.inc 123 2011-10-08 06:55:40Z yd2004 $
+// $Id$
 
 /**
  * 管理首页区块，提供钩子 hook_system_admin_default()

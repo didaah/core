@@ -9,7 +9,7 @@
  * Project home:
  *   http://www.appelsiini.net/projects/jeditable
  *
- * Revision: $Id: jquery.jeditable.time.js 2 2010-04-27 13:41:44Z yd2004 $
+ * Revision: $Id$
  *
  */
  
