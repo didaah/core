@@ -1,0 +1,56 @@
+/* $Id: style.css 128 2011-10-17 06:36:59Z yd2004 $ */
+body {
+  font-family: "Microsoft YaHei","Microsoft JhengHei",Helvetica,Arial,sans-serif;
+}
+
+#wrapper {
+  width: 960px;
+}
+
+#main {
+  margin: 10px auto;
+  clear: both;
+  padding: 5px;
+  overflow: hidden;
+}
+
+#header {
+	height: 100px;
+  padding: 0px;
+  position:relative;
+  text-align: left;
+  z-index: 10;
+}
+
+/*site menu*/
+#header .menu {
+  bottom: 0;
+  height: 30px;
+  line-height: 30px;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+}
+
+#header .menu .site_menu {
+  height: 30px;
+  float: right;
+}
+
+/* logo */
+#header .logo {
+  display:block;
+  padding-top: 6px;
+  padding-left: 6px;
+  float: left;
+}
+
+/*footer*/
+#footer { 
+	clear: both;
+	height: 120px;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  padding: 20px 0;
+}
