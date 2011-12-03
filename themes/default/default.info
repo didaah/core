@@ -1,5 +1,5 @@
 <?php
-// $Id: default.info 128 2011-10-17 06:36:59Z yd2004 $
+// $Id$
 $info = array(
   'name' => 'default',
   'ver' => '1.0',
