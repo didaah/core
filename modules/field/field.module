@@ -1234,8 +1234,8 @@ function field_save(&$field) {
       $error['type']['#error'][] = t('field', '字段标识不能为空');
     } else if (!$field->field_key) {
       $error['field_key']['#error'][] = t('field', '索引不能为空');
-    } else if (mb_strlen($field->type, 'utf-8') > 16) {
-      $error['type']['#error'][] = t('field', '字段标识长度不超过 %strlen 个字符', array('%strlen' => 16));
+    } else if (mb_strlen($field->type, 'utf-8') > 32) {
+      $error['type']['#error'][] = t('field', '字段标识长度不超过 %strlen 个字符', array('%strlen' => 32));
     } else if (mb_strlen($field->field_func, 'utf-8') > 64) {
       $error['field_func']['#error'][] = t('field', '回调函数长度不超过 %strlen 个字符', array('%strlen' => 64));
     } else if ($field->name && mb_strlen($field->name, 'utf-8') > 64) {
@@ -2183,13 +2183,24 @@ function field_field_call_load(&$field) {
 */
 
 /**
- * @Implement of hook_field_call_delete()
- *  删除字段
+ * 删除组下所有字段，不验证字段删除权限，一般用于模块卸载 
+ * @param string $module 
+ *  模块名称
+ * @param string $type 
+ *  组名称
+ * @access public
+ * @return bool
  */
-/*
-function field_field_call_delete($field) {
+function field_field_call_delete($module, $type) {
+  if ($fields = field_get_cache_field_group($module, $type)) {
+    
+    foreach ($fields as $field) {
+      field_delete($field);
+    }
+
+    return true;
+  }
 }
-*/
 
 /**
  * @Implement of hook_field_call_save()

@@ -1,6 +1,70 @@
 <?php
 // $Id$
 
+/*
+ * @Implement of hook_update_X()
+ */
+function field_update_2(){
+
+  /**
+   * 改变 fields 表中 field_type、type 字段的长度
+   */
+  $ret = array();
+
+  $field_type = array(
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => '字段类型标识'
+  );
+  
+  $type = array(
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => '调用标识'
+  );
+
+  if ($ret = db_change_field('fields', 'field_type', 'field_type', $field_type)) {
+    $ret += db_change_field('fields', 'type', 'type', $type);
+  }
+  
+  return $ret;
+}
+
+/**
+ * @Implement of hook_update_X()
+ */
+function field_update_1(){
+  /**
+   * 字段增加索引值 field_key，在节点调用中，可输出关联数组，方便调用
+   */
+  $ret = array();
+  $field_key = array(
+    'type' => 'varchar',
+    'length' => 128,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => '字段索引'
+  );
+  
+  $ret = db_add_field('fields', 'field_key', $field_key);
+  
+  if($ret){
+    db_exec('UPDATE {fields} SET field_key = field_id');
+    db_add_unique('fields', 'ftm', array('field_key', 'type', 'module'));
+  }
+  
+  field_get_cache_field(NULL, 1);
+  
+  return $ret;
+}
+
+/**
+ * @Implement of hook_schema()
+ */
 function field_schema(){
   $schema['fields'] = array(
     'description' => '字段',
@@ -12,7 +76,7 @@ function field_schema(){
       ),
     	'field_type' => array(
         'type' => 'varchar',
-        'length' => 16,
+        'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => '字段类型标识'
@@ -33,7 +97,7 @@ function field_schema(){
       ),
     	'type' => array(
         'type' => 'varchar',
-        'length' => 16,
+        'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => '调用标识'
@@ -276,33 +340,8 @@ function field_install() {
 }
 
 /**
- * @Implement of hook_update_X()
+ * @Implement of hook_uninstall()
  */
-function field_update_1(){
-  /**
-   * 字段增加索引值 field_key，在节点调用中，可输出关联数组，方便调用
-   */
-  $ret = array();
-  $field_key = array(
-    'type' => 'varchar',
-    'length' => 128,
-    'not null' => TRUE,
-    'default' => '',
-    'description' => '字段索引'
-  );
-  
-  $ret = db_add_field('fields', 'field_key', $field_key);
-  
-  if($ret){
-    db_exec('UPDATE {fields} SET field_key = field_id');
-    db_add_unique('fields', 'ftm', array('field_key', 'type', 'module'));
-  }
-  
-  field_get_cache_field(NULL, 1);
-  
-  return $ret;
-}
-
 function field_uninstall() {
   $ret = array();
   $ret = module_install_schema('uninstall', 'field');
