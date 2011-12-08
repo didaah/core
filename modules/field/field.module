@@ -2191,7 +2191,7 @@ function field_field_call_load(&$field) {
  * @access public
  * @return bool
  */
-function field_field_call_delete($module, $type) {
+function field_group_delete($module, $type) {
   if ($fields = field_get_cache_field_group($module, $type)) {
     
     foreach ($fields as $field) {

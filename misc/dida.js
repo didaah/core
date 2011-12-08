@@ -392,7 +392,7 @@ Dida.ajaxSuccess = function(obj, data, type) {
           } else if (type == 'a') {
             alert(data ? data : '操作失败');
           } else {
-            obj.after('<span class="msgjs">' + (data ? data : '操作失败') + '</span>');
+            obj.after('<span class="red msgjs">' + (data ? data : '操作失败') + '</span>');
           }
       }
     }
@@ -512,18 +512,18 @@ $(function() {
     return false;
   });
   
-  $('.dc_form_ajax_form_button').click(function() {
-    var s = $.param($(this).parents('form').formToArray());
-    var getUrl = $(this).attr('alt');
+  $('.dd_form_ajax_form_button').click(function() {
+    var getUrl = $(this).attr('href');
+    var $$ = $(this);
     if (getUrl) {
+      $$.addClass('ja_loading');
       $.ajax({
         type: 'POST',
         url: getUrl,
         dataType: 'script',
-        data: s,
-        error: function(e) {
-          alert('error');
-        }
+        data: $$.parents('form').serialize(),
+        success: function(data) { Dida.ajaxSuccess($$, data); },
+        error: function(e) { alert('error'); }
       });
     };
     return false;
