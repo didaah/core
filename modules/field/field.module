@@ -2330,22 +2330,45 @@ function field_get_cache_term($module, $type) {
  */
 function field_get_cache_term_key($module, $type, $field_key) {
   static $term;
-  $key = 'field_term_key_cache_'.$module.'_'.$type . '_' . $field_key;
+  $key = 'field_term_key_cache_' . $module . '_' . $type . '_' . $field_key;
+  
   if (!isset($term[$key])) {
     $term[$key] = array();
     if ($cache = cache_get($key)) {
       $term[$key] = $cache->data;
-    } else if ($data = field_get_cache_term($module, $type)) {
-      $term[$key] = array();
-      if ($field = field_get_cache_field_key($module, $type, $field_key)) {
-        $term[$key] = $data[$field->field_id];
-      }
+    } else if ($field = field_get_cache_field_key($module, $type, $field_key)) {
+      $term[$key] = field_get_cache_term_id($field->field_id);
       cache_set($key, $term[$key]);
     }
   }
+  
   return $term[$key];
 }
 
+/**
+ * 获取指定 field_id 的所有分类数据
+ */
+function field_get_cache_term_id($field_id) {
+  static $term;
+
+  if (!isset($term[$field_id])) {
+    
+    $term[$field_id] = array();
+    if ($cache = cache_get('field_term_all_' . $field_id)) {
+      $term[$field_id] = $cache->data;
+    } else if ($fetch = db_query('SELECT t.*, f.module, f.type, f.field_type, f.field_key FROM {fields_term} 
+    t INNER JOIN {fields} f ON t.field_id = f.field_id WHERE f.field_id = ? 
+    ORDER BY t.weight ASC, t.tid ASC', array($field_id))) {
+      foreach ($fetch as $o) {
+        $term[$field_id][$o->tid] = $o;
+      }
+      cache_set('field_term_all_' . $field_id, $term[$field_id]);
+    }
+    
+  }
+  
+  return $term[$field_id];
+}
 
 /**
  * 获取（清除）所有字段缓存数据
