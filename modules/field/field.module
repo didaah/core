@@ -2055,15 +2055,7 @@ function field_term_save(&$field, $term, $batch = 0) {
 	
   if (!$term->field_id) $term->field_id = $field->field_id;
   
-  if ($term->tid) {
-    if (!db_query('SELECT tid FROM {fields_term} WHERE field_id = ? AND name = ? AND tid != ? AND pid = ?',
-    array($field->field_id, $term->name, $term->tid, $term->pid), array('return' => 'column'))) {
-      $newterm = field_term_update($term);
-    } else {
-      dd_set_message(t('field', '%string 已经存在', array('%string' => $term->name)), 'error');
-      return false;
-    }
-  } else if ($batch) {
+  if ($batch) {
     static $data;
     if (!isset($data[$term->field_id])) {
       $data[$term->field_id] = array($term->pid => array());
@@ -2078,6 +2070,15 @@ function field_term_save(&$field, $term, $batch = 0) {
       $newterm = field_term_update($term);
     } else {
       $newterm = field_term_insert($term);
+    }
+
+  } else if ($term->tid) {
+    if (!db_query('SELECT tid FROM {fields_term} WHERE field_id = ? AND name = ? AND tid != ? AND pid = ?',
+    array($field->field_id, $term->name, $term->tid, $term->pid), array('return' => 'column'))) {
+      $newterm = field_term_update($term);
+    } else {
+      dd_set_message(t('field', '%string 已经存在', array('%string' => $term->name)), 'error');
+      return false;
     }
   } else if (!db_query('SELECT tid FROM {fields_term} WHERE field_id = ? AND name = ? AND pid = ?',
   array($field->field_id, $term->name, $term->pid), array('return' => 'column'))) {
@@ -2623,7 +2624,8 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
        *  delete：删除节点
        *  update：更新节点
        */
-      $data->field_func('load', $data, $node);
+      $function = $data->field_func;
+      $function('load', $data, $node);
     }
   }
   
@@ -2992,7 +2994,8 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
        *  delete：删除节点
        *  update：更新节点
        */
-      $data->field_func('form', $data, $node, $form);
+      $function = $data->field_func;
+      $function('form', $data, $node, $form);
     }
   }
 }
@@ -3259,7 +3262,8 @@ function field_get_node_validate($module, $type, $value, $node = NULL, $form = N
         if (function_exists($function)) $t = $function($data, $value, $node, $form);
       }
     } else {
-      $t = $data->field_func('validate', $data, $node, $form, $value);
+      $function = $data->field_func;
+      $t = $function('validate', $data, $node, $form, $value);
     }
   }
   return $t;
@@ -3399,7 +3403,8 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
         if (function_exists($function)) $t = $function($data, $node, $view_type);
       }
     } else {
-      $data->field_func('view', $data, $node, $view_type);
+      $function = $data->field_func;
+      $function('view', $data, $node, $view_type);
     }
   }
 }
@@ -3601,7 +3606,8 @@ function field_get_node_save($module, $type, $value, $node = NULL, $form = NULL,
         if (function_exists($function)) $function($data, $value, $node, $form);
       }
     } else {
-      $data->field_func('save', $data, $node, $form, $value);
+      $function = $data->field_func;
+      $function('save', $data, $node, $form, $value);
     }
   }
   
@@ -3676,7 +3682,8 @@ function field_get_node_delete($module, $type, $node) {
       }
       
     } else {
-      $data->field_func('delete', $data, $node);
+      $function = $data->field_func;
+      $function('delete', $data, $node);
     }
     
   }
