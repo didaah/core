@@ -293,23 +293,6 @@ function file_form_save($form, $files) {
   }
 }
 
-function file_set($filepath, $uid, $info = true) {
-  $t = new stdClass();
-  $t->filepath = $filepath;
-  $t->filemime = file_get_mimetype(end(explode('.', $filepath)));
-  if ($info) {
-    $t->filesize = filesize($filepath);
-  }
-  $t->filename = end(explode('/', $filepath));
-  $t->uid = $uid ? $uid : $GLOBALS['user']->uid;
-  $t->status = 1;
-  $t->timestamp = $_SERVER['REQUEST_TIME'];
-  if (db_exec('INSERT INTO {files} (uid, filename, filepath, filemime, filesize, status, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)', array($t->uid, $t->filename, $t->filepath, $t->filemime, $t->filesize, $t->status, $t->timestamp))) {
-    $t->fid = db_last_insert_id();
-    return $t;
-  }
-}
-
 /**
  * 保存上传文件
  * @param (string) $file
@@ -440,7 +423,7 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
   if (!empty($validate['filepath'])) {
     $file->filepath = $validate['filepath'];
   } else if ($validate['savepath']) {
-    $savepath = file_mkdir(file_directory_path() . '/' .$validate['savepath']);
+    $savepath = file_mkdir(file_directory_path() . '/' . $validate['savepath']);
   } else {
     $savepath = file_get_path();
   }
@@ -622,41 +605,45 @@ function file_save_validate(&$file, $validate) {
 }
 
 /**
- * 文件信息写入数据库
+ * 文件信息写入数据库 
+ * @param object $file 
+ *  待写入的文件对象
+ * @access public
+ * @return bool|object 成功返回 $file，失败返回 false
  */
 function file_save($file) {
- // if (!$file->ext_id) $file->ext_id = 0;
   
- // if (!$file->ext_id2) $file->ext_id2 = 0;
+  if (empty($file->filepath)) return false;
+
+  if (!isset($file->uid)) $file->uid = $GLOBALS['user']->uid;
   
- // if (!$file->ext_type) $file->ext_type = '';
+  if (empty($file->timestamp)) $file->timestamp = $_SERVER['REQUEST_TIME'];
   
-  if (!$file->uid) $file->uid = $GLOBALS['user']->uid;
-  
-  if (!$file->timestamp) $file->timestamp = $_SERVER['REQUEST_TIME'];
-  
- // if (!isset($file->filebody)) $file->filebody = '';
-  
-  if ($file->body) $file->filebody = $file->body;
-  
+  if (!empty($file->body)) $file->filebody = $file->body;
+
+  if (empty($file->filemime)) {
+    $file->filemime = file_get_mimetype(end(explode('.', $file->filepath)));
+  }
+
+  if (empty($file->filesize)) {
+    $file->filesize = filesize($file->filepath);
+  }
+
+  if (empty($file->filename)) {
+    $file->filename = end(explode('/', $file->filepath));
+  }
+ 
   if (!empty($file->fid)) {
     $args[] = 'fid';
   } else {
     $args = NULL;
   }
   
-  /*
-  if (db_exec('INSERT INTO {files} (uid, filename, filepath, filemime, filesize, status,
-  timestamp, ext_id, ext_id2, ext_type, filebody) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-  array($file->uid, $file->filename, $file->filepath, $file->filemime,
-  $file->filesize, $file->status, $file->timestamp, $file->ext_id,
-  $file->ext_id2, $file->ext_type, $file->filebody))) {
-  */
-  
   if (db_write_record('files', $file, $args)) {
     return $file;
   }
-  
+
+  return false; 
 }
 
 /**

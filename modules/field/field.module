@@ -871,7 +871,7 @@ function field_field_call_form($field, &$form) {
       '#type' => 'textfield',
       '#title' => t('field', '路径'),
       '#default_value' => $field->data['savepath'],
-      '#description' => t('field', '文件保存路径，留空则使用用户默认文件路径')
+      '#description' => t('field', '文件保存路径，留可使用<a href="!url">通配符</a>，空则使用用户默认文件路径', array('!url' => url('admin/token')))
     );
   } else if ($field->field_type == 'tags') {
     $form['fields']['data']['validate'] = array(
@@ -2942,11 +2942,6 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               '#type' => 'file',
               '#multi' => $multi,
               '#disabled' => $disabled,
-              '#validate' => array(
-                'filetype' => $data->data['filetype'],
-                'savepath' => $data->data['savepath'],
-                'filesize' => $data->data['filesize'] ? $data->data['filesize'] : 999999
-              ),
               '#required' => $node->fields[$data->field_key] ? false : $required,
             );
             $description = '';
@@ -3169,7 +3164,7 @@ function field_get_multi_level_field($field, $value, &$form = NULL) {
 /**
  * 节点回调字段验证
  */
-function field_get_node_validate($module, $type, $value, $node = NULL, $form = NULL) {
+function field_get_node_validate($module, $type, $value, $node = NULL, &$form = NULL) {
   if (!$group = module_invoke($module, 'field_call_group', $type)) {
     return;
   }
@@ -3508,11 +3503,13 @@ function field_get_node_save($module, $type, $value, $node = NULL, $form = NULL,
           break;
           case 'file':
             if ($_FILES['fields'] && $_FILES['fields']['name'][$data->field_key]) {
+
               $validate = array(
                 'filetype' => $data->data['filetype'],
-                'savepath' => $data->data['savepath'],
-                'filesize' => $data->data['filesize'] ? $data->data['filesize'] : 999999
+                'savepath' => !empty($data->data['savepath']) ? dd_get_token($data->data['savepath'], $value) : '',
+                'filesize' => !empty($data->data['filesize']) ? $data->data['filesize'] : 999999
               );
+
               if (is_array($_FILES['fields']['name'][$data->field_key])) {
                 $files = 0;
                 foreach ($_FILES['fields']['name'][$data->field_key] as $i => $name) {
@@ -3728,3 +3725,42 @@ function field_system_cache_clear($op = 'list', $v = NULL) {
       }
   }
 }
+
+/**
+ * @Implement of hook_token_replace()
+ */
+function field_token_replace($text, $value = NULL) {
+  
+  if (!is_object($value)) return $text;
+
+	$args = array(
+		'[field_nid]' => $value->nid,
+		'[field_uid]' => $value->uid,
+		'[field_created]' => $value->created,
+		'[field_updated]' => $value->updated,
+  );
+
+	return strtr($text, $args);
+}
+
+/**
+ * @Implement of hook_token_list()
+ */
+function field_token_list() {
+	return array(
+		'[field_uid]' => array(
+			'title' => t('field', '用户 id'),
+		),
+		'[field_nid]' => array(
+			'title' => t('field', '节点 id'),
+		),
+		'[field_created]' => array(
+			'title' => t('field', '节点添加时间'),
+		),
+		'[field_updated]' => array(
+			'title' => t('field', '节点更新时间'),
+		),
+	);
+}
+
+
