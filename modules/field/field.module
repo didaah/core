@@ -3677,12 +3677,12 @@ function field_get_node_delete($module, $type, $node) {
           
           case 'textfield':
             db_exec('DELETE FROM {fields_small} WHERE nid = ? AND field_id = ?',
-            array($node->nid, $field_id));
+            array($node->nid, $data->field_id));
           break;
           
           case 'textarea':
             db_exec('DELETE FROM {fields_long} WHERE nid = ? AND field_id = ?',
-            array($node->nid, $field_id));
+            array($node->nid, $data->field_id));
             
           break;
           case 'file':
