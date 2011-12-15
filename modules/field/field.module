@@ -2516,7 +2516,7 @@ function field_get_cache_field_id($module, $type, $field_id) {
  *
  * 本函数获取的 nid 数据，包括所有对应的字段，请不要直接通过本函数来获取节点对应的字段数据
  */
-function field_get_node_data($nid, $type = 'term', $clear = NULL) {
+function _field_get_node_data($nid, $type = 'term', $clear = NULL) {
   static $data;
   
   if ($clear) {
@@ -2596,7 +2596,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
       // 没有自定义处理函数的字段
       if (in_array($data->field_type, $term_type)) {
         // 分类类型
-        if ($fetch = field_get_node_data($node->nid, 'term')) {
+        if ($fetch = _field_get_node_data($node->nid, 'term')) {
           foreach ($fetch as $o) {
             if ($o->field_id == $data->field_id) {
               
@@ -2612,7 +2612,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
         }
       } else if ($data->field_type == 'textfield' || $data->field_type == 'textarea') { 
         // 单行文本 和 多行文本
-        if ($fetch = field_get_node_data($node->nid, $data->field_type)) {
+        if ($fetch = _field_get_node_data($node->nid, $data->field_type)) {
           foreach ($fetch as $o) {
             if ($o->field_id == $data->field_id) {
               $node->fields[$data->field_key] = $o;
@@ -2621,7 +2621,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
           }
         }
       } else if ($data->field_type == 'file') { // 上传字段
-        if ($fetch = field_get_node_data($node->nid, 'file')) {
+        if ($fetch = _field_get_node_data($node->nid, 'file')) {
           foreach ($fetch as $o) {
             if ($o->field_id == $data->field_id) {
               $node->fields[$data->field_key][$o->fid] = $o;
@@ -3686,9 +3686,11 @@ function field_get_node_delete($module, $type, $node) {
             
           break;
           case 'file':
-            if ($files = field_get_node_data($node->nid, 'file')) {
+            if ($files = _field_get_node_data($node->nid, 'file')) {
               foreach ($files as $file) {
-                file_delete($file->fid, 1, $file->filepath);
+                if ($file->field_id == $data->field_id) {
+                  file_delete($file->fid, 1, $file->filepath);
+                }
               }
             }
           break;
