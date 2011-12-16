@@ -136,7 +136,11 @@ function bootstrap($op, $inc = NULL) {
       // session 及配置
       conf_init();
 
-      require_once var_get('dd_cache_file', DIDA_ROOT . '/includes/cache.inc');
+      if (is_file(DIDA_ROOT . var_get('dd_cache_file'))) {
+        require_once DIDA_ROOT . var_get('dd_cache_file');
+      } else {
+        require_once DIDA_ROOT . '/includes/cache.inc';
+      }
 
       if (is_array($inc)) {
         foreach ($inc as $filename) {
