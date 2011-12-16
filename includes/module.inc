@@ -421,7 +421,7 @@ function module_set_enabled($list, $type, $modules = array()) {
       }
       
       require_once DIDA_ROOT .'/'. $v['path'] .'/'. $v['filename'] .'.module';
-      $install_file =DIDA_ROOT .'/'.  $v['path'] .'/'. $v['filename'] .'.install';
+      $install_file = DIDA_ROOT .'/'.  $v['path'] .'/'. $v['filename'] .'.install';
       
       if (is_file($install_file)) {
         require_once $install_file;

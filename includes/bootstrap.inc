@@ -326,24 +326,32 @@ function dd_goto($path = '', $query = NULL, $file = NULL, $fragment = NULL, $htt
  *    'query' => (array or string), // 数组：array('op' => 'insert', 'id' => 1)， 或字符串：op=insert&id=1
  *    'absolute' => (bool), // 若为 true，则输出完整路径(包含域名)
  *    'file' => (bool), // 是否为物理文件
+ *    'access' => (bool), // 是否检查权限
  *  )
  * @return (string) html a，如：<a href="url">test</a>
  */
 function l($text, $path, $options = array()) {
   if (!$options['attributes']) $options['attributes'] = array();
+
   if (!$options['attributes']['title']) {
     $options['attributes']['title'] = $text;
   }
+
   if ($options['strlen'] && mb_strlen($text) > $options['strlen']) {
     $text = mb_substr($text, 0, intval($options['strlen'])) . '...';
   }
+
   if ($_GET['q'] == $path) {
     $options['attributes']['class'] .= $options['attributes']['class'] ? ' active' : 'active';
   }
+
   if (isset($options['attributes']['title']) && strpos($options['attributes']['title'], '<') !== FALSE) {
     $options['attributes']['title'] = strip_tags($options['attributes']['title']);
   }
-  return '<a href="'. url($path, $options) .'"'. dd_attributes($options['attributes']) .'>'. ($options['html'] ? $text : strip_tags($text)) .'</a>';
+
+  if ($url = url($path, $options)) {
+    return '<a href="'. $url .'"'. dd_attributes($options['attributes']) .'>'. (!empty($options['html']) ? $text : strip_tags($text)) .'</a>';
+  }
 }
 
 /**
@@ -404,24 +412,34 @@ function f($filepath) {
  *    'query' => (array or string), // 数组：array('op' => 'insert', 'id' => 1)， 或字符串：op=insert&id=1
  *    'absolute' => (bool), // 若为 true，则输出完整路径(包含域名)
  *    'file' => (bool), // 是否为物理文件
+ *    'access' => (bool), // 是否检查权限
  *  )
  * @return (string) 返回处理后的 url
  */
 function url($path = NULL, $options = array()) {
+
+  if (!empty($options['access']) && menu_get_item($path) != MENU_ACCESS_OK) {
+    return false;
+  }
+
   if ($options['file']) {
     return f($path);
   }
+
   if (!isset($options['external'])) {
     $options['external'] = _l_external($path);
   }
+
   if ($options['external']) {
     return $path;
   }
+
   if ($options['fragment']) {
     $options['fragment'] = '#'. $options['fragment'];
   }
 
   global $conf, $base_url, $base_path;
+
   if (is_array($options['query'])) {
     $options['query'] = dd_query_string_encode($options['query']);
   } else if (strpos($options['query'], '=') === false) {
