@@ -662,7 +662,7 @@ function module_invoke_all() {
      * 若有新的接口实现，应清除缓存，调用 module_hook_set_cache() 亦可
      */
     if ($functions = module_hook_get_cache($hook)) {
-      foreach ($functions as $function) {
+      foreach ($functions as $module => $function) {
         if (function_exists($function)) {
           $result = call_user_func_array($function, $args);
           if (is_array($result)) {

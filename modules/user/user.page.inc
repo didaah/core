@@ -11,6 +11,257 @@ function user_default() {
 }
 
 /**
+ * @Implement of hook_user_center() 
+ * @param string $op 
+ * @param object $account 
+ * @access public
+ * @return void
+ */
+function user_user_center_info() {
+  return array(
+    'default' => array(
+      'title' => '个人中心',
+      'path' => 'user/center',
+      'weight' => -1000
+    ),
+    'newpass' => array(
+      'title' => '修改密码',
+    ),
+    'edit' => array(
+      'title' => '编辑资料'
+    ),
+    'logout' => array(
+      'title' => '安全离开',
+      'weight' => 1000,
+      'path' => 'user/logout'
+    )
+  );
+}
+
+/**
+ * 个人中心页面显示
+ * @Implement of hook_user_center_view() 
+ * @param object $center 
+ *  页面对象
+ * @access public
+ * @return void
+ */
+function user_user_center_view($center) {
+  dd_add_css('modules/user/user.css');
+
+  switch ($center->type) {
+    case 'default':
+      if ($data = _module_invoke_all('user_center_default', $center)) {
+        $i = 0;
+        $contents = array();
+        foreach ($data as $module => $content) {
+          $row = array();
+          if (is_array($content)) {
+            $row['#weight'] = !isset($content['#weight']) ? $i : $content['#weight'];
+            $row['#data'] = $content['#data'];
+          } else {
+            $row['#weight'] = $i;
+            $row['#data'] = $content;
+          }
+          
+          $row['#data'] = '<div class="user_center_default_view_' . $module . '>'.$row['#data'].'</div>';
+          
+          $contents[] = $row;
+          ++$i;
+        }
+        
+        uasort($contents, 'dd_form_cmp');
+        
+        foreach ($contents as $d) {
+          $center->body .= $d['#data'];
+        }
+      }
+    break;
+    case 'newpass':
+      $center->body = dd_get_form('_user_center_newpass'); 
+    break;
+    case 'edit':
+      $center->body = dd_get_form('user_edit_form', $center->user);
+    break;
+  }
+
+}
+
+/**
+ * 获取个人中心页面 menu 
+ * @param object $center
+ *  个人中心对象
+ * @access protected
+ * @return array
+ */
+function _user_get_center_info($center) {
+
+  if ($cache = cache_get('user_center_menu_data')) {
+    $data = $cache->data;
+  } else {
+    
+    /**
+     * 读取自定义设置
+     * @TODO 目前提供自定义排序，未来提供自定义页面名称等设置
+     */
+    if ($cache = cache_get('user_center_info_settings')) {
+      $group = $cache->data['group'];
+      $links = $cache->data['links'];
+    } else {
+      $group = array('weight' => array());
+      $links = array('weight' => array());
+    }
+
+    if ($functions = module_hook_get_cache('user_center_info')) {
+      $menu = array();
+      $_menu = array();
+      foreach ($functions as $module => $function) {
+        if (function_exists($function)) {
+          $result = call_user_func($function);
+          
+          // hook_user_center_info() 必须返回数组
+          if (!is_array($result)) continue;
+
+          foreach ($result as $type => $info) {
+            
+            // 未定义页面标题，跳过
+            if (empty($info['title'])) continue;
+
+            // 自定义页面排序
+            if (isset($links['weight'][$type])) {
+              $info['weight'] = $links['weight'][$type];
+            }
+
+            if (empty($info['group'])) {
+              $info['group'] = $module;
+            }
+
+            if (empty($menu[$info['group']])) {
+              $menu[$info['group']] = array('links' => array());
+              // 自定义分组排序
+              if (isset($group['weight'][$info['group']])) {
+                $menu[$info['group']]['weight'] = $group['weight'][$info['group']];
+              }
+            }
+
+            $class = 'user_center_link user_center_link_' . $info['group'];
+
+            if (empty($info['attributes']) || empty($info['attributes']['class'])) {
+              $info['attributes'] = array('class' => $class);
+            } else {
+              $info['attributes']['class'] .= ' ' . $class;
+            }
+
+            if (empty($info['path'])) {
+              $info['path'] = 'user/center/' . $type;
+            }
+
+            //$info['data'] = l($info['title'], $info['path'], $info);
+
+            $info['attributes']['id'] = 'user_center_link_menu_' . $type;
+
+            $_menu[$type] = $info;
+
+            $menu[$info['group']]['links'][$type] = $info;
+          }
+        }
+      }
+
+      // 组排序
+      uasort($menu, 'dd_sort_cmp');
+     
+      $data = array('menu' => $_menu, 'links' => array());
+
+      foreach ($menu as $type => $link) {
+        uasort($link['links'], 'dd_sort_cmp');
+        $data['links'][$type] = $link;
+      }
+      cache_set('user_center_menu_data', $data);
+    }
+  }
+
+  $center->menu = $data['menu'];
+  $center->links = '';
+
+  foreach ($data['links'] as $type => $link) {
+    $item = array();
+    foreach ($link['links'] as $info) {
+      $info['data'] = l($info['title'], $info['path'], $info);
+      $item[] = $info;
+    }
+    $center->links .= theme('item_list', $item, NULL, 'ul', array(
+      'class' => 'user_center_link_item',
+      'id' => 'user_center_link_item_' . $type
+    ));
+  }
+
+}
+
+/**
+ * @Implement of hook_user_page()
+ */
+function user_user_center_default($center) {
+
+  $item[] = dd_get_strong(t('user', '注册时间')) . format_date($center->user->created);
+  
+  if (!empty($ac->login)) {
+    $item[] = dd_get_strong(t('user', '最近登录')) . format_date($center->user->login);
+  }
+
+  $centents = '';
+
+  if ($center->user->field_view) {
+    foreach ($center->user->field_view as $key => $data) {
+      if ($key != 'avatar') {
+        $item[] = array('data' => dd_get_strong($data['#name']) . $data['#content'], 'class' => 'user_field_view_'.$key);
+      } else {
+        $contents = '<div class="user_field_view_avatar">' . $data['#content'] . '</div>';
+      }
+    }
+  }
+  
+  $contents .= theme('item_list', $item, $center->user->name, 'ul', array('id' => 'user_center_default_view_fields'));
+  
+  return array('#data' => $contents, '#weight' => -100);
+}
+
+/**
+ * 用户个人中心
+ */
+function user_page_center() {
+	global $user;
+
+  $center = new stdClass;
+
+  $center->body = '';
+
+  $center->user = $user;
+
+  $center->args = arg();
+
+	$center->type = empty($center->args[2]) ? 'default' : $center->args[2];
+
+  /**
+   * 获取 $center->menu 和 $center->links
+   * $center->menu 是一个数组，包含所有个人中心的注册页面，约等于 module_invoke_all('user_center_info') 
+   * $center->links 是一个字符串，是经过处理的 $center->menu，一般用于模板输出
+   */
+  _user_get_center_info($center);
+
+  if (empty($center->menu[$center->type])) {
+    $center->type = 'default';
+  }
+
+	module_invoke_all('user_center_view', $center);
+
+	dd_set_title(array(t('user', '我的个人中心'), $center->menu[$center->type]['title']));
+	dd_set_breadcrumb(array(l(t('user', '我的个人中心'), 'user/center'), $center->menu[$center->type]['title']));
+
+  return theme('user_center', $center);
+
+}
+
+/**
  * 找回密码
  */
 function user_page_pass() {
@@ -23,7 +274,7 @@ function user_page_pass() {
             setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
             $_SESSION['oldpass'] = time();
             dd_set_message('请在 5 分钟内修改密码');
-            dd_goto('user/newpass');
+            dd_goto('user/center/newpass');
           } else {
             dd_goto('user/pass');
           }
@@ -89,7 +340,7 @@ function user_page_pass_submit(&$form, &$v) {
 /**
  * 修改密码
  */
-function user_page_newpass() {
+function _user_center_newpass() {
   global $user;
   
   if ($_GET['ajax'] == 'submit') {
@@ -122,7 +373,7 @@ function user_page_newpass() {
 	      if ($ok) {
 	        setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
 	        dd_set_message(t('user', '密码修改成功'));
-	        dd_js_print('window.location.href = "'.url('user/newpass').'"');
+	        dd_js_print('window.location.href = "'.url('user/center/newpass').'"');
 	        
 	        exit();
 	      } else {
@@ -135,23 +386,18 @@ function user_page_newpass() {
     dd_js_print('$(\'#ajax_description\').html("'.addslashes(implode('<br />', dd_array2_to('value', $error))).'").show(300);');
     exit();
   }
-  
-  dd_set_tabs(array(
-    l(t('user', '我的主页'), 'user/'.$ac->uid),
-    l(t('user', '编辑资料'), 'user/edit'),
-    l(t('user', '修改密码'), 'user/newpass'),
-  ));
-  
+ 
   $form['settings'] = array(
     '#ajax_validate' => true,
     '#ajax_submit' => array(
       'des' => true,
       'options' => array(
         'dataType' => 'script',
-        'url' => url('user/newpass', array('query' => array('ajax' => 'submit'))),
+        'url' => url('user/center/newpass', array('query' => array('ajax' => 'submit'))),
       ),
     ),
   );
+
   if (!$_SESSION['oldpass'] || $_SESSION['oldpass'] < time() - 300) {
     $form['fields']['oldpass'] = array(
       '#type' => 'password',
@@ -290,7 +536,7 @@ function user_page_login() {
         if ($_GET['redirect'] && strpos($_GET['redirect'], 'user/login') === false && strpos($_GET['redirect'], 'user/register') === false) {
           $rediect = $_GET['redirect'];
         } else {
-          $rediect = url(dd_get_token(var_get_key('user', 'redirect', 'user/' . $_SESSION['user']->uid), $_SESSION['user'], array('user', 'system')));
+          $rediect = url(dd_get_token(var_get_key('user', 'redirect', 'user/center'), $_SESSION['user'], array('user', 'system')));
         }
         dd_js_print('location.href = "'.urldecode($rediect).'"');
       } else {

@@ -359,7 +359,7 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
             $data = $value;
           } elseif ($key == 'children') {
             $children = $value;
-          } else {
+          } else if (!is_array($value)) {
             $attributes[$key] = $value;
           }
         }
@@ -367,7 +367,7 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
         $data = $item;
       }
       if (count($children) > 0) {
-        $data .= theme_item_list($children, NULL, $type, $attributes);
+        $data .= theme('item_list', $children, NULL, $type, $attributes);
       }
       if ($i == 0) {
         $attributes['class'] = empty($attributes['class']) ? 'first' : ($attributes['class'] .' first');

@@ -33,3 +33,21 @@ img.form_captcha_img{
 .user_field_list_term a{
 	color: #55504B;
 }
+
+/*user center*/
+#user-center-header {
+  text-align: right;
+  border-bottom:1px solid #ccc;
+  padding-right: 5px;
+}
+
+#user-center-link {
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+#user-center-body {
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
