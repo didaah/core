@@ -207,8 +207,8 @@ function image_resize($source, $destination, $width, $height, $mark = NULL) {
  * @access public
  * @return bool
  */
-function image_rotate($source, $destination, $degrees, $background = 0x000000, $mark = NULLi) {
-  return image_gd_rotate($source, $destination, $degrees, $background);
+function image_rotate($source, $destination, $degrees, $background = 0x000000, $mark = NULL) {
+  return image_gd_rotate($source, $destination, $degrees, $background, $mark);
 }
 
 /**

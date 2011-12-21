@@ -442,7 +442,7 @@ function user_page_activation() {
         
         if (user_login($user) && ($_GET['ajax'] != 'submit')) {
           dd_set_message('激活成功，欢迎加入 '. $GLOBALS['conf']['site_name']);
-          dd_goto(dd_get_token(var_get_key('user', 'redirect', 'user/' . $user->uid), $user, array('user', 'system')));
+          dd_goto(dd_get_token(var_get_key('user', 'redirect', 'user/center'), $user, array('user', 'system')));
         }
       }
     } else {
@@ -497,7 +497,7 @@ function user_page_register() {
         if ($_GET['redirect'] && strpos($_GET['redirect'], 'user/login') === false && strpos($_GET['redirect'], 'user/register') === false) {
           $rediect = $_GET['redirect'];
         } else {
-          $rediect = url(dd_get_token(var_get_key('user', 'redirect', 'user/' . $account->uid), $account, array('user', 'system')));
+          $rediect = url(dd_get_token(var_get_key('user', 'redirect', 'user/center'), $account, array('user', 'system')));
         }
         if ($account->status == 1) {
           user_login(user_load($account->uid, true));
@@ -572,7 +572,7 @@ function user_page_login_ajax() {
             dd_js_print('self.parent.dialog_colse();');
           break;
           default:
-            $url = $_GET['redirect'] ? $_GET['redirect'] : url(dd_get_token(var_get_key('user', 'redirect', 'user/' . $_SESSION['user']->uid), $_SESSION['user'], array('user', 'system')));
+            $url = $_GET['redirect'] ? $_GET['redirect'] : url(dd_get_token(var_get_key('user', 'redirect', 'user/center'), $_SESSION['user'], array('user', 'system')));
             dd_js_print('window.parent.location.href = "'.urldecode($url).'"');
         }
       } else {

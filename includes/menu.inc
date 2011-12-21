@@ -222,6 +222,7 @@ function menu_set_alias($path, $alias, $type, $tid) {
   if (!db_query('SELECT alias FROM {alias} WHERE alias = ?', array($alias), array('return' => 'column'))) {
     // 清除 menu 缓存
     cache_del('cid', $path, 'cache_menu');
+    cache_del('cid', $alias, 'cache_menu');
     return db_exec('INSERT INTO {alias} (path, alias, type, tid) VALUES (?, ?, ?, ?)', array($path, $alias, $type, $tid));
   }
 }
