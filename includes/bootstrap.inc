@@ -344,8 +344,8 @@ function l($text, $path, $options = array()) {
   if ($options['strlen'] && mb_strlen($text) > $options['strlen']) {
     $text = mb_substr($text, 0, intval($options['strlen'])) . '...';
   }
-
-  if ($_GET['q'] == $path) {
+  
+  if ($_GET['q'] == $path || (!empty($GLOBALS['current_menu_data']) && $GLOBALS['current_menu_data']['path'] == $path)) {
     $options['attributes']['class'] .= $options['attributes']['class'] ? ' active' : 'active';
   }
 
