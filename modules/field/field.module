@@ -2548,9 +2548,10 @@ function _field_get_node_data($nid, $type = 'term', $clear = NULL) {
  */
 function field_file_delete($file) {
   if ($file->ext_type == 'field_file') {
-    if ($o = db_query('SELECT module, type FROM {fields} WHERE field_id = ?',
+    if ($o = db_query('SELECT * FROM {fields} WHERE field_id = ?',
       array($file->ext_id), array('return' => 'one'))) {
       cache_del('cid', $o->module.$o->type.$file->ext_id2, 'cache_field');
+      module_invoke_all('field_file_delete', $o, $file);
     }
   }
 }
@@ -2567,12 +2568,12 @@ function field_file_delete($file) {
  *  指定用户对象，默认以当前用户权限判断
  * @return (void) 字段数据赋于 $node->fields
  */
-function field_get_node_load($module, $type, & $node, $ac = NULL) {
+function field_get_node_load($module, $type, & $node, $ac = NULL, $clear = NULL) {
   global $conf;
   
   if (!$conf['field_count'][$module.$type]) return;
 
-  if ($cache = cache_get($module.$type.$node->nid, 'cache_field')) {
+  if (!$clear && $cache = cache_get($module.$type.$node->nid, 'cache_field')) {
     if (!empty($node->fields) && is_array($node->fields) && is_array($cache->data)) {
       $node->fields += $cache->data;
     } else {
@@ -2596,7 +2597,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
       // 没有自定义处理函数的字段
       if (in_array($data->field_type, $term_type)) {
         // 分类类型
-        if ($fetch = _field_get_node_data($node->nid, 'term')) {
+        if ($fetch = _field_get_node_data($node->nid, 'term', 1)) {
           foreach ($fetch as $o) {
             if ($o->field_id == $data->field_id) {
               
@@ -2612,7 +2613,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
         }
       } else if ($data->field_type == 'textfield' || $data->field_type == 'textarea') { 
         // 单行文本 和 多行文本
-        if ($fetch = _field_get_node_data($node->nid, $data->field_type)) {
+        if ($fetch = _field_get_node_data($node->nid, $data->field_type, 1)) {
           foreach ($fetch as $o) {
             if ($o->field_id == $data->field_id) {
               $node->fields[$data->field_key] = $o;
@@ -2621,7 +2622,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL) {
           }
         }
       } else if ($data->field_type == 'file') { // 上传字段
-        if ($fetch = _field_get_node_data($node->nid, 'file')) {
+        if ($fetch = _field_get_node_data($node->nid, 'file', 1)) {
           foreach ($fetch as $o) {
             if ($o->field_id == $data->field_id) {
               $node->fields[$data->field_key][$o->fid] = $o;
@@ -3686,7 +3687,7 @@ function field_get_node_delete($module, $type, $node) {
             
           break;
           case 'file':
-            if ($files = _field_get_node_data($node->nid, 'file')) {
+            if ($files = _field_get_node_data($node->nid, 'file', 1)) {
               foreach ($files as $file) {
                 if ($file->field_id == $data->field_id) {
                   file_delete($file->fid, 1, $file->filepath);
