@@ -239,7 +239,7 @@ function dd_get_not() {
     $text = t('system', '访问的页面不存在');
     dd_set_title(array($text));
     $default = '<h2 align="center">'.l($text, NULL).'</h2>';
-    echo theme('error', custom_get('page_not_html', $default));
+    echo theme('error', custom_get('page_not_html', $default), 404);
   }
   exit;
 }
@@ -264,7 +264,7 @@ function dd_get_access() {
     $title = t('system', '登录以确认访问权限');
     dd_set_title(array($title));
     dd_set_message($title, 'error');
-    echo theme('error', dd_get_form('user_login_form'));
+    echo theme('error', dd_get_form('user_login_form'), 403);
   }
   exit;
 }
