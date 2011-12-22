@@ -2383,9 +2383,9 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
   if (!isset($menus)) {
     $menus = array();
     module_alter_all('site_menu', $menus);
-    $calss = 'site_menu';
+    $class = 'site_menu';
   } else {
-    $calss = 'site_menu_children';
+    $class = 'site_menu_children';
   }
 
   if ($menus) {
@@ -2441,7 +2441,7 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
       foreach ($items as $d) {
         $item[] = $d['#data'];
       }
-      $output = theme('item_list', $item, NULL, 'ul', array('class' => $calss), 0);
+      $output = theme('item_list', $item, NULL, 'ul', array('class' => $class), 0);
     }
     return $output;
   }
