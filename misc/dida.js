@@ -429,7 +429,7 @@ $(function() {
     msg = $(this).attr('alt');
     if (!confirm((msg ? msg : '确认此操作吗？'))) {
       return false;
-    }else if ($(this).attr('type') == 'button') {
+    } else if ($(this).attr('type') == 'button') {
       location.href = $(this).attr('href');
     }
   });
