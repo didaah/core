@@ -68,7 +68,9 @@ function user_user_center_view($center) {
             $row['#weight'] = $i;
             $row['#data'] = $content;
           }
-          
+
+          if (empty($row['#data'])) continue;
+
           $row['#data'] = '<div class="user_center_default_view_' . $module . '>'.$row['#data'].'</div>';
           
           $contents[] = $row;
@@ -230,14 +232,14 @@ function user_user_center_default($center) {
     $item[] = dd_get_strong(t('user', '最近登录')) . format_date($center->user->login);
   }
 
-  $centents = '';
-
+  $contents = '';
+  
   if ($center->user->field_view) {
     foreach ($center->user->field_view as $key => $data) {
       if ($key != 'avatar') {
         $item[] = array('data' => dd_get_strong($data['#name']) . $data['#content'], 'class' => 'user_field_view_'.$key);
       } else {
-        $contents = '<div class="user_field_view_avatar">' . $data['#content'] . '</div>';
+        $contents .= '<div class="user_field_view_avatar">' . $data['#content'] . '</div>';
       }
     }
   }
