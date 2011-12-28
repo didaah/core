@@ -1288,15 +1288,19 @@ function dd_get_form_meta($sort = 'desc', $value = array(), $title = array()) {
  */
 function form_admin_search($name = 'keyword', $form = array()){
   $form['settings']['#validate'][] = 'form_admin_search_validate';
+
+  if (empty($form['fields'][$name])) {
+    $form['fields'][$name] = array(
+      '#default_value' => !empty($_GET[$name]) ? urldecode($_GET[$name]) : '',
+      '#type' => 'textfield',
+      '#title' => '搜索',
+      '#required' => true,
+      '#prefix' => '<div class="form_admin_search">'
+    );
+  }
   
-  $form['fields'][$name] = array(
-    '#default_value' => !empty($_GET[$name]) ? urldecode($_GET[$name]) : '',
-    '#type' => 'textfield',
-    '#title' => '搜索',
-    '#required' => true,
-    '#prefix' => '<div class="form_admin_search">'
-  );
-  
+  $form['fields'][$name]['#prefix'] = '<div class="form_admin_search">';
+
   $form['fields']['__field'] = array(
     '#type' => 'hidden',
     '#default_value' => $name,
