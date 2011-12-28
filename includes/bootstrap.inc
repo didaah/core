@@ -335,6 +335,8 @@ function dd_goto($path = '', $query = NULL, $file = NULL, $fragment = NULL, $htt
  * @return (string) html a，如：<a href="url">test</a>
  */
 function l($text, $path, $options = array()) {
+  global $current_menu_data;
+
   if (!$options['attributes']) $options['attributes'] = array();
 
   if (!$options['attributes']['title']) {
@@ -344,8 +346,8 @@ function l($text, $path, $options = array()) {
   if ($options['strlen'] && mb_strlen($text) > $options['strlen']) {
     $text = mb_substr($text, 0, intval($options['strlen'])) . '...';
   }
-  
-  if ($_GET['q'] == $path || (!empty($GLOBALS['current_menu_data']) && $GLOBALS['current_menu_data']['path'] == $path)) {
+
+  if ($_GET['q'] == $path || ($current_menu_data['path'] == $current_menu_data['systemUrl'] && $current_menu_data['path'] == $path)) {
     $options['attributes']['class'] .= $options['attributes']['class'] ? ' active' : 'active';
   }
 
