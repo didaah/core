@@ -43,6 +43,7 @@ img.form_captcha_img{
 
 #user-center-link {
   border: 1px solid #ccc;
+  border-bottom: none;
   text-align: center;
 }
 
@@ -51,3 +52,6 @@ img.form_captcha_img{
   padding: 5px;
 }
 
+.item_user_center_link_item {
+  border-bottom: 1px solid #ccc;
+}

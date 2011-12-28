@@ -13,6 +13,7 @@
  *    string $center->type - 当前页面标识
  *    string $center->path - 当前页面路径
  *    string $center->title - 当前页面名称
+ *    array $center->tabs - 选项标签
  *    string $center->body - 当前页面内容
  *    其它模块自定义数据
  *  
@@ -31,6 +32,7 @@ global $user;
   </div></div>
 
   <div class="span-18 last"><div id="user-center-body">
+    <?php echo theme('item_list', $center->tabs, NULL, 'ul', array('class' => 'tabs')); ?>
     <?php echo $center->body;?>
   </div></div>
 

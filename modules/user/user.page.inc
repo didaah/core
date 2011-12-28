@@ -19,8 +19,13 @@ function user_default() {
  */
 function user_user_center_info() {
   return array(
+    'user' => array(
+      'is_group' => true, // 定义组信息
+      'weight' => 1000,
+    ),
     'default' => array(
       'title' => '个人中心',
+      'link_hide' => true, // 不显示为链接
       'path' => 'user/center',
       'weight' => -1000
     ),
@@ -115,6 +120,7 @@ function _user_get_center_info($center) {
     if ($functions = module_hook_get_cache('user_center_info')) {
       $menu = array();
       $_menu = array();
+      $i = 0;
       foreach ($functions as $module => $function) {
         if (function_exists($function)) {
           $result = call_user_func($function);
@@ -123,13 +129,23 @@ function _user_get_center_info($center) {
           if (!is_array($result)) continue;
 
           foreach ($result as $type => $info) {
-            
+
+            // 定义组信息
+            if (!empty($info['is_group'])) {
+              foreach ($info as $key => $value) {
+                $group[$key][$type] = $value;
+              }
+              continue;
+            }
+           
             // 未定义页面标题，跳过
             if (empty($info['title'])) continue;
-
+            
             // 自定义页面排序
             if (isset($links['weight'][$type])) {
-              $info['weight'] = $links['weight'][$type];
+              $info['weight'] = $i+$links['weight'][$type];
+            } else {
+              $info['weight'] = $i;
             }
 
             if (empty($info['group'])) {
@@ -140,10 +156,12 @@ function _user_get_center_info($center) {
               $menu[$info['group']] = array('links' => array());
               // 自定义分组排序
               if (isset($group['weight'][$info['group']])) {
-                $menu[$info['group']]['weight'] = $group['weight'][$info['group']];
+                $menu[$info['group']]['weight'] = $i+$group['weight'][$info['group']];
+              } else {
+                $menu[$info['group']]['weight'] = $i;
               }
             }
-
+            
             $class = 'user_center_link user_center_link_' . $info['group'];
 
             if (empty($info['attributes']) || empty($info['attributes']['class'])) {
@@ -162,7 +180,11 @@ function _user_get_center_info($center) {
 
             $_menu[$type] = $info;
 
+            // 只注册一个页面，不做为 link 显示
+            if (!empty($info['link_hide'])) continue;
+
             $menu[$info['group']]['links'][$type] = $info;
+            ++$i;
           }
         }
       }
@@ -228,7 +250,7 @@ function user_user_center_default($center) {
 /**
  * 用户个人中心
  */
-function user_page_center() {
+function user_page_center($type = 'default') {
 	global $user;
 
   $center = new stdClass;
@@ -239,7 +261,9 @@ function user_page_center() {
 
   $center->args = arg();
 
-	$center->type = empty($center->args[2]) ? 'default' : $center->args[2];
+	$center->type = $type;
+
+  $center->tabs = array();
 
   /**
    * 获取 $center->menu 和 $center->links
