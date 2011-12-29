@@ -281,6 +281,8 @@ function user_page_center($type = 'default') {
 
 	dd_set_title(array(t('user', '我的个人中心'), $center->menu[$center->type]['title']));
 	dd_set_breadcrumb(array(l(t('user', '我的个人中心'), 'user/center'), $center->menu[$center->type]['title']));
+  
+  if (!empty($center->tabs)) dd_set_tabs($center->tabs);
 
   return theme('user_center', $center);
 
