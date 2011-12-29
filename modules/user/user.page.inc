@@ -103,7 +103,7 @@ function user_user_center_view($center) {
  */
 function _user_get_center_info($center) {
 
-  if (!$cache = cache_get('user_center_menu_data')) {
+  if ($cache = cache_get('user_center_menu_data')) {
     $data = $cache->data;
   } else {
     
