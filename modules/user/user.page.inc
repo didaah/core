@@ -103,7 +103,7 @@ function user_user_center_view($center) {
  */
 function _user_get_center_info($center) {
 
-  if ($cache = cache_get('user_center_menu_data')) {
+  if (!$cache = cache_get('user_center_menu_data')) {
     $data = $cache->data;
   } else {
     
@@ -131,7 +131,6 @@ function _user_get_center_info($center) {
           if (!is_array($result)) continue;
 
           foreach ($result as $type => $info) {
-
             // 定义组信息
             if (!empty($info['is_group'])) {
               foreach ($info as $key => $value) {
