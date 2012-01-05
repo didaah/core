@@ -3,12 +3,11 @@
 
 /**
  * 默认语言：Chinese, Simplified(简体中文)(zh-hans)
- * 翻译语言：Chinese, Traditional(繁體中文)(zh-hant)
- * 共有 46 条界面翻译
+ * 翻译语言：English(en)
+ * 共有 45 条界面翻译
  */
 
 $lang = array (
-  '语言管理' => '語言管理',
   '缓存管理' => '缓存管理',
   '添加区块' => '添加区块',
   '无' => '无',

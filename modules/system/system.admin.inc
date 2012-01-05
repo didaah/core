@@ -513,7 +513,7 @@ function system_site_settings() {
     '#type' => 'select',
     '#title' => t('system', '默认语言'),
     '#required' => true,
-    '#default_value' => var_get('default_language', 'zh-CN'),
+    '#default_value' => var_get('default_language', 'zh-hans'),
     '#options' => $conf['languages'],
   );
 
@@ -1111,7 +1111,7 @@ function system_admin_lang_form_validate($form, $v) {
 				
 				system_lang_cache();
 				
-				dd_set_lang('instrt', NULL, array($v['language'])); // 导入语言文件
+				dd_set_lang(NULL, array($v['language'])); // 导入语言文件
 				
 				dd_set_message(t('system', '%string 添加成功', array('%string' => $v['name'])));
 			}
@@ -1122,7 +1122,7 @@ function system_admin_lang_form_validate($form, $v) {
 				if ($v['update'] == $GLOBALS['conf']['default_language']) {
 					var_set('default_language', $v['language']);
 				}
-				dd_set_lang('instrt', NULL, array($v['language'])); // 导入语言文件
+				dd_set_lang(NULL, array($v['language'])); // 导入语言文件
 			}
 			
 			system_lang_cache();
@@ -1144,19 +1144,8 @@ function system_admin_lang_cache() {
   	'#type' => 'select',
   	'#title' => t('system', '选择语言'),
   	'#options' => $conf['languages'],
-  	'#required' => 1,
-  );
-  
-  $form['fields']['value'] = array(
-  	'#title' => t('system', '更新方式'),
-    '#type' => 'select',
-    '#default_value' => 'update',
-    '#required' => 1,
-    '#options' => array(
-      'update' => t('system', '如有冲突，以现有字符串为准(推荐)'),
-      'insert' => t('system', '全新导入，不保留现有字符串'),
-    ),
     '#description' => '请备份你修改过的语言缓存文件',
+  	'#required' => 1,
   );
   
   $form['fields']['submit']['#type'] = 'submit';
@@ -1169,8 +1158,9 @@ function system_admin_lang_cache_validate($form, $v) {
 		$languages[] = $v['language'];
 	} else {
 		$languages = NULL;
-	}
-	dd_set_lang($v['value'], NULL, $languages);
+  }
+
+	dd_set_lang(NULL, $languages);
 }
 
 /**

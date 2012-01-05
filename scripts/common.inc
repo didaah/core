@@ -58,6 +58,23 @@ function args($key = NULL) {
   return isset($key) ? $args[$key] : $args;
 }
 
+/**
+ * 输出到终端的提示信息 
+ * @param string $text 
+ * @access public
+ * @return string
+ */
+function message($text) {
+
+  if (empty($_SERVER['LANG']) || stripos($_SERVER['LANG'], 'utf') === false) {
+    $text = iconv('UTF-8', 'GBK', $text);
+  }
+
+  $text .= "\n";
+
+  echo $text;
+}
+
 // 解析命令行参数
 $_args = args();
 

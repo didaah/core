@@ -369,7 +369,7 @@ function dida_setup() {
               'category' => 'modules/category',
             );
             
-            dd_set_lang('insert', $modules, array('zh-CN', 'zh-TW')); // 导入语言包
+            dd_set_lang($modules, array('zh-hans', 'zh-hant')); // 导入语言包
             
             $var_timestamp = serialize($_SERVER['REQUEST_TIME']);
             

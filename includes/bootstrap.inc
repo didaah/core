@@ -670,19 +670,34 @@ function var_init() {
  *  要转换的字符串参数
  * @param (string) $language
  *  指定语言
- * 所有模块的语言文件缓存在 ./sties/cache/lang_{$language}.lang
+ * 所有模块的语言文件缓存在 {$conf_dir}/cache/{$language}.php
+ * 可在相同目录自定义语言翻译文件，命名为 custom_{$language}.php，自定义翻译，优先级最高
  */
 function t($module, $index, $args = array(), $language = NULL) {
   static $lang;
-  if (!$language && is_string($language)) {
-    $language = !$GLOBALS['user']->language ? $GLOBALS['conf']['default_language'] : $GLOBALS['user']->language;
-  }
 
+  if (empty($language)) {
+    $language = empty($GLOBALS['user']->language) ? $GLOBALS['conf']['default_language'] : $GLOBALS['user']->language;
+  }
+  
   if (!$module || $language != $GLOBALS['conf']['modules'][$module]['language']) {
     if (!isset($lang[$language])) {
-      if (is_file(DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/' .$language . '.php')) {
-        include DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/' .$language . '.php';
+
+      $lang_file = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/';
+
+      if (is_file($lang_file . $language . '.php')) {
+      
+        include $lang_file . $language . '.php';
+
         $lang[$language] = $l;
+        
+        // 加载自定义翻译文件
+        if (is_file($lang_file . 'custom_' . $language . '.php')) {
+          $l = array();
+          include $lang_file . 'custom_' . $language . '.php';
+          $lang[$language] = array_merge($lang[$language], $l);
+        }
+
       } else {
         $lang[$language] = false;
       }
@@ -706,11 +721,11 @@ function t($module, $index, $args = array(), $language = NULL) {
         case '@':
           // 格式化
           $args[$key] = check_plain($value);
-          break;
+        break;
         case '%':
           // 替换占位符 <em> </em
           $args[$key] = '<em>'. $value . '</em>';
-          break;
+        break;
           //case '!': default:
           // 其它不做处理
       }
@@ -721,8 +736,6 @@ function t($module, $index, $args = array(), $language = NULL) {
 
 /**
  * 合并模块语言文件
- * @param (string) $type
- *  合并方式：update - 保存现有字符串，insert - 全新导入
  * @param (array) $lists
  *  模块列表，默认为所有模块文件夹下的语言文件，modules/test/lang/*
  * @param (array) $language
@@ -744,8 +757,9 @@ function t($module, $index, $args = array(), $language = NULL) {
  )
  )
  */
-function dd_set_lang($type = 'update', $lists = NULL, $language = array()) {
+function dd_set_lang($lists = NULL, $language = array()) {
   global $conf;
+
   if (empty($lists)) {
     if ($conf['modules']) {
       foreach ($conf['modules'] as $module => $info) {
@@ -753,6 +767,7 @@ function dd_set_lang($type = 'update', $lists = NULL, $language = array()) {
       }
     }
   }
+
   if (empty($language)) {
     if ($conf['languages']) {
       foreach ($conf['languages'] as $key => $name) {
@@ -762,54 +777,55 @@ function dd_set_lang($type = 'update', $lists = NULL, $language = array()) {
       $language[] = 'zh-hans';
     }
   }
+
   if ($lists) {
+    $cache = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages';
+
+    if (!is_dir($cache)) {
+      @mkdir($cache, 0777);
+    }
+
     foreach ($language as $code) {
       $l = array();
-      	
-      if ($type == 'update') {
-        $cache = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/'.$code.'.php';
-        if (is_file($cache)) {
-          include $cache;
-        }
-      }
-      	
+       	
       foreach ($lists as $module => $path) {
         $lang = array();
         $path = DIDA_ROOT . '/' .  $path . '/languages/' . $code . '.php';
 
-        if (is_file($path)) {
-          include $path;
-          if ($lang) {
-            $newLang = array_diff_key($lang, $l);
-            $reLang = array_intersect_key($lang, $l);
+        if (!is_file($path)) continue;
 
-            if ($newLang) {
-              $l = array_merge($l, $newLang);
-            }
-            if ($reLang) {
-              foreach ($reLang as $rekey => $resub) {
-                if ($l[$rekey] == $resub) {
-                  unset($reLang[$rekey]);
-                }
-              }
-              if ($reLang) {
-                $moduleKey = '__'.$module;
-                if (!$l[$moduleKey]) {
-                  $l[$moduleKey] = $reLang;
-                } else {
-                  $l[$moduleKey] = array_merge($reLang, $l[$moduleKey]);
-                }
-              }
-            }
-          }
-        } else {
-          continue;
+        include $path;
+        if (empty($lang) || !is_array($lang)) continue;
+
+        $newLang = array_diff_key($lang, $l);
+        $reLang = array_intersect_key($lang, $l);
+
+        if ($newLang) {
+          $l = array_merge($l, $newLang);
         }
+
+        if (empty($reLang)) continue;
+        
+        foreach ($reLang as $rekey => $resub) {
+          if ($l[$rekey] == $resub) {
+            unset($reLang[$rekey]);
+          }
+        }
+
+        if ($reLang) {
+          $moduleKey = '__'.$module;
+          if (empty($l[$moduleKey])) {
+            $l[$moduleKey] = $reLang;
+          } else {
+            $l[$moduleKey] = array_merge($reLang, $l[$moduleKey]);
+          }
+        }
+
       }
       	
       if ($l) {
         // 合并为缓存文件
-        cache_system_set_file($code.'.php', 'l', $l, DIDA_ROOT . '/' . $GLOBALS['conf_dir'].'/cache/languages');
+        cache_system_set_file($code.'.php', 'l', $l, $GLOBALS['conf_dir'].'/cache/languages');
         dd_set_message($code . ' 导入成功');
       }
     }
