@@ -1080,22 +1080,48 @@ function dd_form_selects($field) {
  */
 function dd_form_radio($field) {
   $output = dd_form_label($field);
+
   if (is_array($field['#options'])) {
     $id = $field['#attributes']['id'];
-    if ($field['#attributes']['class']) {
-      $field['#attributes']['class'] .= ' '.$id;
+
+    if (!empty($field['#attributes']['class'])) {
+      $field['#attributes']['class'] .= ' ' . $id;
     } else {
       $field['#attributes']['class'] = $id;
     }
-    foreach ($field['#options'] as $key => $op) {
-      $field['#attributes']['id'] = $id .'_'. $key;
-      $cd = '';
-      if ($field['#value'] == (string) $key) $cd = ' checked="checked"';
-      $output .= '<span class="form_radio_field"><input'.$cd.' value="'.$key.'" name="'.$field['#name'].'" type="radio"'.dd_attributes($field['#attributes']).'/><span class="form_radio_text">'.$op .'</span></span>';
+
+    foreach ($field['#options'] as $key => $data) {
+      if (is_array($data)) {
+        foreach ($data as $_key => $value) {
+          if ($_key == 'data') {
+            $desc = $value;
+          } else {
+            $field['#attributes'][$_key] = $value;
+          }
+        }
+      } else {
+        $desc = $data;
+      }
+
+      $field['#attributes']['id'] = $id . '_' . $key;
+      
+      $output .= '<span class="form_radio_field"><input';
+      
+      if ($field['#value'] == (string) $key) $output .= ' checked="checked"';
+
+      $output .= ' value="' . $key . '" name="' . $field['#name'] . '" type="radio"';
+      $output .= dd_attributes($field['#attributes']) . '/>';
+      $output .= '<span class="form_radio_text">' . $desc . '</span></span>';
+
     }
   } else {
-    if ($field['#value']) $cd = ' checked="checked"';
-    $output .= '<span class="form_radio_field"><input'.$cd.' value="1" name="'.$field['#name'].'" type="radio"'.dd_attributes($field['#attributes']).'/><span class="form_radio_text">'.$op .'</span></span>';
+    
+    $output .= '<span class="form_radio_field"><input';
+    if ($field['#value']) $output .= ' checked="checked"';
+
+    $output .= ' value="1" name="'.$field['#name'] . '" type="radio"' . dd_attributes($field['#attributes']);
+    $output .= '/></span>';
+
   }
   return $output . dd_form_error($field);
 }
