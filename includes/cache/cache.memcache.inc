@@ -30,6 +30,7 @@ if (cache_memcache_onnect()) {
           foreach ($keys as $key => $k) {
             $mem->delete($key, 0);
           }
+          $mem->delete('__table_' . $mem_prefix . $table . '_keys', 0);
         }
       break;
       case '*': // 模糊匹配

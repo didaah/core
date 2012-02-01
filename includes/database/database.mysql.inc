@@ -438,7 +438,7 @@ function db_mysql_drop_field($table, $field, $target) {
  */
 function db_mysql_add_foreign($table, $field, $foreign, $target) {
 	if (!db_is_table($table, $target)) {
-		dd_set_message(t('表 @table 不存在', array('@table' => $table)), 'error');
+		dd_set_message(t('system', '表 @table 不存在', array('@table' => $table)), 'error');
 	} else if (db_is_table($foreign['table'], $target)) {
 		if ($foreign['field']) {
 			$sql = 'ALTER TABLE {'.$table."} ADD CONSTRAINT \n";
@@ -453,11 +453,11 @@ function db_mysql_add_foreign($table, $field, $foreign, $target) {
 			}
 			
 		} else {
-			dd_set_message(t('必须提供主表字段值'), 'error');
+			dd_set_message(t('system', '必须提供主表字段值'), 'error');
 		}
 		
 	} else {
-		dd_set_message(t('表 @table 不存在', array('@table' => $foreign['table'])), 'error');
+		dd_set_message(t('system', '表 @table 不存在', array('@table' => $foreign['table'])), 'error');
   }
 }
 
