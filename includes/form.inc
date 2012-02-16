@@ -861,10 +861,14 @@ function dd_form_textfield($field) {
   
   if (strpos($field['#attributes']['class'], 'form_text') === false) {
     $field['#attributes']['class'] = 'form_text';
-    if ($field['#required']) {
-      $field['#attributes']['class'] .= ' required';
-    }
   }
+  
+  if ($field['#required']) {
+    $field['#attributes']['class'] .= ' required';
+  }
+
+  $field['#attributes']['class'] .= ' form_textfield_name_' . $field['__name'];
+
   return dd_form_label($field) . '<input type="text" name="'.$field['#name'].'" value="'.check_plain($field['#value']).'"'.dd_attributes($field['#attributes']).'/>' . dd_form_error($field);
 }
 

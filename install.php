@@ -460,7 +460,11 @@ function _install_setting_chmod() {
   $text[] = 'ini_set(\'session.use_only_cookies\', 1);';
   $text[] = 'ini_set(\'session.use_trans_sid\', 0);';
   $text[] = 'ini_set(\'url_rewriter.tags\', \'\');';
-  
+  $text[] = 'ini_set(\'mbstring.http_input\', \'pass\');';
+  $text[] = 'ini_set(\'mbstring.http_output\', \'pass\');';
+  $text[] = 'ini_set(\'mbstring.internal_encoding\', \'utf-8\');';
+  $text[] = 'ini_set(\'mbstring.encoding_translation\', \'off\');';
+ 
   if (cache_system_set_file('setting.php', NULL, implode("\n", $text), $conf_dir)) {
     if (!chmod($setting_file, 0644)) {
       dd_set_message("无法修改 $file 文件权限，为了安全，应将该文件修改为只读。", 'warning');
