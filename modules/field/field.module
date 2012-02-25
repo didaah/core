@@ -63,7 +63,42 @@ function field_system_tools_ajax($v, $g) {
         }
       }
     break;
-    case 'auto':
+
+    case 'autotag': // 标签提示
+      if ($field = field_load($g['fid'])) {
+        if (!empty($field->data['validate']['autocomplete']) && !empty($v['value'])) {
+          $json['error'] = 0;
+
+          $value = $v['value'];
+          $prefix = '';
+
+          if (strpos($value, ',') !== false || strpos($value, '，') !== false) {
+            $arr = array_unique(explode(',', str_replace('，', ',', $value)));
+            if (count($arr) < 2) {
+              $json['error'] = 1;
+              break;
+            }
+
+            $value = trim(array_pop($arr));
+
+            if (empty($value)) break;
+
+            $prefix = implode(',', $arr) . ',';
+          }
+
+            if ($fetch = db_query('SELECT tid, name FROM {fields_term} WHERE field_id = ? AND name LIKE ? 
+            ORDER BY weight ASC, tid ASC', array($g['fid'], $value . '%'), array('limit' => 10))) {
+              foreach ($fetch as $o) {
+                if (!in_array($o->name, $arr)) {
+                  $json['contents'][] = $prefix . $o->name;
+                }
+              }
+            }
+
+        }
+      }
+
+    case 'auto': // 输入 ajax 验证
       if ($field = field_load($g['fid'])) {
         if ($field->data['validate']['type'] == 'custom_ok' && $field->data['validate']['settings']['values']) {
           $json['error'] = 0;
@@ -880,6 +915,15 @@ function field_field_call_form($field, &$form) {
       '#fieldset_suffix' => 1,
       '#fieldset' => true,
     );
+
+    $form['fields']['data']['validate']['autocomplete'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('field', '输入提示'),
+      '#weight' => -4,
+      '#default_value' => $field->data['validate']['autocomplete'],
+      '#description' => t('field', '根据用户输入，从已有的记录中查询并提示')
+    );
+
     $form['fields']['data']['validate']['maxsize'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '最大长度'),
@@ -887,6 +931,7 @@ function field_field_call_form($field, &$form) {
       '#default_value' => $field->data['validate']['maxsize'],
       '#description' => t('field', '标签最大不超过 64 个字符。汉字、字母、数字均算做一个字符')
     );
+
     $form['fields']['data']['validate']['minsize'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '最小长度'),
@@ -2916,10 +2961,21 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               '#attributes' => array('size' => 50),
               '#description' => $data->data['input_description']
             );
-            if ($data->data['validate']['type']) {
+          
+            if (!empty($data->data['validate']['type'])) {
               if ($textfield_opt = module_invoke_all('field_type_tags', 'node_form', $data->data['validate']['type'], $data)) {
                 $form['fields']['fields'][$data->field_key] = array_merge($form['fields']['fields'][$data->field_key], $textfield_opt);
               }
+            }
+            
+            if (!empty($data->data['validate']['autocomplete'])) {
+              dd_jqui();
+              $form['fields']['fields'][$data->field_key]['#autocomplete'] = array(
+                'url' => url('ajax', array('query' => 'fid='.$data->field_id.'&op=autotag&module=field')),
+                'dom' => '.form_field_tags_autocomplete_' . $data->field_key,
+              );
+              
+              $form['fields']['fields'][$data->field_key]['#attributes']['class'] = ' form_field_tags_autocomplete_' . $data->field_key;
             }
           break;
           case 'textfield':
