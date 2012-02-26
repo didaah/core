@@ -89,7 +89,7 @@ function field_system_tools_ajax($v, $g) {
             if ($fetch = db_query('SELECT tid, name FROM {fields_term} WHERE field_id = ? AND name LIKE ? 
             ORDER BY weight ASC, tid ASC', array($g['fid'], $value . '%'), array('limit' => 10))) {
               foreach ($fetch as $o) {
-                if (!in_array($o->name, $arr)) {
+                if (empty($arr) || !in_array($o->name, $arr)) {
                   $json['contents'][] = $prefix . $o->name;
                 }
               }
@@ -723,23 +723,29 @@ function field_field_type_tags($op, $type = NULL, $field = NULL, $v = NULL) {
           '#default_value' => $value['value_type'],
           '#options' => array(
             1 => t('field', '普通模式'),
-            2 => t('block', '正则模式'),
-            3 => t('block', 'PHP 模式')
+            2 => t('field', '正则模式'),
           )
         ),
         'values' => array(
           '#type' => 'textarea',
           '#default_value' => $value['values'],
           '#attributes' => array('rows' => 6, 'cols' => 60),
-          '#description' => theme('item_list', array(
-              t('field', '模式说明：'),
-              t('field', '普通模式：一行一条记录，首尾空格将被清除'),
-              t('field', '正则模式：符合PHP标准的正则表达式。以斜杠开头，如：/a.*z/ 表示字符串以a开头，以z结尾'),
-              t('field', 'PHP模式：不包含 php 标签，必须用 return 而不是 echo，返回 false 或 true 或 数组，false 表示未通过验证。可用变量：$field_value - 当前输入值，$field - 当前字段，$field_type - 操作类型')
-           )
-          )
         )
       );
+
+      $item = array(
+        t('field', '模式说明：'),
+        t('field', '普通模式：一行一条记录，首尾空格将被清除'),
+        t('field', '正则模式：符合PHP标准的正则表达式。以斜杠开头，如：/a.*z/ 表示字符串以a开头，以z结尾'),
+      );
+
+      // 允许使用 php 输入法的用户
+      if ($GLOBALS['_filter_is_php_code'] == true) {
+        $custom_fields['value_type']['#options'][3] = t('field', 'PHP 模式');
+        $item[] = t('field', 'PHP模式：不包含 php 标签，必须用 return 而不是 echo，返回 false 或 true 或 数组，false 表示未通过验证。可用变量：$field_value - 当前输入值，$field - 当前字段，$field_type - 操作类型');
+      }
+
+      $custom_fields['values']['#description'] = theme('item_list', $item);
     return array(
       'custom_ok' => array(
         'title' => t('field', '自定义(允许特定值)'),
@@ -1060,25 +1066,32 @@ function field_form($field) {
       '#default_value' => $field->field_type,
       '#options' => field_get_type_options($field->type, $group),
     );
-    $form['fields']['import'] = array(
-      '#type' => 'textarea',
-      '#title' => t('field', '你也可以导入字段'),
-      '#description' => t('field', '请将导出的代码复制到文本框，务必保证代码的完整性，不要做任何修改。可同时导入多个字段，注意：多个字段将直接保存，若遇冲突将跳过，不建议使用')
-    );
+
+    if (empty($group['disable_import'])) {
+      $form['fields']['import'] = array(
+        '#type' => 'textarea',
+        '#title' => t('field', '你也可以导入字段'),
+        '#description' => t('field', '请将导出的代码复制到文本框，务必保证代码的完整性，不要做任何修改。可同时导入多个字段，注意：多个字段将直接保存，若遇冲突将跳过，不建议使用')
+      );
+    }
+
     $form['fields']['type'] = array(
       '#type' => 'hidden',
       '#default_value' => $field->type,
       '#constant' => 1,
     );
+
     $form['fields']['module'] = array(
       '#type' => 'hidden',
       '#default_value' => $field->module,
       '#constant' => 1,
     );
+
     $form['settings'] = array(
       '#validate' => array('field_form_select_validate'),
       '#redirect' => $field->redirect,
     );
+
     $form['fields']['submit']['#type'] = 'submit';
     return $form;
   }
@@ -1112,8 +1125,8 @@ function field_form($field) {
   
   $form['fields']['weight'] = array(
     '#default_value' => $field->weight ? $field->weight : 0,
-    '#start' => 20,
-    '#end' => -20,
+    '#start' => -20,
+    '#end' => 20,
     '#title' => t('field', '排序'),
     '#type' => 'weight'
   );
@@ -1136,25 +1149,33 @@ function field_form($field) {
   	'#default_value' => array($field->required),
   	'#options' => array(1 => t('field', '是'))
   );
-  $form['fields']['access'] = array(
-    '#fieldset_prefix' => 'asc',
-    '#fieldset_legend' => t('field', '权限'),
-    '#fieldset_suffix' => 1,
-    '#description' => t('field', '默认与节点权限相同，除非有特殊权限需求， 一般不需要设置以下选项'),
-  );
-  $roles = user_roles_opt();
-  $form['fields']['access']['view'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('field', '浏览'),
-    '#default_value' => $field->access['view'],
-    '#options' => $roles
-  );
-  $form['fields']['access']['update'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('field', '填写'),
-    '#default_value' => $field->access['update'],
-    '#options' => $roles
-  );
+
+  // 是否显示权限设置
+  if (empty($group['disable_access'])) {
+    $form['fields']['access'] = array(
+      '#fieldset_prefix' => 'asc',
+      '#fieldset_legend' => t('field', '权限'),
+      '#fieldset_suffix' => 1,
+      '#description' => t('field', '默认与节点权限相同，除非有特殊权限需求， 一般不需要设置以下选项'),
+    );
+    
+    $roles = user_roles_opt();
+
+    $form['fields']['access']['view'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('field', '浏览'),
+      '#default_value' => $field->access['view'],
+      '#options' => $roles
+    );
+
+    $form['fields']['access']['update'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('field', '填写'),
+      '#default_value' => $field->access['update'],
+      '#options' => $roles
+    );
+  }
+
   /*
   $form['fields']['data'] = array(
     '#fieldset_prefix' => 'asc',
@@ -1169,10 +1190,11 @@ function field_form($field) {
     '#description' => t('field', '显示在表单字段旁，辅助用户输入'),
     '#default_value' => $field->data['input_description'],
   );
+
   $form['fields']['data']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('field', '输出描述'),
-    '#description' => t('field', '大多数时候显示在输出页面中，由模块自行设置'),
+    '#description' => t('field', '通常在浏览页面显示'),
     '#default_value' => $field->data['description'],
   );
   /**
@@ -1441,12 +1463,16 @@ function field_lists($module = NULL, $type = NULL) {
   if ($_POST['field_field_id']) {
     if (isset($_POST['field_change_weight']) && is_numeric($_POST['field_change_weight'])) {
       if (db_exec('UPDATE {fields} SET weight = ? WHERE field_id = ?', array($_POST['field_change_weight'], $_POST['field_field_id']))) {
+        field_get_cache_field(NULL, 1);
+        field_set_cache_term();
         echo 'ok';
       }
       exit;
     }
     if (isset($_POST['field_change_required']) && is_numeric($_POST['field_change_required'])) {
       if (db_exec('UPDATE {fields} SET required = ? WHERE field_id = ?', array($_POST['field_change_required'], $_POST['field_field_id']))) {
+        field_get_cache_field(NULL, 1);
+        field_set_cache_term();
         echo 'ok';
       }
       exit;
@@ -2345,6 +2371,8 @@ function field_set_cache_term($module = NULL, $type = NULL) {
     
     // 删除每个字段单独的缓存
     cache_del('*', 'field_term_key_cache_');
+
+    cache_del('*', 'field_term_all');
     
     if ($children) {
       var_set('field_term_children', $conf['field_term_children']);
@@ -2441,6 +2469,7 @@ function field_get_cache_field($field_id = NULL, $clear = 0) {
     }
     var_set('field_data', $data);
     var_set('field_count', $field_count);
+    cache_del('*', 'field_term_all');
   }
   
   if ($field_id && $data[$field_id] && $data[$field_id]->not_cache) {

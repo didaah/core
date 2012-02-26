@@ -245,6 +245,10 @@ form {
   color: #f00;
 }
 
+.form_textfield_name_title {
+  min-width: 300px;
+}
+
 .form_item .error {
   padding: 1px 0;
 }
