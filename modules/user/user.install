@@ -3,6 +3,20 @@
 
 /**
  * @Implement of hook_update_x()
+ *  增加表 user_ext，用于与第三方认证等关联
+ */
+function user_update_6(){
+  $ret = array();
+  
+  if($field = module_get_table('user', 'user_ext')){
+    $ret = db_create_table('user_ext', $field);
+  }
+  
+  return $ret;
+}
+
+/**
+ * @Implement of hook_update_x()
  * users 表添加 salt 字段，密码随机数，加强帐号安全
  */
 function user_update_5() {
@@ -60,6 +74,7 @@ function user_schema() {
     ),
     'primary key' => array('rid'),
   );
+
   $schema['users'] = array(
     'description' => '用户表',
     'fields' => array(
@@ -70,7 +85,7 @@ function user_schema() {
       ),
       'name' => array(
         'type' => 'varchar',
-        'length' => 60,
+        'length' => 64,
         'not null' => TRUE,
         'default' => '',
         'description' => '昵称'
@@ -210,6 +225,7 @@ function user_schema() {
     ),
     'primary key' => array('uid'),
   );
+
   $schema['user_roles'] = array(
     'description' => '用户所属角色组，可属多个角色组，权限叠加',
     'fields' => array(
@@ -242,6 +258,84 @@ function user_schema() {
     	)
     ),
   );
+
+  $schema['user_ext'] = array(
+    'description' => '与第三方关联的用户，一个系统用户可关联多个第三方用户',
+    'fields' => array(
+      'aid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => '在 users 中的 uid',
+      ),
+      'ext_name' => array(
+        'description' => '第三方用户名',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'ext_type' => array(
+        'description' => '第三方类型或其它标识',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'description' => '模块自定义标识，如：weibo',
+        'type' => 'varchar',
+        'length' => 16,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'ext_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => '扩展 id',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => true,
+        'description' => '其它数据',
+      ),
+      'timestamp' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => '时间',
+      ),
+    ),
+    'indexes' => array(
+      'type' => array('type'),
+      'uid' => array('uid'),
+      'ta' => array('type', 'aid'),
+      'tt' => array('type', 'ext_type'),
+      'ti' => array('type', 'ext_id'),
+      'tn' => array('type', 'ext_name'),
+    ),
+    'foreign keys' => array(
+    	'uid' => array(
+    		'table' => 'users',
+    		'field' => 'uid',
+    		'update' => 'cascade',
+    		'delete' => 'cascade'
+    	),
+    ),
+    'primary key' => array('aid'),
+  );
+
   return $schema;
 }
 

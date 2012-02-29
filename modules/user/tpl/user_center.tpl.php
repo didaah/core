@@ -27,13 +27,13 @@ global $user;
 
   <h2 id="user-center-header">欢迎您，<?php echo $user->name?></h2>
 
-  <div class="span-6"><div id="user-center-link">
+  <div id="user-center-link">
     <?php echo $center->links?>
-  </div></div>
+  </div>
 
-  <div class="span-18 last"><div id="user-center-body">
+  <div id="user-center-body">
     <?php echo theme('item_list', $center->tabs, NULL, 'ul', array('class' => 'tabs')); ?>
     <?php echo $center->body;?>
-  </div></div>
+  </div>
 
 </div>

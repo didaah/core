@@ -682,23 +682,27 @@ function user_edit_submit($form, &$value) {
  * @param (object) $v
  *  用户数据
  * @param (object) $ac
- *  如果是编辑用户，用户旧数据，可能为空
+ *  用户旧数据，如果是增加用户，用户旧数据，可能为空
  */
 function user_save($v, $ac = NULL, &$error = NULL) {
   if (!$ac->uid && $v->uid) {
     $ac = user_load($v->uid);
   }
+
   if (!$error = user_validate($v, $ac)) {
     if ($ac->uid) {
+
       // 编辑
       if (isset($v->theme)) $ac->theme = $v->theme;
       if (isset($v->language)) $ac->language = $v->language;
       if (isset($v->mail)) $ac->mail = $v->mail;
       
-      if (db_exec('UPDATE {users} SET name = ?, mail = ?, theme = ?, language = ? WHERE uid = ?', array($ac->name, $ac->mail, $ac->theme, $ac->language, $ac->uid), array('return' => 1))) {
+      if (db_exec('UPDATE {users} SET name = ?, mail = ?, theme = ?, language = ? WHERE uid = ?',
+      array($ac->name, $ac->mail, $ac->theme, $ac->language, $ac->uid), array('return' => 1))) {
         $v->nid = $ac->uid;
-        
-        if ($v->rid) {
+
+        // 写入用户角色
+        if (!empty($v->rid)) {
         	user_set_roles($ac->uid, $v->rid);
         }
         
@@ -708,14 +712,107 @@ function user_save($v, $ac = NULL, &$error = NULL) {
         if ($user->uid == $ac->uid) {
           user_clear_session($ac->uid);
         }
+
+        // 用户第三方信息
+        if (!empty($v->ext)) {
+          user_ext_save($ac, $v->ext);
+        }
       }
+
       return $v;
-    } else {
-      // 写入
-      return user_insert($v);
+    } else if ($ac = user_insert($v)) {
+      // 用户第三方信息
+      if (!empty($v->ext)) {
+        user_ext_save($ac, $v->ext);
+      }
+      return $ac;
     }
   }
+
+  return false;
 }
+
+/**
+ * 用户第三方信息保存
+ * 一个系统用户可对应多个第三方用户，第三方用户名可重复
+ * 如第三方用户名需唯一，模块本接口或 user_save() 时，应先行检查
+ * @param object $ac 
+ *  用户数据，必须包含 uid
+ * @param array $ext 
+ *  待写入的第三方记录，可同时写入多条
+ *  必须包含 type 和 ext_name，若有 aid，则为更新，示例：
+ *   array(
+ *    array( // 可为 array 或 object
+ *      'ext_name' => 'testname',
+ *      'type' => 'openid',
+ *    ),
+ *   )
+ * @access public
+ * @return bool 以写入状态为准，若有一条记录写入失败，则返回 false
+ */
+function user_ext_save($ac, $ext) {
+  if (empty($ac->uid) || !is_array($ext)) return false;
+  
+  $return = false;
+
+  foreach ($ext as $rows) {
+    if (is_object($rows)) {
+      $rows = (array) $rows;
+    } else if (!is_array($rows)) {
+      continue;
+    }
+    
+    if (empty($rows['ext_name']) || empty($rows['type'])) continue;
+    
+    $rows['uid'] = $ac->uid;
+
+    if (!empty($rows['aid'])) {
+      $return = db_write_record('user_ext', $rows, array('aid'));
+    } else {
+      $return = db_write_record('user_ext', $rows);
+    }
+  }
+
+  return $return;
+}
+
+/**
+ * 加载与用户相关的所有第三方信息 
+ * @param int $uid 
+ *  用户 uid
+ * @access public
+ * @return array
+ */
+function user_ext_load($uid) {
+  if ($fetch = db_query('SELECT * FROM {user_ext} WHERE uid = ?', array($uid))) {
+    $ext = new stdClass;
+    foreach ($fetch as $o) {
+      $o->data = !empty($o->data) ? unserialize($o->data) : array();
+      $ext->{$o->type}[$o->aid] = $o;
+    }
+    return $ext;
+  }
+}
+
+/**
+ * 加载一条第三方信息记录
+ * @param int $aid 
+ * @access public
+ * @return object
+ */
+function user_ext_rows_load($aid) {
+  static $data;
+
+  if (!isset($data[$aid])) {
+    $data[$aid] = array();
+    if ($data[$aid] = db_query('SELECT * FROM {user_ext} WHERE aid = ?', array($aid), array('return' => 'one'))) {
+      $data[$aid]->data = !empty($data[$aid]->data) ? unserialize($data[$aid]->data) : array();
+    }
+  }
+
+  return $data[$aid];
+}
+
 
 /**
  * 验证用户
@@ -1342,6 +1439,7 @@ function _user_login_validate($ac, &$value = NULL) {
  */
 function user_load($uid, $clear = NULL, $field_loads = true, $module_loads = true) {
   static $ac;
+
   if (!isset($ac[$uid]) || $clear) {
   	global $conf;
   	$ac[$uid] = new stdClass();
@@ -1372,6 +1470,7 @@ function user_load($uid, $clear = NULL, $field_loads = true, $module_loads = tru
       $ac[$uid]->nid = $ac[$uid]->uid;
       
       if ($field_loads) {
+        $ac[$uid]->ext = user_ext_load($uid);
         field_get_node_load('user', 'field', $ac[$uid], $ac[$uid]);
       }
       
@@ -1536,6 +1635,12 @@ function user_session_reg(&$ac) {
   $ac->session = session_id();
 }
 
+/**
+ * 清除用户 session 信息缓存 
+ * @param int $uid 
+ * @access public
+ * @return void
+ */
 function user_clear_session($uid) {
   if ($GLOBALS['user']->uid != $uid) return false;
   
@@ -1611,7 +1716,7 @@ function user_site_menu(&$menu) {
         l(t('user', '个人主页'), $user->path),
         l(t('user', '编辑资料'), 'user/center/edit'),
         l(t('user', '修改密码'), 'user/center/newpass'),
-        l(t('user', '安全离开'), 'user/logout'),
+        l(t('user', '安全离开'), 'user/logout', array('query' => 't=' . $_SERVER['REQUEST_TIME'])),
       )
     );
   }

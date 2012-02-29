@@ -22,21 +22,22 @@ function user_user_center_info() {
     'user' => array(
       'is_group' => true, // 定义组信息
       'weight' => 1000,
+      'list_title' => t('user', '基本设置'), // 列表标题
     ),
     'default' => array(
-      'title' => '个人中心',
+      'title' => t('user', '个人中心'),
       'link_hide' => true, // 不显示为链接
       'path' => 'user/center',
       'weight' => -1000
     ),
     'newpass' => array(
-      'title' => '修改密码',
+      'title' => t('user', '修改密码'),
     ),
     'edit' => array(
-      'title' => '编辑资料'
+      'title' => t('user', '编辑资料')
     ),
     'logout' => array(
-      'title' => '安全离开',
+      'title' => l(t('user', '安全离开'), 'user/logout', array('query' => 't=' . $_SERVER['REQUEST_TIME'])),
       'weight' => 1000,
       'path' => 'user/logout'
     )
@@ -115,7 +116,7 @@ function _user_get_center_info($center) {
       $group = $cache->data['group'];
       $links = $cache->data['links'];
     } else {
-      $group = array('weight' => array());
+      $group = array('weight' => array(), 'list_title' => array());
       $links = array('weight' => array());
     }
 
@@ -185,6 +186,7 @@ function _user_get_center_info($center) {
             if (!empty($info['link_hide'])) continue;
 
             $menu[$info['group']]['links'][$type] = $info;
+            $menu[$info['group']]['list_title'] = !empty($group['list_title'][$info['group']]) ? $group['list_title'][$info['group']] : NULL;
             ++$i;
           }
         }
@@ -212,7 +214,7 @@ function _user_get_center_info($center) {
       $info['data'] = l($info['title'], $info['path'], $info);
       $item[] = $info;
     }
-    $center->links .= theme('item_list', $item, NULL, 'ul', array(
+    $center->links .= theme('item_list', $item, $link['list_title'], 'ul', array(
       'class' => 'user_center_link_item',
       'id' => 'user_center_link_item_' . $type
     ));
