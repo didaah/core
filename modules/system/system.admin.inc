@@ -1253,7 +1253,7 @@ function system_admin_format() {
       switch ($args[3]) {
         case 'form':
           // 添加过滤器
-          if ($args[4] && is_numeric($args[5])) {
+          if ($args[4]) {
             $output .= dd_get_form('system_admin_format_form', $args[4], $args[5]);
           } else {
             dd_set_message(t('system', '没有可用的项目'));
