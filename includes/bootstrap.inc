@@ -402,8 +402,14 @@ function _l_external($path) {
  *  文件路径
  * @return (string)
  */
-function f($filepath) {
-  return $GLOBALS['base_path'] . $filepath;
+function f($filepath, $absolute = false) {
+  $path = '';
+
+  if ($absolute) $path = $GLOBALS['base_url'];
+  
+  $path .= $GLOBALS['base_path'] . $filepath;
+
+  return $path;
 }
 
 /**
@@ -429,7 +435,7 @@ function url($path = NULL, $options = array()) {
   }
 
   if ($options['file']) {
-    return f($path);
+    return f($path, $options['absolute']);
   }
 
   if (!isset($options['external'])) {
