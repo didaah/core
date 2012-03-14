@@ -11,8 +11,8 @@
 	<div id="wrapper" class="container"><div class="<?php echo $args_id;?>">
 		<div id="header">
       <div class="menu"><?php echo $menu; ?></div>
-      <a href="<?php echo $base_path?>" title="回到 <?php echo $site_global->name; ?> 首页" class="logo" alt="<?php echo $site_global->name; ?>">
-        <img src="<?php echo $site_global->logo; ?>" />
+      <a href="<?php echo $base_path?>" title="回到 <?php echo $site_global->name; ?> 首页" class="logo">
+        <img src="<?php echo $site_global->logo; ?>" alt="<?php echo $site_global->name?>" />
       </a>
     </div>
     
