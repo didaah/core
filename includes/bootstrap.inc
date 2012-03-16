@@ -515,15 +515,17 @@ function dd_attributes($attributes) {
  * @param (int) $uid
  *  用户 id，默认为当前用户
  */
-function dd_log($type, $value, $ext_id = NULL, $link = NULL, $status = NULL, $uid = NULL) {
+function dd_log($type, $value, $ext_id = NULL, $link = NULL, $status = 0, $uid = NULL) {
   if ($value) {
     if (!isset($uid)) $uid = $GLOBALS['user']->uid;
     if (!$status) $status = 0;
     if (!isset($ext_id)) $ext_id = 0;
+    if (!$ip = ip_address()) $ip = '127.0.0.1';
+    if (empty($link)) $link = dd_get_referer($_SERVER['REQUEST_URI']);
 
     db_exec('INSERT INTO {logs} (uid, ext_id, type, status, value, url, timestamp, host)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)', array($uid, $ext_id, $type, $status, $value, 
-    ($link ? $link : dd_get_referer($_SERVER['REQUEST_URI'])), $_SERVER['REQUEST_TIME'], ip_address()));
+    $link, $_SERVER['REQUEST_TIME'], $ip));
   }
 }
 

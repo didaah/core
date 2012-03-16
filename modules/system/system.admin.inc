@@ -255,6 +255,12 @@ function system_site_files() {
     }
     $form['fields']['user_file_size_role_'.$i]['#fieldset_suffix'] = 1;
   }
+   
+  $form['fields']['file_image_quality'] = array(
+    '#type' => 'textfield',
+    '#default_value' => var_get('file_image_quality', 75),
+    '#title' => t('system', '图片压缩质量'),
+  );
   
   $form['fields']['file_image_watermark'] = array(
     '#fieldset_suffix' => 1,

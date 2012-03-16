@@ -1315,15 +1315,17 @@ function dd_get_form_meta($sort = 'desc', $value = array(), $title = array()) {
  *  关键词字段名称
  * @param array $form
  *  可传入自定义字段
+ * @param string $title
+ *  输入字段显示名称
  */
-function form_admin_search($name = 'keyword', $form = array()){
+function form_admin_search($name = 'keyword', $form = array(), $title = ''){
   $form['settings']['#validate'][] = 'form_admin_search_validate';
 
   if (empty($form['fields'][$name])) {
     $form['fields'][$name] = array(
       '#default_value' => !empty($_GET[$name]) ? urldecode($_GET[$name]) : '',
       '#type' => 'textfield',
-      '#title' => '搜索',
+      '#title' => ($title ? $title : t('system', '搜索')),
       '#required' => true,
       '#prefix' => '<div class="form_admin_search">'
     );

@@ -403,6 +403,10 @@ span.option_label, span.form_radio_text{
 }
 
 /* icon */
+.ext_sort_order {
+  padding: 0 5px;
+}
+
 .sort_active_desc{
 	padding-right: 14px;
   background: url(images/arrow-desc.png) right 0 no-repeat;
@@ -783,10 +787,6 @@ span.ja_loading {
 
 .right_table, .right {
   text-align: right;
-}
-
-.ext_sort_order {
-  padding: 0 5px;
 }
 
 /* grid */

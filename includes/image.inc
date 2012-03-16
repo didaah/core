@@ -463,7 +463,7 @@ function image_gd_close($res, $destination, $extension) {
     return false;
   }
   if ($extension == 'jpeg') {
-    return $close_func($res, $destination, 100);
+    return $close_func($res, $destination, var_get('file_image_quality', 75));
   } else {
     return $close_func($res, $destination);
   }

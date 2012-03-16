@@ -88,7 +88,12 @@ set_time_limit(0);
 
 // 使用指定站点的配置文件，必须有这个参数
 $_SERVER['HTTP_HOST'] = $_args['host'];
-$_SERVER['REQUEST_URI'] = '/scripts';
+
+// url 参数，模拟为首页
+$_SERVER['REQUEST_URI'] = '/';
+
+// 指定 ip
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
 require_once DIDA_ROOT . '/includes/bootstrap.inc';
 
@@ -96,6 +101,12 @@ require_once DIDA_ROOT . '/includes/bootstrap.inc';
 if (!empty($_args['bootstrap'])) {
   bootstrap(($_args['bootstrap'] == 'data' ? 'data' : 'full'));
 }
+
+/**
+ * 终端下执行，解析得到的 $base_path 会加上 scripts 目录，重写
+ */
+$base_url = str_replace('/scripts', '', $base_url);
+$base_path = str_replace('/scripts/', '', $base_path);
 
 /**
  * 某些时候，涉及到大量数据操作的功能，耗时较长，可能需要在命令行下执行。
@@ -117,6 +128,8 @@ if (!empty($_args['script_name'])) {
   
   if (is_file($script_path)) {
     require_once $script_path;
+    // 输出 session 中的提示信息
+    echo strip_tags(dd_get_message());
   }
 }
 
