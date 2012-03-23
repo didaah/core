@@ -487,6 +487,7 @@ function module_include_file($file, $module = NULL) {
 
     // 加载指定模块的文件
     $filepath = DIDA_ROOT . '/' . dd_get_path('module', $module) . '/' . $file;
+    
     if (is_file($filepath)) {
       require_once $filepath;
     }

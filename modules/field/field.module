@@ -1818,12 +1818,16 @@ function field_term_lists($field, $term = NULL) {
         l(t('field', '编辑'), $_GET['q'], array('query' => $get.'&field_custom=update&field_term_tid='.$o->tid.$redirect)),
         l(t('field', '删除'), $_GET['q'], array('query' => $get.'&field_custom=delete&field_term_tid='.$o->tid, 'attributes' => array('class' => 'confirm'))),
       );
-      if (field_term_is_level($o->tid, field_group_info_level($group, $field))) {
-        if (!$_GET['field_term_lists']) {
+
+      if (!$_GET['field_term_lists']) {
+        if (field_term_is_level($o->tid, field_group_info_level($group, $field))) {
           $links[] = l(t('field', '浏览子级'), $_GET['q'], array('query' => $get.'&field_custom=view&field_term_tid='.$o->tid));
+          $links[] = l(t('field', '添加子级'), $_GET['q'], array('query' => $get.'&field_custom=add&field_term_pid='.$o->tid.$redirect));
+          $links[] = l(t('field', '批量添加'), $_GET['q'], array('query' => $get.'&field_custom=import&field_term_pid='.$o->tid.$redirect));
         }
+      } else {
         $links[] = l(t('field', '添加子级'), $_GET['q'], array('query' => $get.'&field_custom=add&field_term_pid='.$o->tid.$redirect));
-        $links[] = l(t('field', '批量添加'), $_GET['q'], array('query' => $get.'&field_custom=import&field_term_pid='.$o->tid.$redirect));
+        $links[] = l(t('field', '批量添加'), $_GET['q'], array('query' => $get.'&field_custom=import&field_term_pid='.$o->tid.$redirect));     
       }
       
       $table[] = array($o->name, dd_imp($links));
@@ -2344,6 +2348,10 @@ function field_field_call_group($type = NULL) {
  * 写入分类缓存，按字段分组信息
  */
 function field_set_cache_term($module = NULL, $type = NULL) {
+  
+  // 清除树状缓存
+  cache_del('*', 'field_cache_options');
+
   if ($module && $type) {
     $fetch = db_query('SELECT t.*, f.module, f.type, f.field_type, f.field_key FROM {fields_term} 
     t INNER JOIN {fields} f ON t.field_id = f.field_id WHERE f.type = ? AND f.module = ? AND 
