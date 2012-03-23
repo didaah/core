@@ -1402,7 +1402,7 @@ function form_date_start_or_end($title, $type = 'get', $return = 'string', $star
     $fields['date_start']['#name'] = 'date_start';
     $fields['date_end']['#name'] = 'date_end';
 
-    return dd_form_textfield($fields['date_start']) .' -- '. dd_form_textfield($fields['date_end']);
+    return '<div class="dd_form_date_start_or_end_wrapper">' . dd_form_textfield($fields['date_start']) .' -- '. dd_form_textfield($fields['date_end']) . '</div>';
 
   } else {
 
