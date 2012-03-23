@@ -2753,9 +2753,12 @@ function field_get_term_options($terms = array(), $required = 0) {
 }
 
 /**
- * 表单分类树
+ * 获取分类子级，用于级联表单 
+ * @param int $tid 
+ * @access protected
+ * @return array
  */
-function field_get_term_childrens($tid) {
+function _field_get_form_term_childrens($tid) {
   if ($o = db_query('SELECT pid, tid FROM {fields_term} WHERE tid = ?', array($tid), array('return' => 'one'))) {
     if ($o->pid) {
       if ($fetch = db_query('SELECT pid, tid, name FROM {fields_term} WHERE pid = ?', array($o->pid))) {
@@ -2764,7 +2767,7 @@ function field_get_term_childrens($tid) {
           $options[$term->tid] = $term->name;
         }
         $childrens[] = array('option' => $options, 'value' => $tid);
-        if ($parent = field_get_term_childrens($o->pid)) {
+        if ($parent = _field_get_form_term_childrens($o->pid, $term)) {
           $childrens = array_merge($childrens, $parent);
         }
       }
@@ -2773,6 +2776,33 @@ function field_get_term_childrens($tid) {
     }
   }
   return $childrens;
+}
+
+/**
+ * 获取指定 tid 的所有子级
+ * @param int $tid 
+ *  指定的 tid
+ * @param array $term 
+ *  从指定的数据中查找，该数组应使用 tid 为键名，通常可使用 field_get_cache_term_key() 获取。反之则从数据库中查找
+ * @access public
+ * @return void
+ */
+function field_get_term_childrens($tid, $term = NULL, &$childrens = array()) {
+  if (empty($term)) {
+    if ($fetch = db_query('SELECT pid, tid, name FROM {fields_term} WHERE pid = ?', array($tid))) {
+      foreach ($fetch as $o) {
+        $childrens[$o->tid] = $o->name;
+        field_get_term_childrens($o->tid, 0, $childrens);
+      }
+    }
+  } else {
+    foreach ($term as $o) {
+      if ($o->pid == $tid) {
+        $childrens[$o->tid] = $o->name;
+        field_get_term_childrens($o->tid, $term, $childrens);
+      }
+    }
+  }
 }
 
 /**
@@ -2866,7 +2896,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               } else if ($node->fields[$data->field_key]) {
                 $default_value = $node->fields[$data->field_key]->tid;
               }
-              if ($default_value && $terms = field_get_term_childrens($default_value)) {
+              if ($default_value && $terms = _field_get_form_term_childrens($default_value)) {
                 static $ajaxId;
                 $ajaxId = 0;
                 $terms = array_reverse($terms);
@@ -3157,7 +3187,7 @@ function field_get_multi_level_field($field, $value, &$form = NULL) {
           $default_value = $value;
         }
         
-        if ($default_value && $terms = field_get_term_childrens($default_value)) {
+        if ($default_value && $terms = _field_get_form_term_childrens($default_value)) {
           static $ajaxId;
           $ajaxId = 0;
           $terms = array_reverse($terms);
