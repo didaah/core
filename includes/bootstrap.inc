@@ -3017,6 +3017,9 @@ function dd_query_string_encode($query = array(), $exclude = array(), $parent = 
     if ($exclude && in_array($key, $exclude)) {
       continue;
     }
+    
+    if (is_object($value)) $value = (array) $value;
+
     if (is_array($value)) {
       $params[] = dd_query_string_encode($value, $exclude, $key);
     } else {
@@ -3121,6 +3124,7 @@ function dd_validate_utf8($text) {
  * @return (string) 编码后的字符串
  */
 function dd_urlencode($text) {
+  if (!is_string($text)) return $text;
   if ($GLOBALS['conf']['clean_url']) {
     return str_replace(array('%2F', '%26', '%23', '//'), array('/', '%2526', '%2523', '/%252F'), rawurlencode($text));
   } else {
