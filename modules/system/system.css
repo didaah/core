@@ -96,3 +96,19 @@
 	color: #f00;
 }
 
+/*tips*/
+.dida_tips {
+	cursor: help;
+}
+
+.dida_tips_view {
+	display: none;
+	position: absolute;
+	padding: 5px 8px;
+	background: #fff;
+	color: #03368E;
+	border: 1px solid #ccc;
+	max-width: 350px;
+	_width: 350px;
+	text-align: left;
+}

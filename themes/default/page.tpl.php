@@ -7,7 +7,7 @@
   <?php echo $styles; ?>
   <?php echo $scripts; ?>
 </head>
-<body>
+  <body class="<?php echo $user_login_status;?>">
 	<div id="wrapper" class="container"><div class="<?php echo $args_id;?>">
 		<div id="header">
       <div class="menu"><?php echo $menu; ?></div>

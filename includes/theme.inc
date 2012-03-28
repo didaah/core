@@ -230,7 +230,8 @@ function template_preprocess_page(&$var, $args) {
       $var[$reg] = $lists;
     }
   }
-  
+
+  $var['user_login_status'] = user_is_login() ? 'user_is_login' : 'user_is_anonymous';
   $var['menu'] = dd_get_menu();
   $var['head_title'] = dd_get_title();
   $var['messages'] = dd_get_message();

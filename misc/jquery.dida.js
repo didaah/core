@@ -172,5 +172,134 @@ jQuery.fn.extend({
           return false;
         });
     }
+  },
+  didaShow: function(o) {
+    var opt = {
+      fadeOutTime: o.fadeOutTime || 500,
+      fadeInTime: o.fadeInTime || 500,
+      dom: o.dom || '#' + this.attr('id'),
+      varyTime: o.varyTime || 5000
+    }
+    
+    var currentId, timeInt, imgCount, showTimer;
+    
+    imgCount = $(opt.dom + ' .focus_change_list li').size();
+    if (imgCount > 0) {
+      $(opt.dom + ' .focus_change_list li').each(function(i) {
+        if (i > 0) $(this).hide();
+        currentId = 0;
+      });
+      
+      function show() {
+        $(opt.dom + ' .focus_change_list li').eq(currentId).fadeOut(opt.fadeOutTime);
+        currentId += 1;
+        if (currentId == imgCount) currentId = 0;
+        $(opt.dom + ' .focus_change_list li').eq(currentId).fadeIn(opt.fadeInTime);
+        $(opt.dom + ' .focus_change_btn li').each(function(i) { 
+          if (i == currentId) {
+            $(this).addClass('current');
+          } else {
+            $(this).removeClass('current');
+          }
+        });
+      }
+      
+      showTimer = window.setInterval(show, opt.varyTime);
+      
+      $(opt.dom).hover(function() {
+        clearInterval(showTimer)
+      }, function() {
+        showTimer = window.setInterval(show, opt.varyTime);
+      });
+      
+      $(opt.dom + ' .focus_change_btn li').hover(function() {
+        var h = $(this).index();
+        if (h != currentId) {
+          $(opt.dom + ' .focus_change_list li').eq(currentId).fadeOut(opt.fadeOutTime);
+          if (h > 0) {
+            currentId = h - 1;
+          } else {
+            currentId = imgCount-1;
+          }
+          show();
+        }
+      });
+    }
+  },
+  didaScroll: function(o) {
+    var opt = {
+      varyTime: o.varyTime || 3000
+    };
+    var currentId = 0;
+    var visibleCount = 0;
+    var $$ = this;
+    var c = $$.children().size();
+    
+    switch(o.direction) {
+      case 'x':
+        var chWidth = parseInt($$.children().eq(0).css('width'));
+        var dowWidth = c*chWidth;
+        var ac;
+        $$.css({width: dowWidth, overflow: 'hidden', position: 'absolute'}).parent().css({position: 'relative'});
+        
+        if (o.visibleCount > 1) {
+          visibleCount = c - o.visibleCount;
+        } else {
+          visibleCount = c;
+        }
+        
+        function showX() {
+          currentId += 1;
+          if (currentId == visibleCount) currentId = 0;
+          $$.animate({left:-(o.size*currentId)}, 500);
+        }
+        ac = window.setInterval(showX, opt.varyTime);
+        $$.hover(function() {
+          clearInterval(ac)
+        }, function() {
+          ac = window.setInterval(showX, opt.varyTime);
+        });
+        if (o.nextButton) {
+          $(o.nextButton).click(function() {
+            showX();
+            return false;
+          });
+        }
+        if (o.prevButton) {
+          $(o.prevButton).click(function() {
+            if (currentId > 1) {
+              currentId -= 2;
+              showX();
+            }
+            return false;
+          });
+        }
+      break;
+      case 'y':
+        
+        //var chWidth = parseInt($$.children().eq(0).css('height'));
+        var dowWidth = c*o.size;
+        var bc;
+        $$.css({height: dowWidth, overflow: 'hidden', position: 'absolute'}).parent().css({position: 'relative'});
+        
+        if (o.visibleCount > 1) {
+          visibleCount = c - o.visibleCount;
+        } else {
+          visibleCount = c;
+        }
+        
+        function showY() {
+          currentId += 1;
+          if (currentId == visibleCount) currentId = 0;
+          $$.animate({top:-(o.size*currentId)}, 700);
+        }
+        bc = window.setInterval(showY, opt.varyTime);
+        $$.hover(function() {
+          clearInterval(bc)
+        }, function() {
+          bc = window.setInterval(showY, opt.varyTime);
+        });
+    }
   }
+
 });

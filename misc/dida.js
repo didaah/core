@@ -634,6 +634,29 @@ $(function() {
       }
     }
   });
+  
+  $('.dida_tips').each(function() {
+    var dom = $(this).attr('alt');
+    $(dom).hide().addClass('dida_tips_view');
+  });
+  
+  $('.dida_tips').live('mouseover', function(e){
+    var dom = $(this).attr('alt');
+    var a = Dida.getsize();
+    var s = {top: e.pageY+10};
+    if (e.pageX > 800) {
+      s.right =  a[0]-e.pageX;
+    } else {
+      s.left = e.pageX+55;
+    }
+    $(dom).css(s).show();
+  });
+  
+  $('.dida_tips').live('mouseout', function(){
+    var dom = $(this).attr('alt');
+    $(dom).hide();
+  });
+  
   if (settings.farbtastic) {
     for (var attr in settings.farbtastic) {
       var element = settings.farbtastic[attr];
