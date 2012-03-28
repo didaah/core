@@ -502,14 +502,8 @@ $(function() {
   });
   
   $('a.all_menu_ext').click(function() {
-    dom = $(this).attr('alt');
-    if ($(this).attr('rel') == 1) {
-      $(this).attr('rel', 0).text('闭合');
-      $('.' + dom).removeClass('div_none');
-    } else {
-      $(this).attr('rel', 1).text('展开');
-      $('.' + dom).addClass('div_none');
-    }
+    var dom = $(this).attr('alt');
+    $('.' + dom).toggle();
     return false;
   });
   

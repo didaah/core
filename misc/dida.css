@@ -48,6 +48,10 @@ thead img {
   border: none;
 }
 
+.div_none {
+  display: none;
+}
+
 .odd {
   background: #E8E8E8;
 }
