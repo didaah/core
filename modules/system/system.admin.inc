@@ -1462,7 +1462,7 @@ function system_admin_filter_form($fid = NULL) {
       if ($fetch = db_query('SELECT * FROM {filters} WHERE format = ? ORDER BY weight ASC, fid DESC', array($fid))) {
         foreach ($fetch as $o) {
           $key = $o->delta.'_'.$o->module;
-          if ($allLists[$key]) {
+          if (!empty($allLists[$key])) {
             $allLists[$key]->fid = $o->fid;
             $allLists[$key]->weight = $o->weight;
           }
@@ -1511,25 +1511,40 @@ function system_admin_filter_form($fid = NULL) {
         '#description' => dd_imp($op) . check_plain($filter->description),
         '#fieldset' => true,
       );
+
+      $form['fields']['filter'][$key]['module'] = array(
+        '#type' => 'hidden',
+        '#constant' => 1,
+        '#default_value' => $filter->module,
+      );
+
+      $form['fields']['filter'][$key]['delta'] = array(
+        '#type' => 'hidden',
+        '#constant' => 1,
+        '#default_value' => $filter->delta,
+      );
+
       $form['fields']['filter'][$key]['filter_id'] = array(
-          '#type' => 'hidden',
-          '#constant' => 1,
-          '#default_value' => $filter->filter_id,
-        );
+        '#type' => 'hidden',
+        '#constant' => 1,
+        '#default_value' => $filter->filter_id,
+      );
+
       $form['fields']['filter'][$key]['check'] = array(
-          '#title' => t('system', '启用'),
-          '#prefix' => '<div>',
-          '#type' => 'checkbox',
-          '#default_value' => $filter->fid ? 1 : 0,
-        );
+        '#title' => t('system', '启用'),
+        '#prefix' => '<div>',
+        '#type' => 'checkbox',
+        '#default_value' => $filter->fid ? 1 : 0,
+      );
+
       $form['fields']['filter'][$key]['weight'] = array(
-          '#title' => t('system', '权重'),
-          '#type' => 'weight',
-          '#start' => -30,
-          '#suffix' => '</div>',
-          '#default_value' => $filter->weight ? $filter->weight : 0,
-          '#end' => 30,
-        );
+        '#title' => t('system', '权重'),
+        '#type' => 'weight',
+        '#start' => -30,
+        '#suffix' => '</div>',
+        '#default_value' => $filter->weight ? $filter->weight : 0,
+        '#end' => 30,
+      );
     }
   }
   $form['settings']['#validate'] = array('system_admin_filter_form_validate');
@@ -1562,14 +1577,12 @@ function system_admin_filter_form_validate($form, $v) {
   }
   
   if ($fid) {
-    if ($v['filter']) {
+    if (!empty($v['filter'])) {
       foreach ($v['filter'] as $key => $filter) {
-        if (is_array($filter)) {
-          list($delta, $module) = explode('_', $key, 2);
-          if ($filter['check'] == 1) {
-            if (!$filter['filter_id']) $filter['filter_id'] = 0;
-            db_exec('INSERT INTO {filters} (format, filter, delta, module, weight) VALUES (?, ?, ?, ?, ?)', array($fid, $filter['filter_id'], $delta, $module, $filter['weight']));
-          }
+        if (is_array($filter) && !empty($filter['check'])) {
+          if (empty($filter['filter_id'])) $filter['filter_id'] = 0;
+          $filter['format'] = $fid;
+          db_write_record('filters', $filter); 
         }
       }
     }
