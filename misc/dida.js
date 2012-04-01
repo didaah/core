@@ -583,7 +583,7 @@ $(function() {
     }
   });
   
-  $('.confirm_msg').click(function() {
+  $('.confirm_msg').live('click', function() {
     alert($(this).attr('title'));
     return false;
   });

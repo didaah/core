@@ -1706,6 +1706,33 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
 }
 
 /**
+ * 将通过 dd_http_request 获取的 cookie 转换为与浏览器提交格式
+ * 获取到的 cookie 格式一般为：
+ *  name=value; path=/; expires=Tue, 29-Mar-22 18:52:18 GMT; domain=test.com,name2=......
+ * 转换为浏览器提交格式：
+ *  name=value;name2=value;name3=value
+ * @param string $cookie 
+ *  获取到的 cookie，包含了 path、domain 等
+ * @access public
+ * @return string
+ */
+function dd_http_request_cookie($cookie) {
+  // 时间中一般包含有逗号(,)，在 dd_http_request 中，cookie 也以逗号分隔，为免冲突，替换掉
+  $cookie = preg_replace('/expires=.*?;/', '', $cookie);
+
+  if (strpos($cookie, ',') !== false) {
+    $data = explode(',', $cookie);
+    $cookie = '';
+    foreach ($data as $value) {
+      $cookie .= current(explode(';', $value, 2)) . ';';
+    }
+    $cookie = rtrim($cookie, ';');
+  }
+
+  return $cookie;
+}
+
+/**
  * HTTP 1.1 Transfer-Encoding: chunked 过滤
  * @param (string) $data
  *  http 返回主体
