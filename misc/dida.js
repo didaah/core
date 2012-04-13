@@ -440,9 +440,15 @@ $(function() {
       $(this).addClass('ja_loading');
       var $$ = $(this);
       var url = $$.attr('href');
-      $.get(url, {'timestamp': Dida.gettime()}, function(data) {
-        Dida.ajaxSuccess($$, data, 'a');
-      });
+      if ($$.attr('method') != 'POST') {
+        $.get(url, {'timestamp': Dida.gettime()}, function(data) {
+          Dida.ajaxSuccess($$, data, 'a');
+        });
+      } else {
+        $.post(url, {'timestamp': Dida.gettime()}, function(data) {
+          Dida.ajaxSuccess($$, data, 'a');
+        });
+      }
     }
     return false;
   });
@@ -587,6 +593,7 @@ $(function() {
     alert($(this).attr('title'));
     return false;
   });
+ 
   
   if (settings.multi) {
     for (var attr in settings.multi) {

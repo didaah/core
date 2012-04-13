@@ -284,7 +284,7 @@ function template_preprocess_page(&$var, $args) {
         $tpl .= '_'. $arg;
       }
     }
-    $var['args_id'] = rtrim($args_value, ' ');
+    $var['args_id'] = rtrim(urlencode($args_value), ' ');
   }
 }
 

@@ -30,9 +30,11 @@ function db_info() {
  *  连接成功，返回true，并将连接对象写入全局变量 $db。失败则返回 false
  */
 function db_connect($target = 'default') {
-  global $database, $dbc, $db;
+  global $database, $dbc, $db, $_db;
+
   if (!isset($db[$target]) && $dbc[$target]  = $database[$target]) {
     $function = 'db_'.$dbc[$target]['driver'].'_connect';
+    $dbc[$target]['target'] = $target;
     require_once DIDA_ROOT . '/includes/database/database.'.$dbc[$target]['driver'].'.inc';
     if (function_exists($function)) {
       if ($db[$target] = $function($dbc[$target], $error)) {
@@ -409,7 +411,7 @@ function db_add_unique($table, $name, $fields, $target = 'default') {
 function db_drop_unique($table, $name, $target = 'default') {
   global $dbc;
   if (empty($dbc[$target])) db_connect($target);
-  return call_user_func('db_' . $dbc[$target]['driver'].'_drop_unique', $table, $name, $fields, $target);
+  return call_user_func('db_' . $dbc[$target]['driver'].'_drop_unique', $table, $name, $target);
 }
 
 /**
