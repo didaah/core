@@ -1420,9 +1420,10 @@ function _user_login_validate($ac, &$value = NULL) {
     }
     if ($t) return $t;
     
-    if (!$value->his[1]) {
+    if (empty($value->his[1])) {
       global $cookie_domain;
       setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
+      dd_set_cookie('time', time(), -1);
     }
     
     if (user_login(user_load($ac->uid))) {

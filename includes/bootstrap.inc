@@ -959,7 +959,7 @@ function ip_address() {
 function dd_user_validate() {
   global $user;
 
-  if ($_COOKIE[session_name()] && $_SESSION['user'] && $_SESSION['user']->session == $_COOKIE[session_name()]) {
+  if (!empty($_COOKIE[session_name()]) && $_SESSION['user'] && $_SESSION['user']->session == $_COOKIE[session_name()]) {
     $user = $_SESSION['user'];
     $active = dd_get_cookie('time');
     $time = time();
@@ -976,9 +976,10 @@ function dd_user_validate() {
         $user->online += $online;
       }
     }
-    if (!$user->__SETVALIDATE) {
-      if ($active > ($user->active + 600)) {
-        //每600秒验证一次用户session
+
+    if (!empty($user->__SETVALIDATE)) {
+      // 每 600 秒验证一次 session。如上次活动时间为 0，则强行验证一次 session
+      if (empty($active) || $active > ($user->active + 600)) {
         if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',
         array($user->uid, $_COOKIE[session_name()]), array('return' => 'column'))) {
           user_logout();  // 游客
@@ -991,18 +992,18 @@ function dd_user_validate() {
   }
 
   // 默认时区
-  if (!$user->timezone) {
-    $user->timezone = 'Asia/Chongqing';
+  if (empty($user->timezone)) {
+    $user->timezone = var_get('default_timezone', 'Asia/Chongqing');
   }
 
-  if (!$user->uid) {
+  if (empty($user->uid)) {
     $user = user_anonymous();  // 游客
   }
 
-  date_default_timezone_set(var_get('default_timezone', 'Asia/Chongqing'));
+  date_default_timezone_set($user->timezone);
 
   // 管理员强制要求某个用户退出
-  if ($user->uid && $GLOBALS['conf']['dida_user_enforce_logout']) {
+  if ($user->uid && !empty($GLOBALS['conf']['dida_user_enforce_logout'])) {
     $key = array_search($user->uid, $GLOBALS['conf']['dida_user_enforce_logout']);
     if ($key !== false) {
       unset($GLOBALS['conf']['dida_user_enforce_logout'][$key]);
@@ -1230,6 +1231,7 @@ function dd_set_cookie($name, $value, $expires = NULL, $path = '/', $domain = NU
   if (!isset($expires)) {
     $expires = $_SERVER['REQUEST_TIME'] + 31536000;
   }
+
   if (!isset($domain)) {
     $domain = $GLOBALS['cookie_domain'];
   }
