@@ -1207,11 +1207,16 @@ function conf_init() {
   $session_name = 'DIDA' . md5($session_name);
   
   session_name($session_name);
+
   if (!empty($_COOKIE[$session_name])) {
     session_id($_COOKIE[$session_name]);
   }
   
   session_start();
+
+  if (!empty($_COOKIE['remember'])) {
+    setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
+  }
 }
 
 /**

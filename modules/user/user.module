@@ -1420,13 +1420,8 @@ function _user_login_validate($ac, &$value = NULL) {
     }
     if ($t) return $t;
     
-    if (empty($value->his[1])) {
-      global $cookie_domain;
-      setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
-      dd_set_cookie('time', time(), -1);
-    }
-    
-    if (user_login(user_load($ac->uid))) {
+   
+    if (user_login(user_load($ac->uid), $value->his[1])) {
       return true;
     }
   } else {
@@ -1584,8 +1579,13 @@ function user_user_page($ac) {
 
 /**
  * 用户登录，触发 hook_user_login()
+ * @param object $user 
+ * @param bool $history 
+ *  记住登录状态，即设置 cookie 有效期
+ * @access public
+ * @return object
  */
-function user_login($user) {
+function user_login($user, $history = true) {
   user_session_reg($user);
   
   /**
@@ -1594,6 +1594,13 @@ function user_login($user) {
    */
   module_alter_all('user_login', $user);
   
+  if (empty($history)) {
+    dd_set_cookie('remember', 1, -1); // 有值，代表不保存登录状态，关闭浏览器则失效
+    dd_set_cookie('time', time(), -1);
+  } else {
+    setcookie('remember', 0, -1, '/', $GLOBALS['cookie_domain']);
+  }
+
   dd_log('user_login', $user->name . '-' . $user->uid, 0, dd_get_referer($_SERVER['HTTP_REFERER']), 0, $user->uid);
   
   return $user;
@@ -1622,7 +1629,7 @@ function user_session_reg(&$ac) {
   session_unset();
   unset($ac->pass);
   unset($ac->init);
-  setcookie('time',$_SERVER['REQUEST_TIME'], $_SERVER['REQUEST_TIME'] + 31536000, '/', $cookie_domain);
+  dd_set_cookie('time', $_SERVER['REQUEST_TIME'], $_SERVER['REQUEST_TIME'] + 31536000);
   
   $_SESSION['user'] = $ac;
   session_regenerate_id();
