@@ -458,11 +458,21 @@ function db_get_placeholder($array = array()) {
  *  如果是更新操作，应当传递做为条件的字段名称，字段之间的关系只能是 AND
  * @param (array) $opt
  *   db_exec() 接口 $opt 参数
+ * @param string|array $table_field
+ *  指定待操作的表字段(array)，或表名(string)，这将跳过检查表是否存，通常用在向其它库插入内容
  * @return
  *  成功返回 true，update 时影响的列数，将赋给 _db_write_record 单元，失败返回 false。
  */
-function db_write_record($table, &$o, $wheres = array(), array $opt = array()) {
-  $tables = module_get_schema($table);
+function db_write_record($table, &$o, $wheres = array(), array $opt = array(), $table_field = NULL) {
+  if (!empty($table_field)) {
+    if (is_array($table_field)) {
+      $tables = $table_field;
+    } else {
+      $tables = module_get_schema($table_field);
+    }
+  } else {
+    $tables = module_get_schema($table);
+  }
   
   if (!is_array($tables['fields'])) {
     if (db_is_table($table)) {
