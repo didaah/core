@@ -1,7 +1,7 @@
 <?php
 //$Id$
 
-if (cache_memcache_onnect()) {
+if (cache_memcache_connect()) {
   /**
    * 缓存清除
    * @param (string) $type
@@ -103,7 +103,7 @@ if (cache_memcache_onnect()) {
 /**
  * memcache 连接
  */
-function cache_memcache_onnect() {
+function cache_memcache_connect() {
   global $mem, $mem_prefix;
   
   if (!isset($mem)) {

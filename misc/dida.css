@@ -44,6 +44,11 @@ thead {
   height: 24px;
 }
 
+#dialog_image_wrapper {
+  display: block;
+  margin: 0 auto;
+}
+
 thead img {
   border: none;
 }

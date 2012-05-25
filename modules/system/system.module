@@ -740,7 +740,7 @@ function system_filter($op, $delta = NULL, $format = NULL, $value = NULL, $filte
 
         default: // 其它手动添加的过滤器
           if ($filter = filter_get_filters($filter_id)) {
-            switch ($filter->dalta) {
+            switch ($filter->delta) {
               case 'keyword':
                 // 词语过滤、替换
                 $value = strtr($value, $filter->tags);
@@ -857,7 +857,7 @@ function system_filter($op, $delta = NULL, $format = NULL, $value = NULL, $filte
         case 'html_enabled':
           $form['body'] = array(
             '#type' => 'textfield',
-            '#title' => t('system', '不允许的标签'),
+            '#title' => t('system', '允许的标签'),
             '#required' => 1,
             '#default_value' => $value->body,
             '#attributes' => array('size' => 60),
@@ -877,7 +877,7 @@ function system_filter($op, $delta = NULL, $format = NULL, $value = NULL, $filte
         default:
           $form['body'] = array(
             '#type' => 'textfield',
-            '#title' => t('system', '允许的标签'),
+            '#title' => t('system', '不允许的标签'),
             '#required' => 1,
             '#default_value' => $value->body,
             '#attributes' => array('size' => 60),

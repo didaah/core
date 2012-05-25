@@ -537,7 +537,7 @@ $(function() {
     return false;
   });
   
-  $('.thickbox, .dialog').click(function() {
+  $('.dialog').live('click', function() {
     var o = {};
     o.url = $(this).attr('href');
     o.title = $(this).attr('title') || $(this).text();

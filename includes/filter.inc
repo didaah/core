@@ -227,7 +227,7 @@ function filter_get_filters($fid = NULL) {
         foreach ($fetch as $o) {
           if ($o->module == 'system' && $o->body) {
             switch ($o->delta) {
-              case 0: case 1:
+              case 'html_enabled': case 'html_disabled':
                 if ($tags = explode(' ', $o->body)) {
                   foreach ($tags as $tag) {
                     $o->tags[$tag] = 1;
@@ -235,8 +235,8 @@ function filter_get_filters($fid = NULL) {
                   }
                 }
               break;
-              case 2:
-                if ($tags = explode("\n", $o->body)) {
+              case 'keyword':
+                if ($tags = dd_line_to_array($o->body, true)) {
                   foreach ($tags as $tag) {
                     if (strpos($tag, '|') === false) {
                       $o->tags[$tag] = "";
@@ -254,5 +254,6 @@ function filter_get_filters($fid = NULL) {
       cache_set('filter_get_filters', $filters);
     }
   }
+  
   return $fid ? $filters[$fid] : $filters;
 }

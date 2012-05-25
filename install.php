@@ -59,12 +59,21 @@ conf_init();
 
 $log_dir = DIDA_ROOT . '/sites/logs';
 
-if (is_file('./install/install.php') && function_exists('install')) {
-  call_user_func('install');
-  exit;
+/**
+ * 自定义安装
+ */
+$custom_install = DIDA_ROOT . '/install/install.php';
+
+if (is_file($custom_install)) {
+  require_once $custom_install;
+  if (function_exists('install')) {
+    call_user_func('install');
+    exit;
+  }
 }
 
 $title = '检查安装环境';
+
 $is_env_ok = false;
 
 if (!$error = dida_is_setup()) { // 检查安装环境

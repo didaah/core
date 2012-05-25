@@ -1524,12 +1524,12 @@ function system_admin_filter_form($fid = NULL) {
         '#default_value' => $filter->delta,
       );
 
-      $form['fields']['filter'][$key]['filter_id'] = array(
+      $form['fields']['filter'][$key]['filter'] = array(
         '#type' => 'hidden',
         '#constant' => 1,
-        '#default_value' => $filter->filter_id,
+        '#default_value' => $filter->filter_id ? $filter->filter_id : 0,
       );
-
+      
       $form['fields']['filter'][$key]['check'] = array(
         '#title' => t('system', '启用'),
         '#prefix' => '<div>',
