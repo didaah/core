@@ -51,6 +51,7 @@ function db_mysql_connect($dbc, & $error) {
  *  db_query("SELECT * FROM {test} WHERE id = :id", array(':id' => 10));
  *  db_query("SELECT * FROM {test} WHERE id = :id AND name = :name",array(':id' => 10, ':name' => $name));
  *  db_query("SELECT * FROM {test} WHERE id IN (:id, :id2)", array(':id' => 10, ':id2' => 12));
+ *  db_query("SELECT * FROM {test} WHERE id IN (:id)", array(':id' => array(10, 20, 21));
  *
  * @example 带条件带属性的查询：
  *  db_query("SELECT * FROM {test} WHERE id = :id", array(':id' => 10), array('fetch' => 'array'));
