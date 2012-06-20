@@ -5,9 +5,11 @@
  * @file
  *  按模块生成语言翻译文件
  *  终端命令示例：
- *    为 www.cmsns.com 站点下 system 模块生成英文语言包
+ *    为 www.didaah.org 站点下 system 模块生成英文语言包
  *    翻译语言文件将保存为 {module_name}/languages/{lang}.php，已有翻译语言文件将被覆盖，但原有翻译字符串将被保留
- *    php common.inc --host www.cmsns.com --bootstrap data --script_name lang_export.inc --module_name system --lang en
+ *    php scripts/common.inc --host www.didaah.org --bootstrap data --script_name lang_export.inc --module_name system --lang en
+ *
+ * @TODO js 中的多语言待确定
  */
 
 if (!empty($_args['lang'])) {
@@ -16,8 +18,8 @@ if (!empty($_args['lang'])) {
   
   if (!$lang_name = system_get_languages_data($_args['lang'])) {
     message('语言不存在');
-  } else if (!$path = dd_get_path('module', $_args['module_name'])) {
-    message('模块不存在');
+  } else if (!$path = dd_get_path('all', $_args['module_name'])) {
+    message('模块或主题不存在');
   } else {
 
     message('正在导出模块 - ' . $_args['module_name']);
@@ -106,7 +108,6 @@ if (!empty($_args['lang'])) {
   message('请指定等导出的语言');
 }
 
-
 /**
  * 获取指定目录下所有待翻译的文件 
  * @param string $dir 
@@ -122,7 +123,7 @@ function _lang_export_files($dir, &$files = array()) {
       foreach ($objs as $obj) {
         if (is_dir($obj)) {
           _lang_export_files($obj, $files);
-        } else if (in_array(end(explode('.', $obj)), array('module', 'install', 'info', 'inc', 'php', 'js'))) {
+        } else if (in_array(end(explode('.', $obj)), array('module', 'install', 'info', 'inc', 'php'))) {
           $files[] = $obj;
         }
       }

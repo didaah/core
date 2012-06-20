@@ -2,7 +2,10 @@
 // $Id$
 
 function theme_init() {
-  global $conf, $base_path, $base_theme_name, $base_theme_info;
+  global $conf, $base_path, $base_theme_name, $base_theme_info, $language_code; 
+
+  // 当前用户所选择的界面的语言，若未选择，则使用网站默认语言
+  $language_code = empty($GLOBALS['user']->language) ? var_get('default_language', 'zh-hans') : $GLOBALS['user']->language;
 
   $base_theme_name = !$GLOBALS['user']->theme ? $conf['default_theme'] : $GLOBALS['user']->theme;
   
@@ -233,6 +236,7 @@ function template_preprocess_page(&$var, $args) {
 
   $var['user_login_status'] = user_is_login() ? 'user_is_login' : 'user_is_anonymous';
   $var['menu'] = dd_get_menu();
+  $var['lang_links'] = system_get_lang_change_link();
   $var['head_title'] = dd_get_title();
   $var['messages'] = dd_get_message();
   $var['breadcrumb'] = dd_get_breadcrumb();

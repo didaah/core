@@ -6,6 +6,9 @@
  */
 function module_init() {
   global $conf;
+  
+  $conf['module_theme'] = array_merge($conf['modules'], $conf['themes']);
+  
   foreach ($conf['modules'] as $module => $info) {
     if (!module_load($module.'.module', $info['path'])) {
       module_invoke($module, 'init');
@@ -18,6 +21,7 @@ function module_init() {
  */
 function module_load_install($module = NULL) {
   global $conf;
+
   if ($module) {
     $info = $conf['modules'][$module];
     $filepath = DIDA_ROOT .'/'. $info['path'] .'/'. $module. '.install';

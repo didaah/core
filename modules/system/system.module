@@ -22,31 +22,38 @@ function system_menu() {
     'page_callback' => 'captcha_page',
     'file' => 'system.captcha.inc'
   );
+  
   $items['ajax'] = array(
     'access_callback' => true,
     'description' => '全局 ajax 地址',
     'page_callback' => 'system_tools_ajax',
+    'file' => 'system.ajax.inc'
   );
+
   $items['g'] = array(
     'access_callback' => true,
     'description' => '全局重定向跳转地址',
     'page_callback' => 'system_tools_go',
   );
+
   $items['admin'] = array(
     'title' => '网站管理',
     'access_arguments' => array('system view admin'),
     'page_callback' => 'system_admin_default',
     'file' => 'system.admin.inc'
   );
+
   $items['images/error'] = array(
     'access_callback' => true,
     'page_callback' => 'system_images_error',
   );
+
   $items['files/editor'] = array(
     'access_arguments' => array('file upload'),
     'page_callback' => 'system_file_upload',
     'file' => 'system.file.inc',
   );
+
   $items['files/%/%'] = array(
     'load_functions' => array(1 => array('file_load'), 2 => '%'),
     'access_callback' => 'file_is_access',
@@ -54,12 +61,14 @@ function system_menu() {
     'page_callback' => 'file_operate',
     'page_arguments' => array(1, 2),
   );
+
   $items['admin/token'] = array(
     'title' => '通配符',
     'access_arguments' => array('system view admin'),
     'page_callback' => 'system_admin_token',
     'file' => 'system.admin.inc',
   );
+
   $items['admin/modules'] = array(
     'title' => '模块管理',
     'access_arguments' => array('system admin module'),
@@ -67,6 +76,7 @@ function system_menu() {
     'page_arguments' => array('system_modules_page'),
     'file' => 'system.module.inc',
   );
+
   $items['admin/front'] = array(
     'title' => '首页设置',
     'access_arguments' => array('system admin front'),
@@ -74,12 +84,14 @@ function system_menu() {
     'page_arguments' => array('system_admin_front'),
     'file' => 'system.admin.inc',
   );
+
   $items['admin/logs'] = array(
     'title' => '系统日志',
     'access_arguments' => array('system admin logs'),
     'page_callback' => 'system_admin_logs',
     'file' => 'system.admin.inc',
   );
+
   $items['admin/themes'] = array(
     'title' => '主题管理',
     'access_arguments' => array('system admin theme'),
@@ -94,6 +106,7 @@ function system_menu() {
     'page_arguments' => array('system_themes_admin'),
     'file' => 'system.module.inc',
   );
+
   $items['admin/themes/setting/%'] = array(
     'load_functions' => array(3 => '%'),
     'title' => '主题设置',
@@ -102,15 +115,18 @@ function system_menu() {
     'page_arguments' => array('system_themes_setting', 3),
     'file' => 'system.module.inc',
   );
+
   $items['admin/status/update'] = array(
     'access_arguments' => array('system view admin'),
     'page_callback' => 'system_status_update',
   );
+
   $items['admin/status/php'] = array(
     'access_arguments' => array('system view admin'),
     'page_callback' => 'system_status_php',
     'file' => 'system.admin.inc',
   );
+
   $items['admin/cache'] = array(
     'title' => '缓存管理',
     'access_arguments' => array('system admin cache'),
@@ -118,6 +134,7 @@ function system_menu() {
     'page_arguments' => array('system_cache_clear'),
     'file' => 'system.admin.inc'
   );
+
   $items['admin/cache/settings'] = array(
     'title' => '缓存设置',
     'access_arguments' => array('system admin cache'),
@@ -125,30 +142,35 @@ function system_menu() {
     'page_arguments' => array('system_cache_settings'),
     'file' => 'system.admin.inc'
   );
+
   $items['admin/lang'] = array(
     'title' => '语言设置',
     'access_arguments' => array('system admin lang'),
     'page_callback' => 'system_admin_lang',
     'file' => 'system.admin.inc'
   );
+
   $items['admin/filter'] = array(
     'title' => '输入设置',
     'access_arguments' => array('system admin filter'),
     'page_callback' => 'system_admin_filter',
     'file' => 'system.admin.inc'
   );
+
   $items['admin/format'] = array(
     'title' => '过滤器列表',
     'access_arguments' => array('system admin filter'),
     'page_callback' => 'system_admin_format',
     'file' => 'system.admin.inc'
   );
+
   $items['admin/alias'] = array(
     'title' => '别名管理',
     'access_arguments' => array('system admin alias'),
     'page_callback' => 'system_admin_alias',
     'file' => 'system.admin.inc'
   );
+
   $items['admin/settings'] = array(
     'title' => '站点设置',
     'access_arguments' => array('system admin settings'),
@@ -156,6 +178,7 @@ function system_menu() {
     'page_arguments' => array('system_site_settings'),
     'file' => 'system.admin.inc'
   );
+
   $items['admin/settings/global'] = array(
     'title' => '站点信息',
     'access_arguments' => array('system admin settings global'),
@@ -163,6 +186,7 @@ function system_menu() {
     'page_arguments' => array('system_site_global'),
     'file' => 'system.admin.inc'
   );
+
   $items['admin/settings/error'] = array(
     'title' => '错误设置',
     'access_arguments' => array('system admin settings error'),
@@ -170,6 +194,7 @@ function system_menu() {
     'page_arguments' => array('system_site_error'),
     'file' => 'system.admin.inc'
   );
+
   /*
   $items['admin/settings/cron'] = array(
     'title' => '计划任务',
@@ -177,7 +202,8 @@ function system_menu() {
     'page_callback' => 'system_admin_cron',
     'file' => 'system.admin.inc'
   );
-  */
+   */
+
   $items['admin/settings/captcha'] = array(
     'title' => '验证码设置',
     'access_arguments' => array('system admin settings captcha'),
@@ -185,6 +211,7 @@ function system_menu() {
     'page_arguments' => array('system_site_captcha'),
     'file' => 'system.admin.inc'
   );
+
   $items['admin/settings/files'] = array(
     'title' => '文件设置',
     'access_arguments' => array('system admin settings files'),
@@ -192,6 +219,7 @@ function system_menu() {
     'page_arguments' => array('system_site_files'),
     'file' => 'system.admin.inc'
   );
+
   return $items;
 }
 
@@ -215,6 +243,7 @@ function system_perm() {
     'system admin settings files' => t('system', '文件设置'),
     'system admin filter' => t('system', '输入法管理'),
     'system admin lang' => t('system', '界面翻译'),
+    'system admin lang change' => t('system', '选择语言'),
     'file upload' => t('system', '上传文件'),
     'file all view' => t('system', '浏览所有文件'),
     'file one view' => t('system', '浏览自己的文件'),
@@ -396,23 +425,6 @@ function system_images_error() {
 }
 
 /**
- * 全局 ajax 地址，方便模块创建 ajax，省去定义 hook_menu 的步骤
- * 不验证权限，请在 module_system_tools_ajax 中自行验证
- */
-function system_tools_ajax() {
-  $module = !empty($_POST['module']) ? $_POST['module'] : $_GET['module'];
-  
-  if ($module && isset($GLOBALS['conf']['modules'][$module])) {
-    
-    // 传递 $_POST、$_GET
-    echo module_invoke($module, 'system_tools_ajax', $_POST, $_GET);
-    
-  }
-  
-  exit;
-}
-
-/**
  * 全局重定向地址，方便模块创建重定向，省去定义 hook_menu 的步骤
  * 不验证权限，请在 module_system_tools_go 中自行验证
  */
@@ -443,54 +455,6 @@ function system_tools_go() {
   }
   
   exit;
-}
-
-/**
- * @Implement of hook_system_tools_ajax()
- */
-function system_system_tools_ajax($v, $g) {
-  switch ($v['op']) {
-    case 'admin_menu':
-      if (is_array($v['system_admin_menu_list'])) {
-        if (!user_access('system view admin')) return false;
-        
-        global $user;
-        $table = array_flip($v['system_admin_menu_list']);
-        cache_set('_admin_menu_list_'.$user->uid, $table);
-        
-        $language = $user->language ? $user->language : $GLOBALS['conf']['default_language'];
-        
-        if ($data = cache_get('admin_menus_' . $user->uid .'_'. $language)) {
-          if (is_array($data->data)) {
-            foreach ($data->data as $module => $menu) {
-              $data->data[$module]['#weight'] = $table[$module];
-            }
-            uasort($data->data, 'dd_form_cmp');
-            cache_set('admin_menus_' . $user->uid .'_'. $language, $data->data);
-          }
-        }
-        
-        return true;
-      }
-    break;
-    case 'block_set_link':
-      $json = array('path' => '');
-      
-      if ($_POST['path'] && $_POST['title']) {
-        if ($v = system_set_custom_block_links($_POST)) {
-          $json = $v->data;
-          $json['path'] = url($v->data['path']);
-        }
-      }
-      
-    return json_encode($json);
-    
-    case 'block_delete_link':
-      if ($_POST['id']) {
-        $return = system_del_custom_block_links($_POST['id']);
-      }
-    return $return;
-  }
 }
 
 /**
@@ -2123,3 +2087,32 @@ function system_cron($timestamp) {
   }
   
 }
+
+/**
+ * 语言切换 
+ * @param bool $html
+ *  返回 html，或一个可用于 item_list 的数组
+ * @access public
+ * @return string|array
+ */
+function system_get_lang_change_link($html = true) {
+  global $conf, $user, $language_code; 
+
+  if (!empty($conf['languages']) && user_access('system admin lang change')) {
+    $links = array();
+    foreach ($conf['languages'] as $key => $name) {
+      if ($key != $language_code) {
+        $class = 'dd_lang_link_icon dd_lang_link_icon_' . $key;
+      } else {
+        $class = 'dd_lang_link_icon dd_lang_link_icon_' . $key . ' dd_lang_link_icon_active';
+      }
+
+      $links[] = l($name, 'ajax', array(
+        'query' => 'module=system&op=lang_change&lang=' . $key . '&redirect=' . url($_GET['q']),
+        'attributes' => array('class' => $class),
+      ));
+    }
+    return $html ? theme('item_list', $links, NULL, 'ul', array('class' => 'dd_item_lang_change')) : $links;
+  }
+}
+

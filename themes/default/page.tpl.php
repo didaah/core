@@ -10,6 +10,7 @@
   <body class="<?php echo $user_login_status;?>">
 	<div id="wrapper" class="container"><div class="<?php echo $args_id;?>">
 		<div id="header">
+      <?php echo $lang_links; ?>
       <div class="menu"><?php echo $menu; ?></div>
       <a href="<?php echo $base_path?>" title="回到 <?php echo $site_global->name; ?> 首页" class="logo">
         <img src="<?php echo $site_global->logo; ?>" alt="<?php echo $site_global->name?>" />

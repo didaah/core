@@ -864,7 +864,7 @@ function file_mkdir($path, $mode = 0775, $recursive = 1) {
 function file_operate($file, $op) {
   switch ($op) {
     case 'delete':
-      if (strpos($filepath->filemime, 'image') !== false) {
+      if (strpos($file->filemime, 'image') !== false) {
         $thumb = 1;
       }
       if (file_delete($file->fid, $thumb, $file->filepath)) {

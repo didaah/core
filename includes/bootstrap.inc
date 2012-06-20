@@ -57,6 +57,7 @@ function bootstrap($op, $inc = NULL) {
   switch ($op) {
     case 'full':
       require_once DIDA_ROOT . '/includes/database.inc';
+
       //初始化默认数据库连接
       db_connect('default');
 
@@ -165,21 +166,27 @@ function bootstrap($op, $inc = NULL) {
 
 /**
  * 获取模块、主题文件物理路径
- * @param (string) $type
- *  类型，分为：theme、module
+ * @param string $type
+ *  类型，分为：theme、module、all
  * @param (string) $name
  *  模块或主题的系统名称
  */
 function dd_get_path($type, $name) {
   global $conf;
+
   switch ($type) {
-    case 'module':
-      $lists = $conf['modules'];
-      break;
     case 'theme':
       $lists = $conf['themes'];
+    break;
+    case 'all': 
+      $lists = $conf['module_theme']; // 模块或主题
+    break;
+    case 'module': default:
+      $lists = $conf['modules'];
+    break;
   }
-  return $lists[$name]['path'];
+
+  return !empty($lists[$name]['path']) ? $lists[$name]['path'] : false;
 }
 
 /**
@@ -683,12 +690,15 @@ function var_init() {
  */
 function t($module, $index, $args = array(), $language = NULL) {
   static $lang;
+  global $language_code;
 
-  if (empty($language)) {
-    $language = empty($GLOBALS['user']->language) ? $GLOBALS['conf']['default_language'] : $GLOBALS['user']->language;
-  }
-  
-  if (!$module || $language != $GLOBALS['conf']['modules'][$module]['language']) {
+  if (empty($language)) $language = $language_code;
+
+  /**
+   * 1、$module 为空，需要加载翻译文件
+   * 2、请求的语言 $language 与模块 ($module) info 中指定的界面语言不相同，也需要加载翻译文件
+   */ 
+  if (empty($module) || $language != $GLOBALS['conf']['module_theme'][$module]['language']) {
     if (!isset($lang[$language])) {
 
       $lang_file = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/';
@@ -769,8 +779,8 @@ function dd_set_lang($lists = NULL, $language = array()) {
   global $conf;
 
   if (empty($lists)) {
-    if ($conf['modules']) {
-      foreach ($conf['modules'] as $module => $info) {
+    if ($conf['module_theme']) {
+      foreach ($conf['module_theme'] as $module => $info) {
         $lists[$module] = $info['path'];
       }
     }
@@ -790,7 +800,8 @@ function dd_set_lang($lists = NULL, $language = array()) {
     $cache = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages';
 
     if (!is_dir($cache)) {
-      @mkdir($cache, 0777);
+      dd_set_message(t('system', '%dir 不存在，无法更新语言文件', array('%dir' => $cache)), 'error');
+      return false;
     }
 
     foreach ($language as $code) {
@@ -833,8 +844,12 @@ function dd_set_lang($lists = NULL, $language = array()) {
       	
       if ($l) {
         // 合并为缓存文件
-        cache_system_set_file($code.'.php', 'l', $l, $GLOBALS['conf_dir'].'/cache/languages');
-        dd_set_message($code . ' 导入成功');
+        if ($path = cache_system_set_file($code.'.php', 'l', $l, $GLOBALS['conf_dir'].'/cache/languages')) {
+          chmod($path, 0777);
+          dd_set_message(t('system', '%name 导入成功', array('%name' => $code)));
+        } else {
+          dd_set_message(t('system', '%name 导入失败，请检查缓存目录权限', array('%name' => $code)), 'error');
+        }
       }
     }
   }
@@ -3421,12 +3436,11 @@ function dd_get_redirect($url = NULL) {
 }
 
 /**
- * 跳转至 redirect 或 指定路
+ * 跳转至 redirect 或 指定路径
  * @param (string) $url
  */
 function dd_goto_redirect($url = NULL) {
-  if (!$url) $url = $_GET['q'];
-  dd_goto($_GET['redirect'] ? $_GET['redirect'] : $url);
+  dd_goto(!empty($_GET['redirect']) ? $_GET['redirect'] : $url);
 }
 
 /**
@@ -3492,7 +3506,7 @@ function dd_decode_ascii($str, $imp = '.') {
  *  待保存的数据
  * @param (string) $path
  *  保存路径，默认保存在缓存目录
- * @return (bool)
+ * @return bool|string 失败返回 false，成功返回文件路径
  */
 function cache_system_set_file($filename, $var_name, $value, $path = 1) {
   $info = '//$Id$' . "\n\n";
@@ -3515,7 +3529,11 @@ function cache_system_set_file($filename, $var_name, $value, $path = 1) {
     $value = '$'. $var_name .' = '. $value;
   }
 
-  return file_put_contents($filepath, "<?php \n $info" . $value . "\n\n?>");
+  if (file_put_contents($filepath, "<?php \n $info" . $value . "\n\n?>")) {
+    return $filepath;
+  } else {
+    return false;
+  }
 }
 
 /**

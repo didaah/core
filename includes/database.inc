@@ -78,7 +78,7 @@ function db_query($sql, $args = array(), $opt = array()) {
     $start = microtime(true);
   }
  
-  if (!empty($args))  db_args_filter($sql, $args);
+  if (!empty($args)) db_args_filter($sql, $args);
 
   $fetch = $function($sql, $args, $opt);
   
@@ -99,14 +99,20 @@ function db_query($sql, $args = array(), $opt = array()) {
 function db_args_filter(&$sql, &$args) {
   // 如果占位符对应的参数是一个数组，分拆，当成 IN 传入
   foreach (array_filter($args, 'is_array') as $key => $data) {
+    
     // 特殊占位符，不做解析，参见 database.mysql.inc db_mysql_exec
     if ($key == 'values' || $key == 'placeholder') continue;
+
     $new_keys = array();
+
     foreach ($data as $i => $value) {
       $new_keys[$key . '_' . $i] = $value;
     }
+
     $sql = preg_replace('#' . $key . '\b#', implode(', ', array_keys($new_keys)), $sql);
+    
     unset($args[$key]);
+
     $args += $new_keys;
   }
 }

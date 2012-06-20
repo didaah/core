@@ -160,10 +160,12 @@ function dd_get_form($form_id) {
         
         session_write_close();
         
-        if ($_GET['redirect']) {
+        if (!empty($_GET['redirect'])) {
         	$redirect = $_GET['redirect'];
-        } else if ($form['settings']['#redirect']) {
+        } else if (!empty($form['settings']['#redirect'])) {
         	$redirect = $form['settings']['#redirect'];
+        } else if (!empty($form['#redirect'])) {
+        	$redirect = $form['#redirect'];
         } else {
         	$redirect = url($_GET['q']);
         }

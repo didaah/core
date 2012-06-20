@@ -931,8 +931,8 @@ function system_install() {
   $languages = array(
   	'placeholder' => array(':lang', ':name'),
   	'values' => array(
-	  	array('zh-CN', '简体中文'),
-	  	array('zh-TW', '繁体中文')
+	  	array('zh-hans', '简体中文'),
+	  	array('zh-hant', '正體中文')
   	)
   );
   

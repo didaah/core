@@ -46,6 +46,25 @@ body {
   float: left;
 }
 
+/* lang change link */
+.item_dd_item_lang_change {
+  position: absolute;
+  right: 0;
+  top: 10px;
+}
+
+.item_dd_item_lang_change li {
+  float: left;
+  margin: 0 4px;
+}
+
+.dd_lang_link_icon_active {
+  font-weight: bold;
+  color: #BF640A;
+  text-decoration: underline;
+}
+
+
 /*footer*/
 #footer { 
 	clear: both;
