@@ -424,7 +424,21 @@ $(function() {
       return false;
     }
   });
-  
+ 
+  $('.dida_close_page').live('click', function() {
+    if ($.browser.msie) {
+      window.opener = null;
+      window.close(); 
+    } else if ($.browser.mozilla) {
+      window.location.href = 'about:blank ';
+    } else {
+      window.opener = null;
+      window.open('', '_self', '');
+      window.close(); 
+    }
+    return false;
+  });
+
   $('.confirm').live('click', function() {
     msg = $(this).attr('alt');
     if (!confirm((msg ? msg : '确认此操作吗？'))) {

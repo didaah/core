@@ -15,6 +15,8 @@ function bootstrap($op, $inc = NULL) {
 
   if ($called) return;
 
+  date_default_timezone_set('Asia/Chongqing');
+
   global $cookie_domain, $user, $database, $dbc, $db, $conf, $conf_dir, $log_dir, $installed, $free_update;
 
   $log_dir = DIDA_ROOT . '/sites/logs';
@@ -690,7 +692,7 @@ function var_init() {
  */
 function t($module, $index, $args = array(), $language = NULL) {
   static $lang;
-  global $language_code;
+  global $language_code, $conf;
 
   if (empty($language)) $language = $language_code;
 
@@ -698,7 +700,7 @@ function t($module, $index, $args = array(), $language = NULL) {
    * 1、$module 为空，需要加载翻译文件
    * 2、请求的语言 $language 与模块 ($module) info 中指定的界面语言不相同，也需要加载翻译文件
    */ 
-  if (empty($module) || $language != $GLOBALS['conf']['module_theme'][$module]['language']) {
+  if (empty($module) || empty($conf['module_theme'][$module]) || $language != $conf['module_theme'][$module]['language']) {
     if (!isset($lang[$language])) {
 
       $lang_file = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/';
@@ -998,7 +1000,7 @@ function dd_user_validate() {
         if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',
         array($user->uid, $_COOKIE[session_name()]), array('return' => 'column'))) {
           user_logout();  // 游客
-          dd_set_message('登录超时，请重新登录', 'error');
+          dd_set_message(t('system', '登录超时，请重新登录'), 'error');
         } else {
           $user->active = $time;
         }
@@ -1006,16 +1008,18 @@ function dd_user_validate() {
     }
   }
 
+  if (empty($user->uid)) {
+    $user = user_anonymous();  // 游客
+  }
+
   // 默认时区
   if (empty($user->timezone)) {
     $user->timezone = var_get('default_timezone', 'Asia/Chongqing');
   }
 
-  if (empty($user->uid)) {
-    $user = user_anonymous();  // 游客
+  if ($user->timezone != 'Asia/Chongqing') {
+    date_default_timezone_set($user->timezone);
   }
-
-  date_default_timezone_set($user->timezone);
 
   // 管理员强制要求某个用户退出
   if ($user->uid && !empty($GLOBALS['conf']['dida_user_enforce_logout'])) {
@@ -1300,7 +1304,10 @@ function dd_get_microtime() {
  * @return (string)
  */
 function format_date_week_cn($timestamp) {
-  $cn = array('日', '一', '二', '三', '四', '五', '六');
+  $cn = array(
+    t('system', '星期日'), t('system', '星期一'), t('system', '星期二'),
+    t('system', '星期三'), t('system', '星期四'), t('system', '星期五'), t('system', '星期六')
+  );
   return $cn[date('w', $timestamp)];
 }
 
@@ -1320,9 +1327,7 @@ function format_date($timestamp, $type = 'default', $format = '') {
       $format = 'Y/m/d';
       break;
     case 'large':
-      $cn = array('日', '一', '二', '三', '四', '五', '六');
-      $m = date('w', $timestamp);
-      $format = 'Y/m/d H:i:s 星期'.$cn[$m];
+      $format = 'Y/m/d H:i:s ' . format_date_week_cn($timestamp);
       break;
     case 'custom':
       if (!$format) $format = 'Y/m/d H:i:s';
@@ -1345,8 +1350,17 @@ function format_date($timestamp, $type = 'default', $format = '') {
  * @return (string)
  */
 function format_interval($timestamp, $granularity = 5) {
-  $units = array(31536000 => '年', 604800 => '周', 86400 => '天', 3600 => '小时', 60 => '分钟', 1 => '秒');
+  $units = array(
+    31536000 => t('system', '年'), 
+    604800 => t('system', '周'), 
+    86400 => t('system', '天'),
+    3600 => t('system', '小时'),
+    60 => t('system', '分钟'),
+    1 => t('system', '秒')
+  );
+
   $output = '';
+
   foreach ($units as $key => $value) {
     if ($timestamp >= $key) {
       $output .= floor($timestamp / $key) . $value;
@@ -1357,7 +1371,8 @@ function format_interval($timestamp, $granularity = 5) {
       break;
     }
   }
-  return $output ? $output : '0 秒';
+
+  return $output ? $output : t('system', '0 秒');
 }
 
 /**
@@ -1795,7 +1810,7 @@ function dd_error_msg($msg) {
  *  错误信息
  */
 function text_log($filename, $msg) {
-  $filepath = DIDA_ROOT . '/sites/logs/'.$_SERVER['HTTP_HOST'].'_'. $filename . '_'.date("Y") .'_'.date("m") . '.txt';
+  $filepath = DIDA_ROOT . '/sites/logs/'.$_SERVER['HTTP_HOST'].'_'. $filename . '_'.date('Y') .'_'.date('m') . '.txt';
   $handle = fopen($filepath, 'ab');
   fwrite($handle, $msg. "\n<!-- 分隔符 -->\n");
   fclose($handle);
@@ -2033,7 +2048,7 @@ function qqwry_data($ip, $file = './tools/QQWry.Dat') {
     if ($ip2num < $ipNum) {
       if ($Middle == $BeginNum) {
         fclose($fd);
-        return '未知';
+        return t('system', '未知');
       }
       $BeginNum = $Middle;
     }
@@ -2110,7 +2125,7 @@ function qqwry_data($ip, $file = './tools/QQWry.Dat') {
   $ipaddr = preg_replace('/^\s*/is', '', $ipaddr);
   $ipaddr = preg_replace('/\s*$/is', '', $ipaddr);
   if (preg_match('/http/i', $ipaddr) || $ipaddr == '') {
-    $ipaddr = '未知';
+    $ipaddr = t('system', '未知');
   }
   return iconv("gb2312", "UTF-8", $ipaddr);
 }
