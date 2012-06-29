@@ -122,6 +122,8 @@ function bootstrap($op, $inc = NULL) {
        * 仅载入数据库连接
        */
       require_once DIDA_ROOT . '/includes/database.inc';
+      require_once DIDA_ROOT . '/includes/pager.inc';
+
       //初始化默认数据库连接
       db_connect('default');
 
