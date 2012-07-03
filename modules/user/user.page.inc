@@ -460,7 +460,8 @@ function _user_center_newpass() {
  */
 function user_page_activation() {
   if ($_GET['validate'] && $_GET['uid']) {
-    if ($uid = db_query('SELECT uid FROM {users} WHERE validate = ? AND uid = ?', array($_GET['validate'], $_GET['uid']), array('return' => 'column'))) {
+    if ($uid = db_query('SELECT uid FROM {users} WHERE validate = ? AND uid = ?',
+    array($_GET['validate'], $_GET['uid']), array('return' => 'column'))) {
       if (db_exec('UPDATE {users} SET status = 1, validate = ? WHERE uid = ?', array('', $uid))) {
         
         $user = user_load($uid);
@@ -468,34 +469,39 @@ function user_page_activation() {
         module_invoke_all('user_status', 0, $user);
         
         if (user_login($user) && ($_GET['ajax'] != 'submit')) {
-          dd_set_message('激活成功，欢迎加入 '. $GLOBALS['conf']['site_name']);
+          dd_set_message(t('user', '激活成功，欢迎加入 !name', array('!name' => $GLOBALS['conf']['site_name'])));
           dd_goto(dd_get_token(var_get_key('user', 'redirect', 'user/center'), $user, array('user', 'system')));
         }
       }
     } else {
-      dd_set_message('不正确的激活链接', 'error');
+      dd_set_message(t('user', '不正确的激活链接'), 'error');
     }
   }
+  
   $form['settings'] = array(
     '#validate' => array('user_activation_validate'),
   );
+
   $form['fields']['mail'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '邮箱'),
     '#required' => true,
     '#description' => t('user', '请输入你注册时填写的邮箱，系统将为你重新发送激活链接'),
   );
+
   $form['fields']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('user', '发送激活链接')
   );
+
   return $form;
 }
 
 function user_activation_validate($form, $v) {
   if ($msg = form_vali_mail($v['mail'])) {
     $t['mail']['#error'][] = $msg;
-  } else if (!$o = db_query('SELECT uid, name, created FROM {users} WHERE mail = ? AND status = 0', array($v['mail']), array('return' => 'one'))) {
+  } else if (!$o = db_query('SELECT uid, name, created FROM {users} WHERE mail = ? AND status = 0',
+  array($v['mail']), array('return' => 'one'))) {
     $t['mail']['#error'][] = t('user', '不正确的邮箱');
   } else {
     _user_activation($o->uid, $o->name, $v['mail'], $o->created);

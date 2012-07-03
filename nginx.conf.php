@@ -1,6 +1,6 @@
-<?php exit; ?>
-
+<?php  header('Content-Type: text/plain; charset=utf-8'); ?>
 #若使用 nginx，可参考以下配置，实现简洁链接和文件保护
+#本文件修改自 nginx 1.0 默认配置文件
 
 #user  nobody;
 worker_processes  1;
@@ -28,12 +28,26 @@ http {
     #access_log  logs/access.log  main;
 
     sendfile        on;
-    #tcp_nopush     on;
-
+    tcp_nopush     on;
+    
+    # 上传文件
+    client_max_body_size 16m;
+    
     #keepalive_timeout  0;
     keepalive_timeout  65;
+    tcp_nodelay on;
 
-    #gzip  on;
+    # 打开 gzip
+    gzip  on;
+
+    # 超过 1 k 才进行压缩
+    gzip_min_length 1k;
+
+    # 压缩等级
+    gzip_comp_level 2;
+
+    # 压缩类型
+    gzip_types  text/plain application/x-javascript text/css application/xml;
 
     server {
         listen       80;
@@ -68,12 +82,12 @@ http {
         #}
 
         # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
-        #
+        # php 支持，视情况去除注释
         #location ~ \.php$ {
         #    root           html;
         #    fastcgi_pass   127.0.0.1:9000;
         #    fastcgi_index  index.php;
-        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    fastcgi_param  SCRIPT_FILENAME $document_root$real_script_name; 
         #    include        fastcgi_params;
         #}
 
@@ -93,6 +107,15 @@ http {
             rewrite ^/(.*)$ /index.php?q=$1 last;
             break;
         }
+        
+        # 文件缓存
+        location ~* ^.+.(jpg|jpeg|gif|png|js|css|ico)$ {
+          root   html;
+          access_log off;
+          expires 30d;
+          add_header Cache_Control private;
+        }
+
     }
 
 

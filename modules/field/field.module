@@ -2655,7 +2655,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL, $clear = NULL)
   
   if (!$conf['field_count'][$module.$type]) return;
 
-  if (!$clear && $cache = cache_get($module.$type.$node->nid, 'cache_field')) {
+  if (!$clear && $cache = cache_get($module . $type . $node->nid, 'cache_field')) {
     if (!empty($node->fields) && is_array($node->fields) && is_array($cache->data)) {
       $node->fields += $cache->data;
     } else {

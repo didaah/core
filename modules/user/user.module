@@ -858,6 +858,7 @@ function user_validate($v, $ac = NULL) {
  */
 function user_register_form($op = 'user') {
 	global $conf;
+
   $form['settings'] = array(
     '#validate' => array('user_register_validate'),
     '#ajax_validate' => true,
@@ -870,6 +871,7 @@ function user_register_form($op = 'user') {
       ),
     ),
   );
+
   $form['fields']['mail'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '邮箱'),
@@ -880,6 +882,7 @@ function user_register_form($op = 'user') {
       'class' => "{email:true}"
     ),
   );
+
   $form['fields']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '昵称'),
@@ -887,6 +890,7 @@ function user_register_form($op = 'user') {
     '#weight' => -90,
     '#description' => t('user', '昵称长度 2-20，中英文皆可'),
   );
+
   $form['fields']['pass'] = array(
     '#type' => 'password',
     '#title' => t('user', '密码'),
@@ -897,6 +901,7 @@ function user_register_form($op = 'user') {
       'id' => 'password',
     ),
   );
+
   $form['fields']['pass2'] = array(
     '#type' => 'password',
     '#title' => t('user', '确认'),
@@ -907,6 +912,7 @@ function user_register_form($op = 'user') {
       'class' => "{equalTo:'#password'}"
     ),
   );
+
   if (($conf['user']['select_lang'] || $op == 'admin') && count($conf['languages']) > 1) {
 	  $form['fields']['language'] = array(
 	    '#type' => 'select',
@@ -915,6 +921,7 @@ function user_register_form($op = 'user') {
 	    '#options' => array('' => t('user', '默认')) + $conf['languages'],
 	  );
 	}
+
 	if (($conf['user']['select_theme'] || $op == 'admin') && count($conf['themes']) > 1) {
 		
 	  foreach ($conf['themes'] as $theme) {
@@ -928,6 +935,7 @@ function user_register_form($op = 'user') {
 	    '#options' => array('' => t('user', '默认')) + $themes,
 	  );
   }
+
   if ($conf['captcha']['user_register']['data']) {
     $form['fields']['captcha'] = array(
       '#type' => 'captcha',
@@ -943,6 +951,7 @@ function user_register_form($op = 'user') {
   $ac = new stdClass();
   
   field_get_node_form('user', 'field', $ac, $form);
+
   module_alter_all('user_register_form', $form, $op, $ac);
   
   $form['fields']['button'] = array(
@@ -952,6 +961,7 @@ function user_register_form($op = 'user') {
     '#value' => t('user', '确认注册'),
     '#field_suffix' => l(t('user', '已经注册?'), 'user/login')
   );
+
   return $form;
 }
 
@@ -966,6 +976,7 @@ function user_default_validate_name($name) {
   } else if (db_query('SELECT name FROM {users} WHERE name = ?', array($name), array('return' => 'column'))) {
     $t['name']['#error'][] = t('user', '!name 已经存在', array('!name' => $name));
   }
+
   return $t;
 }
 
@@ -1113,13 +1124,19 @@ function user_insert($value) {
  * 帐号激活邮件
  */
 function _user_activation($uid, $name, $mail, $time) {
-  $site = $GLOBALS['conf']['site_name'];
+  $site = $GLOBALS['conf']['site_global']['name'];
   $pass = dd_rand_str();
   if (db_exec('UPDATE {users} SET validate = ? WHERE uid = ?', array($pass, $uid))) {
-    $url = url('user/activation', array('query' => 'validate='. $pass .'&uid='. $uid, 'absolute' => true));
+    $url = url('user/activation', array('query' => 'validate='. $pass . '&uid=' . $uid, 'absolute' => true));
     dd_set_mail(
       array(array($mail, $name)),
-      $site . ' 激活帐号', '亲爱的 '.$name.'<br />你于 '.format_date($time).' 在 '.$site.' 完成了注册，以下是你的帐号激活链接：'.$url.' <br />未激活之前，你的帐号无法登录。<br />多次获取激活链接，以最后一次为准。<br />若该帐号并非你本人注册，请忽略此邮件。<br />' . $site
+      t('user', '激活你在 !site 的帐号', array('!site' => $site)),
+      t('user', '亲爱的 !name：<br />你于 %time 在 !site 进行了注册，以下是你的帐号激活链接：!url <br />未激活之前，你的帐号无法登录。<br />多次获取激活链接，以最后一次为准。<br />若该帐号并非你本人注册，请忽略此邮件。<br />!site', array(
+        '!name' => $name,
+        '%time' => format_date($time),
+        '!site' => $site,
+        '!url' => $url
+      ))
     );
     return true;
   }
@@ -1129,15 +1146,20 @@ function _user_activation($uid, $name, $mail, $time) {
  * 找回密码
  */
 function _user_newpass($uid, $name, $mail) {
-  $site = $GLOBALS['conf']['site_name'];
+  $site = $GLOBALS['conf']['site_global']['name'];
   $str = dd_rand_str();
   $time = time();
   if (db_exec('UPDATE {users} SET newpass = ?, active = ? WHERE uid = ?', array($str, $time, $uid))) {
-    $url = url('user/pass', array('query' => 'type=newpass&str='. $str .'&uid='. $uid, 'absolute' => true));
+    $url = url('user/pass', array('query' => 'type=newpass&str=' . $str . '&uid=' . $uid, 'absolute' => true));
     dd_set_mail(
       array(array($mail, $name)),
-      $site . ' 找回密码',
-      '亲爱的 '.$name.'<br />你于 '.format_date($time).' 在 '.$site.' 请求找回密码，以下是你的密码修改链接：'.$url.'<br />通过本链接你可直接修改密码，在修改密码之前，你的旧密码仍然可以登录。<br />本链接在24小时内有效，且只能使用一次，多次找回，以最后一次为准。<br />' . $site
+      t('user', '找回你在 !site 的密码', array('!site' => $site)),
+      t('user', '亲爱的 !name：<br />你于 %time 在 !site 请求找回密码，以下是你的密码修改链接：!url <br />通过本链接你可以直接修改密码，在成功修改密码之前，你的旧密码仍然可以登录。<br />本链接在 24 小时内有效，且只能使用一次，多次找回，以最后一次为准。<br />若该操作并非你本人发起，请注意你的帐号安全。<br />!site', array(
+        '!name' => $name,
+        '%time' => format_date($time),
+        '!site' => $site,
+        '!url' => $url
+      ))
     );
     return true;
   }
