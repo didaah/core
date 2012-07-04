@@ -7,7 +7,13 @@
  *  终端命令示例：
  *    为 www.didaah.org 站点下 system 模块生成英文语言包
  *    翻译语言文件将保存为 {module_name}/languages/{lang}.php，已有翻译语言文件将被覆盖，但原有翻译字符串将被保留
- *    php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --module_name system --lang en
+ *    生成 system 模块的英文语言文件
+ *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --module_name system --lang en
+ *    生成所有已启用模块的英文语言文件
+ *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --lang en
+ *    生成所有已启用模块的英文语言文件，如语言文件已存在，直接替换
+ *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --clear_cache 1 --lang en
+ *
  *
  * @TODO js 中的多语言待确定
  */
@@ -16,7 +22,7 @@ require_once DIDA_ROOT . '/modules/system/system.admin.inc';
 
 if (!empty($_args['lang'])) {
   if (!empty($_args['module_name'])) {
-    _lang_export($_args['lang'], $module);
+    _lang_export($_args['lang'], $_args['module_name']);
   } else if ($fetch = db_query('SELECT * FROM {system}')) {
     foreach ($fetch as $o) {
       _lang_export($_args['lang'], $o->filename);
@@ -32,6 +38,7 @@ function _lang_export($lang_code, $module) {
   if (!$lang_name = system_get_languages_data($lang_code)) {
     message('语言不存在');
   } else if (!$path = db_query('SELECT path FROM {system} WHERE filename = ?', array($module), array('return' => 'column'))) {
+    echo $module;
     message('模块或主题不存在');
   } else {
     
@@ -103,7 +110,9 @@ function _lang_export($lang_code, $module) {
       if (!empty($lang)) {
         $output = '<?php';
         $output .= "\n";
-        $output .= '// $Id$';
+        $output .= '// $';
+        $output .= 'Id';
+        $output .= '$';
 
         $message = "\n\n/**\n";
         $message .= ' * 默认语言：' . system_get_languages_data($default_lang) . "($default_lang)\n";
@@ -116,6 +125,11 @@ function _lang_export($lang_code, $module) {
         
         
         message($message);
+
+        // 已有同名语言文件存在，若未传递清除参数，将该文件保存为备份，以免替换该文件造成损失
+        if (empty($_args['clear_cache']) && is_file($lang_file)) {
+          rename($lang_file, $lang_file . '.bak');
+        }
 
         if (file_put_contents($lang_file, $output)) {
           message('已保存至 ' . $lang_file);

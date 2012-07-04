@@ -725,7 +725,7 @@ function t($module, $index, $args = array(), $language = NULL) {
       }
     }
 
-    if ($module && $lang[$language] && $lang[$language][$index]) {
+    if ($module && $lang[$language] && !empty($lang[$language][$index])) {
       if (!is_array($lang[$language]['__'.$module]) || $lang[$language]['__'.$module][$index]) {
         $index = $lang[$language][$index];
       } else {

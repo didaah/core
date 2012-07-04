@@ -18,7 +18,6 @@
  * 用户注销：hook_user_logout($ac)
  */
 
-
 // 用户状态
 define('USER_STATUS_PEND', 0); // 未激活
 define('USER_STATUS_ACTIVE', 1); // 正常状态
@@ -1979,13 +1978,28 @@ function user_get_avatar_fid() {
  */
 function user_get_avatar($uid, $size = NULL, $style = 'scale') {
   static $data;
+
   if (!isset($data[$uid])) {
     $data[$uid] = var_get_key('user', 'default_logo', 'misc/images/avatar.gif');
-    
-    $filepath = file_directory_path().'/avatar/'.$uid.'.jpg';
-    
-    if (is_file($filepath)) {
-      $data[$uid] = $filepath;
+
+    // 防止上传名称 md5 设置切换，引起冲突
+    if (var_get('file_upload_rename', 0)) {
+      $filepath = array(
+        file_directory_path() . '/avatar/' . md5($uid . '.jpg') . '.jpg',
+        file_directory_path() . '/avatar/' . $uid . '.jpg',
+      );
+    } else {
+      $filepath = array(
+        file_directory_path() . '/avatar/' . $uid . '.jpg',
+        file_directory_path() . '/avatar/' . md5($uid . '.jpg') . '.jpg',
+      );
+    }
+
+    foreach ($filepath as $path) {
+      if (is_file($path)) {
+        $data[$uid] = $path;
+        continue;
+       }
     }
   }
   
