@@ -4,7 +4,7 @@
 /**
  * 默认语言：Chinese, Simplified(简体中文)(zh-hans)
  * 翻译语言：Chinese, Traditional(繁體中文)(zh-hant)
- * 共有 46 条界面翻译
+ * 共有 49 条界面翻译
  */
 
 $lang = array (
@@ -54,4 +54,7 @@ $lang = array (
   '删除' => '删除',
   '名称' => '名称',
   '操作' => '操作',
+  '普通模式：一行一个。斜杠(/)代表整个路径。如：user 匹配单个页面，而 user/ 匹配以 user 下的所有页面。&lt;front&gt; 代表首页' => '普通模式：一行一个。斜杠(/)代表整个路径。如：user 匹配单个页面，而 user/ 匹配以 user 下的所有页面。&lt;front&gt; 代表首页',
+  'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo' => 'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo',
+  '数据已过期，模块(%string)中已不存在这个区块，请更新 <a href="!url">区块列表缓存</a>' => '数据已过期，模块(%string)中已不存在这个区块，请更新 <a href="!url">区块列表缓存</a>',
 );

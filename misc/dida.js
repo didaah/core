@@ -364,6 +364,12 @@ Dida.ajaxSuccess = function(obj, data, type) {
           // 删除祖级
           obj.parent().parent().remove();
         break;
+
+        case 'reload':
+          // 重载页面
+          Dida.loca(); 
+        break;
+
         case 'own':
           // 删除本身
           obj.remove();

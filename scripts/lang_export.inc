@@ -7,24 +7,39 @@
  *  终端命令示例：
  *    为 www.didaah.org 站点下 system 模块生成英文语言包
  *    翻译语言文件将保存为 {module_name}/languages/{lang}.php，已有翻译语言文件将被覆盖，但原有翻译字符串将被保留
- *    php scripts/common.inc --host www.didaah.org --bootstrap data --script_name lang_export.inc --module_name system --lang en
+ *    php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --module_name system --lang en
  *
  * @TODO js 中的多语言待确定
  */
 
+require_once DIDA_ROOT . '/modules/system/system.admin.inc';
+
 if (!empty($_args['lang'])) {
-  
-  require_once DIDA_ROOT . '/modules/system/system.admin.inc';
-  
-  if (!$lang_name = system_get_languages_data($_args['lang'])) {
+  if (!empty($_args['module_name'])) {
+    _lang_export($_args['lang'], $module);
+  } else if ($fetch = db_query('SELECT * FROM {system}')) {
+    foreach ($fetch as $o) {
+      _lang_export($_args['lang'], $o->filename);
+    }
+  }
+} else {
+  message('请指定等导出的语言');
+}
+
+function _lang_export($lang_code, $module) {
+  global $_args;
+
+  if (!$lang_name = system_get_languages_data($lang_code)) {
     message('语言不存在');
-  } else if (!$path = dd_get_path('all', $_args['module_name'])) {
+  } else if (!$path = db_query('SELECT path FROM {system} WHERE filename = ?', array($module), array('return' => 'column'))) {
     message('模块或主题不存在');
   } else {
+    
+    //$path = DIDA_ROOT . '/' . $path;
+    
+    message('正在导出模块 - ' . $module);
 
-    message('正在导出模块 - ' . $_args['module_name']);
-
-    message('正在导出语言 - ' . $lang_name . '(' . $_args['lang'] . ')');
+    message('正在导出语言 - ' . $lang_name . '(' . $lang_code . ')');
      
     $path = DIDA_ROOT . '/' . $path;
     
@@ -37,7 +52,7 @@ if (!empty($_args['lang'])) {
 
     if (!empty($files)) {
       
-      include_once $path . '/' . $_args['module_name'] . '.info';
+      include_once $path . '/' . $module . '.info';
 
       // 截入已有翻译文件
       
@@ -47,7 +62,7 @@ if (!empty($_args['lang'])) {
         message($lang_file . '创建失败，无法自动保存翻译文件');
       }
 
-      $lang_file .=  '/' . $_args['lang'] . '.php'; 
+      $lang_file .=  '/' . $lang_code . '.php'; 
 
       if (is_file($lang_file)) {
         include_once $lang_file;
@@ -62,12 +77,23 @@ if (!empty($_args['lang'])) {
       foreach ($files as $file) {
         message('正在分析文件 - ' . $file);
         if ($string = file_get_contents($file)) {
-          $mat = array();
-          preg_match_all('/[^\'|"]t\(.{1,4}' . $_args['module_name'] . '[\'|"].{1,3}[\'|"](.*?)[\)|\'|"]/ms', $string, $mat); 
+
+          $mat = $mat2 = array();
+
+          $string = str_replace(array('\\"', "\\'"), array('[&__a]', '[&__b]'), $string);
+
+          preg_match_all('/[^\'|"]t\(.{1,4}' . $module . '[\'|"].{1,3}\'(.*?)\'/ms', $string, $mat); 
+          preg_match_all('/[^\'|"]t\(.{1,4}' . $module . '[\'|"].{1,3}"(.*?)"/ms', $string, $mat2);
+          
+          if (!empty($mat2[1])) {
+            $mat[1] = array_merge($mat[1], $mat2[1]);
+          }
+
           foreach ($mat[1] as $value) {
             // @TODO 需要实现从数据库中导出已完成的翻译
             // 若已有，则跳过
             if (empty($lang[$value])) {
+              $value = str_replace(array('[&__a]', '[&__b]'), array('"', "'"), $value);
               $lang[$value] = $value;
             }
           }
@@ -81,8 +107,8 @@ if (!empty($_args['lang'])) {
 
         $message = "\n\n/**\n";
         $message .= ' * 默认语言：' . system_get_languages_data($default_lang) . "($default_lang)\n";
-        $message .= ' * 翻译语言：' . $lang_name . '(' . $_args['lang'] . ")\n";
-        $message .= ' * 共有 ' . count($lang) . " 条界面翻译\n";
+        $message .= ' * 翻译语言：' . $lang_name . '(' . $lang_code . ")\n";
+        $message .= ' * 共有 ' . count($lang) . " 条翻译\n";
         $message .= " */\n\n";
 
         $output .= $message;
@@ -104,8 +130,6 @@ if (!empty($_args['lang'])) {
       message('没有需要翻译的字符串');
     }
   }
-} else {
-  message('请指定等导出的语言');
 }
 
 /**
