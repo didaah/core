@@ -977,41 +977,44 @@ function ip_address() {
  */
 function dd_user_validate() {
   global $user;
-
-  if (!empty($_COOKIE[session_name()]) && $_SESSION['user'] && $_SESSION['user']->session == $_COOKIE[session_name()]) {
+  
+  if (!empty($_COOKIE[session_name()]) && !empty($_SESSION['user'])) {
+    
     $user = $_SESSION['user'];
     $active = dd_get_cookie('time');
     $time = time();
     dd_set_cookie('time', $time);
 
-    if ($active > ($time - 1800)) {
-      // 两次活动时间间隔 30 分钟内
-      if (($active > ($user->active + 300)) && ($active < ($user->active + 600))) {
-        //每300秒写入一次用户在线时间。若距上次活动超过600秒，为不活动用户。
-        $online = $active - $user->active; //增加在线时间
-        db_exec('UPDATE {users} SET active = ?, online = online + ? WHERE uid = ?', array($time, $online, $user->uid));
-        $user->active = $time;
-        $user->exp += $exp;
-        $user->online += $online;
-      }
-    }
-
-    if (!empty($user->__SETVALIDATE)) {
-      // 每 600 秒验证一次 session。如上次活动时间为 0，则强行验证一次 session
-      if (empty($active) || $active > ($user->active + 600)) {
-        if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',
-        array($user->uid, $_COOKIE[session_name()]), array('return' => 'column'))) {
-          user_logout();  // 游客
-          dd_set_message(t('system', '登录超时，请重新登录'), 'error');
-        } else {
+    if ($_SESSION['user']->session == $_COOKIE[session_name()]) {
+      if ($active > ($time - 1800)) {
+        // 两次活动时间间隔 30 分钟内
+        if (($active > ($user->active + 300)) && ($active < ($user->active + 600))) {
+          //每300秒写入一次用户在线时间。若距上次活动超过600秒，为不活动用户。
+          $online = $active - $user->active; //增加在线时间
+          db_exec('UPDATE {users} SET active = ?, online = online + ? WHERE uid = ?', array($time, $online, $user->uid));
           $user->active = $time;
+          $user->exp += $exp;
+          $user->online += $online;
+        }
+      }
+
+      if (!empty($user->__SETVALIDATE)) {
+        // 每 600 秒验证一次 session。如上次活动时间为 0，则强行验证一次 session
+        if (empty($active) || $active > ($user->active + 600)) {
+          if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',
+          array($user->uid, $_COOKIE[session_name()]), array('return' => 'column'))) {
+            user_logout();  // 游客
+            dd_set_message(t('system', '登录超时，请重新登录'), 'error');
+          } else {
+            $user->active = $time;
+          }
         }
       }
     }
   }
 
   if (empty($user->uid)) {
-    $user = user_anonymous();  // 游客
+    $user = user_anonymous($user);  // 游客
   }
 
   // 默认时区
@@ -1173,13 +1176,22 @@ function dd_get_referer($url) {
 /**
  * 游客信息
  */
-function user_anonymous() {
+function user_anonymous($data = NULL) {
   global $cookie_domain, $conf;
+
   setcookie('time', '', -1, '/', $cookie_domain);
+ 
+  if (!empty($data)) {
+    foreach ($data as $key => $value) {
+      $user->{$key} = $value;
+    }
+  }
+
   $user->uid = 0;
   $user->name = $user->roles[var_get_key('user', 'anonymous_role', 1)] = var_get_key('user', 'anonymous', '游客');
   $user->session = $_COOKIE[session_name()];
   $user->host = ip_address();
+ 
   return $user;
 }
 

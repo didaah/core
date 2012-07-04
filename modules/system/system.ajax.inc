@@ -68,11 +68,11 @@ function system_system_tools_ajax($v, $g) {
     return $return;
 
     case 'lang_change':
-      if (user_access('system admin lang change')) {
+      if (user_access('system lang change')) {
         global $conf, $user;
         
         if (!empty($conf['languages']) && !empty($g['lang']) && !empty($conf['languages'][$g['lang']])) {
-
+          
           $_SESSION['user']->language = $g['lang'];
 
           if ($user->uid > 0) {

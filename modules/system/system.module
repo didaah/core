@@ -243,7 +243,7 @@ function system_perm() {
     'system admin settings files' => t('system', '文件设置'),
     'system admin filter' => t('system', '输入法管理'),
     'system admin lang' => t('system', '界面翻译'),
-    'system admin lang change' => t('system', '选择语言'),
+    'system lang change' => t('system', '选择语言'),
     'file upload' => t('system', '上传文件'),
     'file all view' => t('system', '浏览所有文件'),
     'file one view' => t('system', '浏览自己的文件'),
@@ -2098,7 +2098,7 @@ function system_cron($timestamp) {
 function system_get_lang_change_link($html = true) {
   global $conf, $user, $language_code; 
 
-  if (!empty($conf['languages']) && user_access('system admin lang change')) {
+  if (!empty($conf['languages']) && user_access('system lang change')) {
     $links = array();
     foreach ($conf['languages'] as $key => $name) {
       if ($key != $language_code) {
