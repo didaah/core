@@ -24,8 +24,8 @@
   * 示例
   *  $config = array(
   *    'default' => 'sites/default', // 默认，所有未指定的，使用此配置。可不设置
-  *    'www.example.com' => 'sites/myhost',
-  *    'photo.example.com' => 'sites/photo',
-  *    'www.myname.com' => 'sites/photo'
+  *    'www.example.com' => 'sites/all/myhost',
+  *    'photo.example.com' => 'sites/all/photo',
+  *    'www.myname.com' => 'sites/all/photo'
   *  );
   */

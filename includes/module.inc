@@ -648,6 +648,7 @@ function module_hook_get_cache($hook) {
  */
 function module_hook_set_cache() {
   var_del('hook_cache');
+  cache_del('cid', 'schema');
 }
 
 /**
