@@ -3319,6 +3319,7 @@ function field_get_node_validate($module, $type, $value, $node = NULL, &$form = 
   if (!$datas = field_get_cache_field_group($module, $type)) return;
   
   global $conf;
+
   foreach ($datas as $data) {
     if (!$data->field_func) {
       // 没有自定义处理函数的字段
@@ -3344,7 +3345,7 @@ function field_get_node_validate($module, $type, $value, $node = NULL, &$form = 
           break;
           case 'tags':
             // 标签
-            if ($tags = field_get_string_tags($data->field_id, $value->fields[$data->field_key])) {
+            if ($tags = field_get_string_tags($value->fields[$data->field_key])) {
             	foreach ($tags as $tag) {
             		if (mb_strlen($tag, 'utf-8') > 64) {
             			$t['fields'][$data->field_key]['#error'][] = t('field', '%string 的长度不超过 %length 字符', array('%string' => $tag, '%length' => 64));
@@ -3605,7 +3606,7 @@ function field_get_node_save($module, $type, $value, $node = NULL, $form = NULL,
           case 'tags':
             $field_ids[$data->field_id] = $data->field_id;
             
-            if ($tags = field_get_string_tags($data->field_id, $value->fields[$data->field_key])) {
+            if ($tags = field_get_string_tags($value->fields[$data->field_key])) {
           		foreach ($tags as $tag) {
                 if ($node->fields[$data->field_key]) {
                   if (in_array($tag, $node->fields[$data->field_key])) {
@@ -3839,23 +3840,30 @@ function field_get_node_delete($module, $type, $node) {
 
 /**
  * 字符串解析为标签，以“,”或“，”为分隔符
+ * @param string $text 
+ * @access public
+ * @return array
  */
-function field_get_string_tags($id, $text) {
+function field_get_string_tags($text) {
   static $tags;
-  if (!isset($tags[$id])) {
+  
+  $key = md5($text);
+
+  if (!isset($tags[$key])) {
     $text = str_replace('，', ',', $text);
     if (strpos($text, ',') !== false) {
       foreach (explode(',', $text) as $tag) {
         if ($tag =  trim($tag)) {
-          $tags[$id][] = $tag;
+          $tags[$key][] = $tag;
         }
       }
-      $tags[$id] = array_unique($tags[$id]);
+      $tags[$key] = array_unique($tags[$key]);
     } else if ($text = trim($text)) {
-      $tags[$id][] = $text;
+      $tags[$key][] = $text;
     }
   }
-  return $tags[$id];
+
+  return $tags[$key];
 }
 
 /**
