@@ -917,31 +917,27 @@ function dd_form_textarea($field) {
 
 //验证码字段
 function dd_form_captcha($field, $form = NULL) {
-  //require_once './modules/system/system.captcha.inc';
-  /*
-   array('type' => 1, 'image' => 100x100)
-  */
-  $array = array(
-    'name' => $field['#name'],
-    'form_id' => $field['#form_id'],
-    'captcha' => $field['#captcha'],
-  );
   
   if (!system_is_captcha_ttf()) {
     unset($field['#captcha']['image']);
   }
-  
-  //$str = captcha_get($field['#name'], $form['#form_id'], $form['#form_token'], $field['#captcha']['type'], $field['#captcha']['image']);
-  
+
   $key = $form['#form_token'] . $field['#name'] . $form['#form_id'];
-  
-  dd_add_js(array('captcha' => array($key => array(
+
+  $values = array(
     'name' => $field['#name'],
     'type' => $field['#captcha']['type'] ? $field['#captcha']['type'] : 0,
     'form_id' => $form['#form_id'],
     'tag' => $form['#form_token'],
-    'image' => $field['#captcha']['image'] ? $field['#captcha']['image']: 0)
-  )), 'setting');
+    'mosaic' => $field['#captcha']['mosaic'],
+    'image' => $field['#captcha']['image'] ? $field['#captcha']['image']: 0
+  );
+
+  dd_add_js(array('captcha' => array($key => array(
+    'data' => dd_encrypt(serialize($values)),
+    'image' => $values['image'],
+  ))), 'setting');
+
   if ($field['#attributes']['class']) {
     if (strpos($field['#attributes']['class'], 'form_field_input_captcha') === false) {
       $field['#attributes']['class'] .= ' form_field_input_captcha';
@@ -949,7 +945,23 @@ function dd_form_captcha($field, $form = NULL) {
   } else {
     $field['#attributes']['class'] = 'form_field_input_captcha';
   }
-  return dd_form_label($field) . '<input type="text" name="'.$field['#name'].'" value="'.$field['#value'].'"'.dd_attributes($field['#attributes']).'/>' .'<span class="form_captcha" alt="'.$key.'" title="'.t('system', '点击换一个验证码').'">'.t('system', '获取验证码').'</span>'. dd_form_error($field);
+
+  $html =  dd_form_label($field) . '<input type="text" name="' . $field['#name'] . '" value="';
+  $html .= $field['#value'] . '"' . dd_attributes($field['#attributes']).'/>';
+  $html .= '<span class="form_captcha" alt="' . $key . '" title="' . t('system', '点击换一个验证码') . '">';
+
+  if ($field['#captcha']['show']) {
+    // 默认显示验证码
+    require_once DIDA_ROOT . '/modules/system/system.captcha.inc';
+    $html .= captcha_get($values); 
+  } else {
+    // 需点击显示
+    $html .= t('system', '获取验证码');
+  }
+
+  $html .= '</span>' . dd_form_error($field);
+
+  return $html;
 }
 
 /**

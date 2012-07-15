@@ -685,20 +685,30 @@ function system_site_settings_submit($form, $v) {
  * 验证码设置
  */
 function system_site_captcha() {
+
+  dd_set_tabs(array(
+    l(t('system', '验证码设置'), 'admin/settings/captcha'),
+    l(t('system', '自定义验证码'), 'admin/settings/captcha/custom'),
+  ));
+
   $form['fields']['captcha_file_ttf'] = array(
     '#type' => 'textfield',
-    '#default_value' => var_get('captcha_file_ttf', './tools/simkai.ttf'),
+    '#field_prefix' => DIDA_ROOT,
+    '#default_value' => var_get('captcha_file_ttf', '/tools/simkai.ttf'),
     '#title' => t('system', '字体文件'),
     '#description' => t('system', '图片验证码必须提供中文字体文件，请将字体文件放于程序可访问的目录(推荐 tools)，在此设置路径')
   );
+
   if ($fields = module_invoke_all('system_site_captcha', 'fields')) {
     foreach ($fields as $key => $field) {
       if (!is_array($field)) continue;
       
       $value = var_get_key('captcha', $key);
+
       $form['fields'][$key]['data'] = array(
         '#type' => 'radio',
         '#title' => t('system', '启用'),
+        '#required' => 1,
         '#default_value' => $value['data'] ? $value['data'] : 0,
         '#options' => array(
           t('system', '否'),
@@ -707,9 +717,11 @@ function system_site_captcha() {
         '#fieldset_prefix' => 'asc',
         '#fieldset_legend' => $field['title'],
       );
-      if ($field['attributes']) {
+
+      if (!empty($field['attributes']) && is_array($field['attributes'])) {
         $form['fields'][$key]['data'] = array_merge($form['fields'][$key]['data'], $field['attributes']);
       }
+
       $form['fields'][$key]['type'] = array(
         '#type' => 'select',
         '#title' => t('system', '类型'),
@@ -717,28 +729,58 @@ function system_site_captcha() {
         '#options' => array(
           t('system', '纯数字'),
           t('system', '数字、字母混合'),
-          t('system', '汉字'),
+          t('system', '自定义'),
           t('system', '计算式'),
           t('system', '问答式'),
         )
       );
+
       $form['fields'][$key]['image'] = array(
         '#type' => 'select',
         '#title' => t('system', '样式'),
         '#default_value' => $value['image'],
-        '#fieldset_suffix' => 1,
         '#options' => array(
           t('system', '文本'),
           t('system', '图片'),
         )
       );
+
+      $form['fields'][$key]['mosaic'] = array(
+        '#type' => 'select',
+        '#title' => t('system', '干扰'),
+        '#default_value' => $value['mosaic'],
+        '#description' => t('system', '若为图片，是否加入干扰码，防止被识别'),
+        '#options' => array(
+          t('system', '关闭'),
+          t('system', '开启'),
+        )
+      );
+
+      $form['fields'][$key]['show'] = array(
+        '#type' => 'select',
+        '#title' => t('system', '显示'),
+        '#default_value' => $value['show'],
+        '#fieldset_suffix' => 1,
+        '#description' => t('system', '可防止被识别'),
+        '#options' => array(
+          t('system', '需点击显示'),
+          t('system', '默认显示'),
+        )
+      );
     }
+
     $form['fields']['submit'] = array(
       '#type' => 'submit',
       '#submit' => 'system_site_captcha_submit'
     );
   }
+
+  $op = 'form';
+
+  module_alter_all('system_site_captcha', $op, $form);
+
   dd_set_breadcrumb(array(l(t('system', '系统管理'), 'admin'), t('system', '验证码设置')));
+
   return $form;
 }
 
@@ -747,6 +789,66 @@ function system_site_captcha_submit($form, $v) {
   unset($v['captcha_file_ttf']);
   var_set('captcha', $v);
   dd_set_message(t('system', '保存成功'));
+}
+
+/**
+ * 验证码设置
+ */
+function system_site_captcha_custom() {
+
+  dd_set_tabs(array(
+    l(t('system', '验证码设置'), 'admin/settings/captcha'),
+    l(t('system', '自定义验证码'), 'admin/settings/captcha/custom'),
+  ));
+
+  $form = array('fields' => array());
+
+  $form['fields']['ask'] = array(
+    '#type' => 'textarea',
+    '#default_value' => custom_get('_captcha_data_ask'),
+    '#title' => t('system', '问答式验证码'),
+    '#description' => t('system', '每行一个问题及答案，用户必须填写答案。以“|”分隔，如：中国有多少个民族？|56'),
+  );
+
+  $form['fields']['custom'] = array(
+    '#type' => 'textarea',
+    '#default_value' => custom_get('_captcha_data_custom'),
+    '#title' => t('system', '自定义验证码'),
+    '#description' => t('system', '每行一个验证码，用户必须填写相同内容。如：床前明月光'),
+  );
+
+  $form['fields']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => 'system_site_captcha_custom_submit',
+  );
+
+  return $form;
+}
+
+function system_site_captcha_custom_submit(&$form, &$v) {
+  
+  if (!empty($v['ask'])) {
+    custom_set('_captcha_data_ask', $v['ask']);
+
+    if ($data = dd_line_to_array($v['ask'], 1)) {
+      $datas = array();
+      foreach ($data as $value) {
+        if (strpos($value, '|') !== false) {
+          $datas[] = explode('|', $value, 2);
+        }
+      }
+      if ($datas) custom_set('captcha_data_ask', $datas);
+    }
+  }
+
+  if (!empty($v['custom'])) {
+    custom_set('_captcha_data_custom', $v['custom']);
+    if ($data = dd_line_to_array($v['custom'], 1)) {
+      custom_set('captcha_data_custom', $data);
+    }
+  }
+
+  dd_set_message(t('system', '操作成功'));
 }
 
 /**
@@ -774,6 +876,7 @@ function system_site_error() {
       'call_function' => '_system_image_error_save',
     ),
   );
+
   $form['fields']['debug'] = array(
     '#type' => 'radio',
     '#title' => t('system', '程序错误信息'),

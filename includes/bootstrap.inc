@@ -249,7 +249,7 @@ function dd_get_not() {
   } else {
     $text = t('system', '访问的页面不存在');
     dd_set_title(array($text));
-    $default = '<h2 align="center">'.l($text, NULL).'</h2>';
+    $default = '<h2 align="center">' . l($text, NULL) . '</h2>';
     echo theme('error', custom_get('page_not_html', $default), 404);
   }
   exit;
@@ -268,13 +268,12 @@ function dd_get_access() {
     } else {
       $text = t('system', '没有权限访问该页');
       dd_set_title(array($text));
-      $default = '<h2 align="center">'.l($text, NULL).'</h2>';
+      $default = '<h2 align="center">' . l($text, NULL) . '</h2>';
       echo theme('print', custom_get('page_access_html', $default));
     }
   } else {
     $title = t('system', '登录以确认访问权限');
     dd_set_title(array($title));
-    dd_set_message($title, 'error');
     echo theme('error', dd_get_form('user_login_form'), 403);
   }
   exit;
@@ -1961,16 +1960,19 @@ function dd_set_mail($mails, $subject, $message, $headers = NULL, $html = 1, $at
 
 /**
  * 获取 IP 地理位置
- * @param (string) $ip
+ * @param string $ip
  *  ip 地址
- * @param (bool) $true
+ * @param bool $true
  *  在括号内显示地理信息，如：9.9.9.9.9(中国)。默认为：中国
+ * @param bool $public
+ *  公开整个 ip，若为 false，则以 * 替换 ip 结尾部分
  * @param (string) $function
- *  调用函数，默认使用 纯真 ip 库函
- * @return (string) 地理信息，如：9.9.9.9.9(中国)，或：中国
+ *  调用函数，默认使用 纯真 ip 库函数
+ * @return string 地理信息，如：9.9.9.9.9(中国)，或：中国
  */
-function dd_get_ip($ip, $true = NULL, $function = 'qqwry_data') {
+function dd_get_ip($ip, $true = NULL, $public = true, $function = 'qqwry_data')  {
   static $ips;
+
   if (!$ip) return false;
 
   if (!isset($ips[$ip])) {
@@ -1981,15 +1983,21 @@ function dd_get_ip($ip, $true = NULL, $function = 'qqwry_data') {
         $t = t('system', '本机地址'); 
       } else if ($iparray[0] > 255 || $iparray[1] > 255 || $iparray[2] > 255 || $iparray[3] > 255) {
         $t = t('system', 'IP不存在');
-      } else {
+      } else if (function_exists($function)) {
         $t = $function($ip);
+      } else {
+        $t = t('system', '未知IP');
       }
     } else {
       $t = t('system', 'IP不合法');
     }
      
     if ($true) {
-      $ips[$ip] = $ip . '(' . $t .')';
+      if ($public) {
+        $ips[$ip] = $ip . '(' . $t .')';
+      } else {
+        $ips[$ip] = $iparray[0] . '.' . $iparray[1] . '.' . $iparray[2] . '.*(' . $t .')';
+      }
     } else {
       $ips[$ip] = $t;
     }

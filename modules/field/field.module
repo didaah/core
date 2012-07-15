@@ -2503,6 +2503,7 @@ function field_get_cache_field($field_id = NULL, $clear = 0) {
  */
 function field_get_data_field($module, $type) {
   static $datas;
+
   if (!isset($datas[$module][$type])) {
     $datas[$module][$type] = array();
     if ($fetch = db_query('SELECT * FROM {fields} WHERE module = ? AND type = ? ORDER BY weight ASC, field_id ASC',
@@ -2517,6 +2518,7 @@ function field_get_data_field($module, $type) {
       }
     }
   }
+
   return $datas[$module][$type];
 }
 
@@ -2531,6 +2533,7 @@ function field_get_data_field($module, $type) {
  */
 function field_get_cache_field_group($module, $type = NULL, $clear = 0) {
   $group = module_invoke($module, 'field_call_group', $type);
+
   if (!$group['not_cache']) {
     if ($fields = field_get_cache_field(NULL, $clear)) {
       foreach ($fields as $field) {
@@ -2566,7 +2569,12 @@ function field_get_cache_field_key($module, $type, $field_key) {
 }
 
 /**
- * 按 id 获取字段
+ * 按 field_id 获取字段
+ * @param string $module 
+ * @param string $type 
+ * @param int $field_id 
+ * @access public
+ * @return object
  */
 function field_get_cache_field_id($module, $type, $field_id) {
   if ($fields = field_get_cache_field_group($module, $type)) {

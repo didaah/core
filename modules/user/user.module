@@ -940,10 +940,7 @@ function user_register_form($op = 'user') {
       '#type' => 'captcha',
       '#required' => true,
       '#title' => t('user', '验证'),
-      '#captcha' => array(
-        'image' => $conf['captcha']['user_register']['image'] ? '50x16' : 0,
-        'type' => $conf['captcha']['user_register']['type']
-      )
+      '#captcha' => $conf['captcha']['user_register'],
     );
   }
   

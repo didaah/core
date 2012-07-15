@@ -8,7 +8,8 @@
 
 // 验证码类型
 define('DIDA_CAPTCHA_TYPE_INT', 1); // 纯数字
-define('DIDA_CAPTCHA_TYPE_ZH', 2); // 汉字
+define('DIDA_CAPTCHA_TYPE_CUSTOM', 2); // 自定义文本
+define('DIDA_CAPTCHA_TYPE_ZH', 2); // @TODO 汉字将取消，归类于自定义文本
 define('DIDA_CAPTCHA_TYPE_MATH', 3); // 四则混合运算
 define('DIDA_CAPTCHA_TYPE_ASK', 4); // 问答式
 
@@ -209,6 +210,14 @@ function system_menu() {
     'access_arguments' => array('system admin settings captcha'),
     'page_callback' => 'dd_get_form',
     'page_arguments' => array('system_site_captcha'),
+    'file' => 'system.admin.inc'
+  );
+
+  $items['admin/settings/captcha/custom'] = array(
+    'title' => '自定义验证码',
+    'access_arguments' => array('system admin settings captcha'),
+    'page_callback' => 'dd_get_form',
+    'page_arguments' => array('system_site_captcha_custom'),
     'file' => 'system.admin.inc'
   );
 
@@ -465,7 +474,7 @@ function system_is_captcha_ttf() {
   if (!isset($return)) {
     $return = false;
     if ($ttf = var_get('captcha_file_ttf')) {
-      $return = is_file($ttf);
+      $return = is_file(DIDA_ROOT . $ttf);
     }
   }
   return $return;

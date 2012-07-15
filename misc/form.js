@@ -5,21 +5,16 @@ $(function() {
   },function() {
     $(this).removeClass('inputhover');
   })
-  /*
-  $('.form_field_input_captcha').one('click', function() {
-    $(this).next('.form_captcha').trigger('click');
-  });
-  */
+
   $('.form_captcha').click(function() {
     if (settings.captcha) {
       var k = $(this).attr('alt');
-      var j = settings.captcha[k];
+      var opt = settings.captcha[k];
       var $$ = $(this);
       
-      var opt = j;
       opt.timestamp = Dida.gettime();
-      
-      if (j.image) {
+
+      if (opt.image) {
         $$.html('<img class="form_captcha_img" src="'+ Dida.url('captcha', opt) +'" />');
       } else {
         $.post(settings.base_path + 'captcha', opt, function(data) {
@@ -28,6 +23,7 @@ $(function() {
       }
     }
   });
+
   $('a.form_file_click').click(function() {
     length = $(this).prev().attr('multi');
     dom = $(this).attr('alt');

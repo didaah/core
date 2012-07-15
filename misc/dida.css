@@ -250,6 +250,11 @@ form {
   margin: 3px 0;
 }
 
+.form_item_captcha {
+  height: 30px;
+  line-height: 30px;
+}
+
 .label_required, .red, a.red, .form_error, .error, .form_required {
   color: #f00;
 }
