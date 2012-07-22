@@ -31,23 +31,23 @@ function bootstrap($op, $inc = NULL) {
   }
 
   if (!$conf_dir) {
-    if (is_dir(DIDA_ROOT . '/sites/'.$_SERVER['HTTP_HOST'])) {
-      $conf_dir = 'sites/'.$_SERVER['HTTP_HOST'];
+    if (is_dir(DIDA_ROOT . '/sites/' . $_SERVER['HTTP_HOST'])) {
+      $conf_dir = 'sites/' . $_SERVER['HTTP_HOST'];
     } else {
       $conf_dir = 'sites';
     }
   }
 
-  if (!is_file(DIDA_ROOT . '/' . $conf_dir .'/setting.php')) {
+  if (!is_file(DIDA_ROOT . '/' . $conf_dir . '/setting.php')) {
     dd_to_install();
   }
 
-  require_once DIDA_ROOT . '/' . $conf_dir.'/setting.php';
+  require_once DIDA_ROOT . '/' . $conf_dir . '/setting.php';
 
   if (!$installed) dd_to_install();
 
-  if (is_file(DIDA_ROOT . '/' . $conf_dir .'/cache/conf.php')) {
-    require_once DIDA_ROOT . '/' . $conf_dir .'/cache/conf.php';
+  if (is_file(DIDA_ROOT . '/' . $conf_dir . '/cache/conf.php')) {
+    require_once DIDA_ROOT . '/' . $conf_dir . '/cache/conf.php';
   } else {
     dd_to_install();
   }

@@ -497,10 +497,16 @@ $(function() {
     });
   });
   
+  $('.dd_form_ajax_field').each(function() {
+    if ($(this).hasClass('changeconfirm')) {
+      $(this).attr('changeDefault', $(this).val());
+    }
+  });
+
   $('.dd_form_ajax_field').change(function() {
     var href = $(this).attr('href');
-    
     if ($(this).hasClass('changeconfirm') && !confirm('确认此操作吗？')) {
+      $(this).val($(this).attr('changeDefault'));
       return false;
     }
     
@@ -510,11 +516,11 @@ $(function() {
         type: 'POST',
         url: href,
         dataType: 'html',
-        data: 'id='+$(this).attr('alt')+'&value=' + $(this).val(),
+        data: 'id=' + $(this).attr('alt') + '&value=' + $(this).val(),
         success: function(data) {
           if (data == -1) {
             alert('操作失败');
-          }else if (data == 'two') {
+          } else if (data == 'two') {
             $$.parent().parent().remove();
           }
         }
