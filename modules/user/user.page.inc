@@ -300,14 +300,14 @@ function user_page_pass() {
           if (user_login(user_load($uid))) {
             setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
             $_SESSION['oldpass'] = time();
-            dd_set_message('请在 5 分钟内修改密码');
+            dd_set_message(t('user', '请在 5 分钟内修改密码'));
             dd_goto('user/center/newpass');
           } else {
             dd_goto('user/pass');
           }
         }
       } else {
-        dd_set_message('错误的请求', 'error');
+        dd_set_message(t('user', '错误的请求'), 'error');
       }
     break;
   }
@@ -317,19 +317,22 @@ function user_page_pass() {
     '#validate' => array('user_page_pass_validate'),
     '#description' => t('user', '请输入注册邮箱或昵称'),
   );
+  
   $form['fields']['mail'] = array(
     '#type' => 'textfield',
-    '#title' => '邮箱',
+    '#title' => t('user', '邮箱'),
   );
+  
   $form['fields']['name'] = array(
     '#type' => 'textfield',
-    '#title' => '昵称',
+    '#title' => t('user', '昵称'),
   );
+  
   $form['fields']['submit'] = array(
     '#type' => 'submit',
     '#submit' => 'user_page_pass_submit',
-    '#value' => '确认'
   );
+
   return $form;
 }
 
@@ -347,7 +350,7 @@ function user_page_pass_validate(&$form, &$v) {
   if (!isset($v['_dida_values']->_ac->uid)) {
     $t['mail']['#error'][] = t('user', '帐号或邮箱尚未注册');
   } else if ($v['_dida_values']->_ac->status == 0) {
-    $t['mail']['#error'][] = t('user', '你的帐号还未激活，<a href="!link">立即激活</a>',
+    $t['mail']['#error'][] = t('user', '帐号还未激活，<a href="!link">立即激活</a>',
     array('!link' => url('user/activation')));
   }
   

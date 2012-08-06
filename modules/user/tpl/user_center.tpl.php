@@ -25,7 +25,7 @@ global $user;
 
 <div id="user-center" class="user-center-content user-center-content-<?php echo $center->type;?>">
 
-  <h2 id="user-center-header">欢迎您，<?php echo $user->name?></h2>
+  <h2 id="user-center-header"><?php echo t('user', '欢迎您，!name', array('!name' => $user->name))?></h2>
 
   <div id="user-center-link">
     <?php echo $center->links?>

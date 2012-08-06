@@ -1348,7 +1348,7 @@ function user_login_form($url = NULL) {
       'size' => 20,
       'class' => "{required:true, messages:{required:'". t('user', '请输入密码')."'}}"
     ),
-    '#description' => l('忘记密码？', 'user/pass', array('attributes' => array('target' => '_parent')))
+    '#description' => l(t('user', '忘记密码？'), 'user/pass', array('attributes' => array('target' => '_parent')))
   );
   if ($conf['captcha']['user_login']['data']) {
     $form['fields']['captcha'] = array(

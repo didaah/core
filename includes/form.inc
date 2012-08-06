@@ -993,9 +993,12 @@ function dd_form_checkbox($field) {
   return $output . dd_form_error($field);
 }
 
-function dd_form_ajax_form($url, $title = '确认提交', $att = NULL) {
+function dd_form_ajax_form($url, $title = '', $att = NULL) {
+ if (empty($title)) $title = t('system', '确认提交');
+
  $att['alt'] = $url;
  $att['class'] = 'dd_form_ajax_form_button';
+
  dd_add_js('misc/jquery.form.js');
 	return dd_form_button(array(
 		'#name' => 'dd_form_ajax_form_button[]',
@@ -1022,7 +1025,7 @@ function dd_form_ajax_all_check($att = NULL, $value = NULL) {
   $output .= dd_attributes($att);
   $output .= ' />';
   
-  $output .= !isset($value) ? '全选' : $value;
+  $output .= !isset($value) ? t('system', '全选') : $value;
   return $output;
 }
 
@@ -1050,7 +1053,7 @@ function dd_form_ajax_check($att = NULL) {
 function dd_form_ajax_button($att = NULL) {
   $output = '<input name="admin_delete_button[]" type="button" ';
   if (!isset($att['value'])) {
-    $att['value'] = '确认删除';
+    $att['value'] = t('system', '确认删除');
   }
   
   if (!isset($att['rel'])) {
@@ -1156,7 +1159,7 @@ function dd_form_button($field) {
 
 //提交按钮字段
 function dd_form_submit($field) {
-  return dd_form_label($field) .'<input type="submit" name="'.$field['#name'].'" value="'.($field['#value'] ? $field['#value'] : '确认提交').'"'.dd_attributes($field['#attributes']).'/>';
+  return dd_form_label($field) .'<input type="submit" name="'.$field['#name'].'" value="'.($field['#value'] ? $field['#value'] : t('system', '确认提交')).'"'.dd_attributes($field['#attributes']).'/>';
 }
 
 //图片按钮字段
@@ -1168,7 +1171,7 @@ function dd_form_label($field) {
   if ($field['#title'] || $field['#required']) {
     $t = '<label class="dd_label" for="'.$field['#name'].'">';
     if ($field['#title']) $t .= $field['#title'].'：';
-    if ($field['#required']) $t .= '<span class="form_required" title="此项不能为空。">*</span>';
+    if ($field['#required']) $t .= '<span class="form_required" title="' . t('system', '此项不能为空。') . '">*</span>';
     $t .= "</label>\n";
   }
   
