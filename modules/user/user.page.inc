@@ -103,8 +103,9 @@ function user_user_center_view($center) {
  * @return array
  */
 function _user_get_center_info($center) {
+  global $language_code; 
 
-  if ($cache = cache_get('user_center_menu_data')) {
+  if ($cache = cache_get('user_center_menu_data_' . $language_code)) {
     $data = $cache->data;
   } else {
     
@@ -201,7 +202,7 @@ function _user_get_center_info($center) {
         uasort($link['links'], 'dd_sort_cmp');
         $data['links'][$type] = $link;
       }
-      cache_set('user_center_menu_data', $data);
+      cache_set('user_center_menu_data_' . $language_code, $data);
     }
   }
 
