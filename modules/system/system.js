@@ -58,7 +58,7 @@ $(function() {
   });
   
   $('#system_admin_menu_list_didaSystemCustom li a').each(function() {
-  	$(this).after('<span class="system_admin_block_link_remove" style="display: none">移除这个链接</span>');
+  	$(this).after('<span class="system_admin_block_link_remove" style="display: none">' + Dida.t('system', '移除这个链接') + '</span>');
   });
   
   $('#system_admin_menu_list_didaSystemCustom li').hover(function() {
@@ -107,7 +107,7 @@ $(function() {
 	      }
 	    });
 		} else {
-			alert('链接和标题不能为空');
+			alert(Dida.t('system', '链接和标题不能为空'));
 		}
 	});
 	

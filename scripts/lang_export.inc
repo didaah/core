@@ -11,6 +11,8 @@
  *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --module_name system --lang en
  *    生成所有已启用模块的英文语言文件
  *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --lang en
+ *    生成所有已启用模块的英文语言文件，并导入已有的翻译（包括已合并的翻译文件和自定义翻译文件）
+ *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --lang en --export_value 1
  *    生成所有已启用模块的英文语言文件，如语言文件已存在，直接替换
  *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --clear_cache 1 --lang en
  *
@@ -33,7 +35,27 @@ if (!empty($_args['lang'])) {
 }
 
 function _lang_export($lang_code, $module) {
-  global $_args;
+  global $_args, $conf_dir;
+
+  if (!empty($_args['export_value'])) {
+    /**
+     * 读取该语言所有已翻译的字符串，做为默认翻译
+     */
+    $cache_lang_file = DIDA_ROOT . '/' . $conf_dir . '/cache/languages/';
+    $cache_lang_value = array();
+
+    if (is_file($cache_lang_file . $lang_code . '.php')) {
+      // 已合并的缓存翻译文件
+      include $cache_lang_file . $lang_code . '.php';
+      $cache_lang_value = $l;
+      // 加载自定义翻译文件
+      if (is_file($cache_lang_file . 'custom_' . $lang_code . '.php')) {
+        $l = array();
+        include $cache_lang_file . 'custom_' . $lang_code . '.php';
+        $cache_lang_value = array_merge($cache_lang_value, $l);
+      }
+    }
+  }
 
   if (!$lang_name = system_get_languages_data($lang_code)) {
     message('语言不存在');
@@ -41,8 +63,6 @@ function _lang_export($lang_code, $module) {
     echo $module;
     message('模块或主题不存在');
   } else {
-    
-    //$path = DIDA_ROOT . '/' . $path;
     
     message('正在导出模块 - ' . $module);
 
@@ -53,8 +73,9 @@ function _lang_export($lang_code, $module) {
     $files = _lang_export_files($path);
 
     // system 模块，加上系统核心文件
-    if ($_args['module_name'] == 'system') {
+    if ($module == 'system') {
       $files = _lang_export_files(DIDA_ROOT . '/includes', $files);
+      $files = _lang_export_files(DIDA_ROOT . '/misc', $files);
     }
 
     if (!empty($files)) {
@@ -70,13 +91,16 @@ function _lang_export($lang_code, $module) {
       }
 
       $lang_file .=  '/' . $lang_code . '.php'; 
+      
+      // 所有待翻译的界面字符串
+      $lang = array();
 
       if (is_file($lang_file)) {
         include_once $lang_file;
-      } else {
-        // 所有界面待翻译字符串
-        $lang = array();
       }
+
+      // js 文件中使用到界面字符串
+      $js_lang = array();
 
       // 模块界面默认语言，若无，则为中文简体
       $default_lang = !empty($info['language']) ? $info['language'] : 'zh-hans';
@@ -88,25 +112,37 @@ function _lang_export($lang_code, $module) {
           $mat = $mat2 = array();
 
           $string = str_replace(array('\\"', "\\'"), array('[&__a]', '[&__b]'), $string);
+          
+          $filetype = substr($file, -2);
 
-          preg_match_all('/[^\'|"]t\(.{1,4}' . $module . '[\'|"].{1,3}\'(.*?)\'/ms', $string, $mat); 
-          preg_match_all('/[^\'|"]t\(.{1,4}' . $module . '[\'|"].{1,3}"(.*?)"/ms', $string, $mat2);
+          if ($filetype != 'js') {
+            // php 文件中使用 t() 函数实现多语言
+            preg_match_all('/[^\'|"]t\(.{1,4}' . $module . '[\'|"].{1,3}\'(.*?)\'/ms', $string, $mat); 
+            preg_match_all('/[^\'|"]t\(.{1,4}' . $module . '[\'|"].{1,3}"(.*?)"/ms', $string, $mat2);
+          } else {
+            // js 文件中使用 Dida.t() 实现，使用上面的正则也能匹配，但为防止冲突，使用更为精准的匹配
+            preg_match_all('/[^\'|"]Dida\.t\(.{1,4}' . $module . '[\'|"].{1,3}\'(.*?)\'/ms', $string, $mat); 
+            preg_match_all('/[^\'|"]Dida\.t\(.{1,4}' . $module . '[\'|"].{1,3}"(.*?)"/ms', $string, $mat2);
+          }
           
           if (!empty($mat2[1])) {
             $mat[1] = array_merge($mat[1], $mat2[1]);
           }
 
           foreach ($mat[1] as $value) {
-            // @TODO 需要实现从数据库中导出已完成的翻译
-            // 若已有，则跳过
-            if (empty($lang[$value])) {
+            if ($filetype == 'js') {
+              $js_lang[$value] = 1;
+            }
+            if (!empty($_args['export_value']) && !empty($cache_lang_value[$value])) {
+              $lang[$value] = $cache_lang_value[$value];
+            } else if (empty($lang[$value])) {
               $value = str_replace(array('[&__a]', '[&__b]'), array('"', "'"), $value);
               $lang[$value] = $value;
             }
           }
         }
       }
-
+      
       if (!empty($lang)) {
         $output = '<?php';
         $output .= "\n";
@@ -122,7 +158,7 @@ function _lang_export($lang_code, $module) {
 
         $output .= $message;
         $output .= '$lang = ' . var_export($lang, true) . ";\n";
-        
+        $output .= '$js_lang = ' . var_export($js_lang, true) . ";\n"; 
         
         message($message);
 
@@ -161,7 +197,7 @@ function _lang_export_files($dir, &$files = array()) {
       foreach ($objs as $obj) {
         if (is_dir($obj)) {
           _lang_export_files($obj, $files);
-        } else if (in_array(end(explode('.', $obj)), array('module', 'install', 'info', 'inc', 'php'))) {
+        } else if (in_array(end(explode('.', $obj)), array('module', 'install', 'info', 'inc', 'php', 'js'))) {
           $files[] = $obj;
         }
       }

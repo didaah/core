@@ -7,9 +7,9 @@ $(function() {
   })
 
   $('.form_captcha').click(function() {
-    if (settings.captcha) {
+    if (Dida.settings.captcha) {
       var k = $(this).attr('alt');
-      var opt = settings.captcha[k];
+      var opt = Dida.settings.captcha[k];
       var $$ = $(this);
       
       opt.timestamp = Dida.gettime();
@@ -17,7 +17,7 @@ $(function() {
       if (opt.image) {
         $$.html('<img class="form_captcha_img" src="'+ Dida.url('captcha', opt) +'" />');
       } else {
-        $.post(settings.base_path + 'captcha', opt, function(data) {
+        $.post(Dida.settings.base_path + 'captcha', opt, function(data) {
           $$.html(data);
         });
       }
@@ -37,7 +37,7 @@ $(function() {
       }
     } else {
       $(this).remove();
-      alert('最多允许同时上传 '+length+' 个文件');
+      alert(Dida.t('system', '最多允许同时上传 %length 个文件', {'%length': length}));
     }
     return false;
   });

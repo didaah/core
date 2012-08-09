@@ -1,5 +1,4 @@
 // $Id$
-var Dida = {cache: {}};
 Dida.dejson = function(data) {
   if ((data.substring(0, 1) != '{') && (data.substring(0, 1) != '[')) {
     return false;
@@ -51,10 +50,10 @@ Dida.url = function(q, opt) {
   var external = Dida.external(q);
   
   if (!external) {
-    if (settings.clean_url || url.indexOf('?') != -1) {
-      url = settings.base_path + q;
+    if (Dida.settings.clean_url || url.indexOf('?') != -1) {
+      url = Dida.settings.base_path + q;
     } else {
-      url = settings.base_path + '?q=' + q;
+      url = Dida.settings.base_path + '?q=' + q;
     }
   }
   
@@ -89,7 +88,7 @@ Dida.loca = function(url) {
 Dida.onbe = function(msg) {  
   window.onbeforeunload = onbeforeunload_handler;
   function onbeforeunload_handler() {
-    var warning = msg ? msg : '确认退出？';
+    var warning = msg ? msg : Dida.t('system', '确认退出？');
     return warning;
   }
 };
@@ -159,7 +158,7 @@ Dida.dialog = function(opt) {
     height: 450,
     title: '', 
     url: '',
-    closeText: '关闭',
+    closeText: Dida.t('system', '关闭'),
     autoOpen: true,
     modal: false,
     //bgiframe: true,
@@ -170,8 +169,8 @@ Dida.dialog = function(opt) {
   
   $.extend(o, opt);
   
-  if ($.isPlainObject(settings.dialogOptions)) {
-    $.extend(o, settings.dialogOptions);
+  if ($.isPlainObject(Dida.settings.dialogOptions)) {
+    $.extend(o, Dida.settings.dialogOptions);
   }
   
   if ($('#dialog_wrapper').size()) {
@@ -232,7 +231,7 @@ Dida.dialog = function(opt) {
     if (!$.isFunction(o.open)) {
       o.open = function() {
         var h = '<div id="dialog_wrapper_loading">';
-        h += '<img align="absmiddle" src="'+settings.base_path+'misc/images/loading.gif" />加载中，请稍候…</div>';
+        h += '<img align="absmiddle" src="'+Dida.settings.base_path+'misc/images/loading.gif" />' + Dida.t('system', '加载中，请稍候…') + '</div>';
         h += '<iframe id="dialog_iframe_wrapper" frameborder="no" border="0" src="'+o.url+'" width="100%"';
         h += ' height="100%" style="display:none"></iframe>';
         
@@ -251,7 +250,7 @@ Dida.dialog = function(opt) {
       o.open = function() {
         var _s = Dida.getsize();
         var h = '<div id="dialog_wrapper_loading">';
-        h += '<img align="absmiddle" src="'+settings.base_path+'misc/images/loading.gif" />加载中，请稍候…</div>';
+        h += '<img align="absmiddle" src="'+Dida.settings.base_path+'misc/images/loading.gif" />' + Dida.t('system', '加载中，请稍候…') + '</div>';
         h += '<img id="dialog_image_wrapper" src="'+o.url+'" />';
         $(this).append(h);
         $('#dialog_image_wrapper').load(function() {
@@ -274,7 +273,7 @@ Dida.dialog = function(opt) {
     if (!$.isFunction(o.open)) {
       o.open = function() {
         var h = '<div id="dialog_wrapper_loading">';
-        h += '<img align="absmiddle" src="'+settings.base_path+'misc/images/loading.gif" />加载中，请稍候…</div>';
+        h += '<img align="absmiddle" src="'+Dida.settings.base_path+'misc/images/loading.gif" />' + Dida.t('system', '加载中，请稍候…') + '</div>';
         h += '<div id="dialog_ajax_wrapper" style="display:none"></div>';
         
         $(this).append(h);
@@ -290,14 +289,14 @@ Dida.dialog = function(opt) {
   }
   
   $("#dialog_wrapper").prev('.ui-widget-header').find(".ui-dialog-titlebar-close")
-  .before('<a href="#" title="最小化" class="ui-icon ui-icon-minusthick ui-icon-dialog-max-min"></a>');
+  .before('<a href="#" title="' + Dida.t('system', '最小化') + '" class="ui-icon ui-icon-minusthick ui-icon-dialog-max-min"></a>');
   
   $(".ui-icon-dialog-max-min").click(function() {
     var obj = $(this).parents(".ui-dialog").find("#dialog_wrapper");
     if (obj.css('display') == 'none') {
       
       obj.show();
-      $(this).attr('title', '最小化').removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick')
+      $(this).attr('title', Dida.t('system', '最小化')).removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick')
       .parents(".ui-dialog").css('height', 'auto');
       
       $('#dialog_wrapper').dialog("option", "position", 'center');
@@ -305,7 +304,7 @@ Dida.dialog = function(opt) {
     } else {
       obj.hide();
       
-      $(this).attr('title', '最大化').removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick')
+      $(this).attr('title', Dida.t('system', '最大化')).removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick')
       .parents(".ui-dialog").css('height', '35px');
       
       $('#dialog_wrapper').dialog("option", "position", ['right', 'bottom']);
@@ -380,7 +379,7 @@ Dida.ajaxSuccess = function(obj, data, type) {
         break;
         case 'replace':
           // 替换
-          var text = obj.attr('replace') ? obj.attr('replace') : '成功';
+          var text = obj.attr('replace') ? obj.attr('replace') : Dida.t('system', '成功');
           if (text) {
             obj.after('<span class="red msgjs">' + text + '</span>');
             obj.remove();
@@ -389,16 +388,16 @@ Dida.ajaxSuccess = function(obj, data, type) {
         default:
           if (data == 1) {
             
-            var text = obj.attr('replace') ? obj.attr('replace') : '成功';
+            var text = obj.attr('replace') ? obj.attr('replace') : Dida.t('system', '成功');
             if (text) {
               obj.after('<span class="red msgjs">' + text + '</span>');
               obj.remove();
             }
             
           } else if (type == 'a') {
-            alert(data ? data : '操作失败');
+            alert(data ? data : Dida.t('system', '操作失败'));
           } else {
-            obj.after('<span class="red msgjs">' + (data ? data : '操作失败') + '</span>');
+            obj.after('<span class="red msgjs">' + (data ? data : Dida.t('system', '操作失败')) + '</span>');
           }
       }
     }
@@ -407,6 +406,59 @@ Dida.ajaxSuccess = function(obj, data, type) {
     eval(data);
     
   }
+};
+
+/**
+ * js 中的字符串多语言
+ * @param module
+ *  模块名称
+ * @param str
+ *  待翻译的字符串
+ * @param args
+ *  占位符替换值
+ * @return string
+ */
+Dida.t = function(module, str, args) {
+
+  // 读取翻译
+  if (Dida.locale && Dida.locale[str]) {
+    if (!Dida.locale['__' + module] || !Dida.locale['__' + module][str]) {
+      str = Dida.locale[str];
+    } else {
+      str = Dida.locale['__' + module][str];
+    }
+  }
+
+  if (args) {
+    for (var key in args) {
+      switch (key.charAt(0)) {
+        case '@':
+          args[key] = Dida.checkPlain(args[key]);
+        break
+        case '!':
+          break;
+        case '%':
+        default:
+          args[key] = '<em>' + args[key] + '</em>';
+          break;
+      }
+      str = str.replace(key, args[key]);
+    }
+  }
+  return str;
+};
+
+/**
+ * 处理字符串的 html 标签
+ */
+Dida.checkPlain = function(str) {
+  str = String(str);
+  var replace = { '&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;' };
+  for (var character in replace) {
+    var regex = new RegExp(character, 'g');
+    str = str.replace(regex, replace[character]);
+  }
+  return str;
 };
 
 $(function() {
@@ -419,7 +471,7 @@ $(function() {
     if ($.browser.msie) {
       this.style.behavior='url(#default#homepage)';this.setHomePage($(this).attr('href'));
     } else {
-      alert('你的浏览器安全设置过高，不支持此操作。');
+      alert(Dida.t('system', '你的浏览器安全设置过高，不支持此操作。'));
     }
     return false;
   });
@@ -447,7 +499,7 @@ $(function() {
 
   $('.confirm').live('click', function() {
     msg = $(this).attr('alt');
-    if (!confirm((msg ? msg : '确认此操作吗？'))) {
+    if (!confirm((msg ? msg : Dida.t('system', '确认此操作吗？')))) {
       return false;
     } else if ($(this).attr('type') == 'button') {
       location.href = $(this).attr('href');
@@ -456,7 +508,7 @@ $(function() {
   
   $('.confirmajax').live('click', function() {
     msg = $(this).attr('alt');
-    if (confirm((msg ? msg : '确认此操作吗？'))) {
+    if (confirm((msg ? msg : Dida.t('system', '确认此操作吗？')))) {
       $(this).addClass('ja_loading');
       var $$ = $(this);
       var url = $$.attr('href');
@@ -505,7 +557,7 @@ $(function() {
 
   $('.dd_form_ajax_field').change(function() {
     var href = $(this).attr('href');
-    if ($(this).hasClass('changeconfirm') && !confirm('确认此操作吗？')) {
+    if ($(this).hasClass('changeconfirm') && !confirm(Dida.t('system', '确认此操作吗？'))) {
       $(this).val($(this).attr('changeDefault'));
       return false;
     }
@@ -519,7 +571,7 @@ $(function() {
         data: 'id=' + $(this).attr('alt') + '&value=' + $(this).val(),
         success: function(data) {
           if (data == -1) {
-            alert('操作失败');
+            alert(Dida.t('system', '操作失败'));
           } else if (data == 'two') {
             $$.parent().parent().remove();
           }
@@ -574,7 +626,7 @@ $(function() {
   });
   
   $('input[class="admin_delete_button"]').click(function() {
-    if (confirm('确认此操作吗？')) {
+    if (confirm(Dida.t('system', '确认此操作吗？'))) {
       var href = $(this).attr('alt');
       var c = $(this).attr('rel');
       $('.' + c).not($('input.form_all_check')).each(function() {
@@ -599,8 +651,8 @@ $(function() {
   });
   
   $('.login_msg').click(function() {
-    if (!settings.user_is_login) {
-      if (confirm('你需要登录才能进行此操作，立即登录？')) {
+    if (!Dida.settings.user_is_login) {
+      if (confirm(Dida.t('system', '你需要登录才能进行此操作，立即登录？'))) {
         var u = '';
         if ($(this).attr('redirect')) {
           u = $(this).attr('redirect');
@@ -621,23 +673,23 @@ $(function() {
   });
  
   
-  if (settings.multi) {
-    for (var attr in settings.multi) {
-      var element = settings.multi[attr];
+  if (Dida.settings.multi) {
+    for (var attr in Dida.settings.multi) {
+      var element = Dida.settings.multi[attr];
       $(element).each(function() {
         $('#multi_' + this.dom).MultiFile({'list' : '#multi_list_' + this.dom});
       });
     }
   }
-  if (settings.edit) {
-    $(settings.edit).each(function() {
+  if (Dida.settings.edit) {
+    $(Dida.settings.edit).each(function() {
       $(this.dom).editable(null, this.opt);
     });
   }
   
   $('.pager_form_go_input').blur(function() {
     var id = $(this).attr('alt');
-    var s = settings.pager[id];
+    var s = Dida.settings.pager[id];
     var t = parseInt($(this).val());
     var go = 0;
     if (t) {
@@ -684,9 +736,9 @@ $(function() {
     $(dom).hide();
   });
   
-  if (settings.farbtastic) {
-    for (var attr in settings.farbtastic) {
-      var element = settings.farbtastic[attr];
+  if (Dida.settings.farbtastic) {
+    for (var attr in Dida.settings.farbtastic) {
+      var element = Dida.settings.farbtastic[attr];
       $(element).each(function() {
         var f = $.farbtastic(this.dom);
         var p = $(this.dom).css('opacity', 0.25);
@@ -706,9 +758,9 @@ $(function() {
   };
   
   //自动完成
-  if (settings.auto) {
+  if (Dida.settings.auto) {
     var ui_auto = {};
-    $(settings.auto).each(function(i, item) {
+    $(Dida.settings.auto).each(function(i, item) {
       if (item.dom) {
         ui_auto[i] = item;
         if (ui_auto[i].url) {
@@ -752,20 +804,20 @@ $(function() {
     });
   }
   
-  if (settings.sort) {
-    var element = settings.sort;
+  if (Dida.settings.sort) {
+    var element = Dida.settings.sort;
     $(element).each(function(i) {
       var $$ = this;
       $(this.wid).after('<span class="ui-icon ui-icon-arrowthick-2-n-s"></span>');
       $(this.dom).after('<div class="messages sort_messages sort_messages_'+ i +'" style="display: none"></div>');
       $(this.dom).sortable({
-         change: function(event, ui) {$('.sort_messages').show().text('提示：排序已变动，请提交保存'); $(this.dom).sortable("serialize"); }
+         change: function(event, ui) {$('.sort_messages').show().text(Dida.t('system', '提示：排序已变动，请提交保存')); $(this.dom).sortable("serialize"); }
       });
     });
   };
   
-  if (settings.markItUp && typeof(Dida.markitup) == 'object') {
-    $(settings.markItUp).each(function() {
+  if (Dida.settings.markItUp && typeof(Dida.markitup) == 'object') {
+    $(Dida.settings.markItUp).each(function() {
       if (this.dom) {
         var $$ = this;
         var type = $$.type || 'html';
@@ -775,21 +827,28 @@ $(function() {
   }
   
   // ajax 验证
-  if (settings.ajax_validate) {
-    
-    $(settings.ajax_validate).each(function(i) {
-      var o = this;
-      
-      if (o.ajax_submit) {
-        o.submitHandler = function(form) {
-          $(form).ajaxSubmit(o.options);
-        };
-      }
-      
-      $('#'+ o.form_id).validate(o);
-      
+  if (Dida.settings.ajax_validate) {
+ 	
+    $.extend($.validator.messages, {
+      required: Dida.t('system', '不能为空'),
+      remote: Dida.t('system', '不正确的输入，请修改'),
+      email: Dida.t('system', '请输入合法的电子邮件地址'),
+      url: Dida.t('system', '请输入有效的URL'),
+      date: Dida.t('system', '请输入有效的日期'),
+      dateISO: Dida.t('system', '请输入(ISO)标准日期格式，如：2009-08-28'),
+      number: Dida.t('system', '只允许输入数字'),
+      digits: Dida.t('system', '只允许输入整数'),
+      creditcard: Dida.t('system', '请输入有效的信用卡号码'),
+      equalTo: Dida.t('system', '两次输入不一致'),
+      accept: Dida.t('system', '请输入有效的扩展名'),
+      maxlength: $.validator.format(Dida.t('system', '最多允许 {0} 个字符')),
+      minlength: $.validator.format(Dida.t('system', '最少需要 {0} 个字符')),
+      rangelength: $.validator.format(Dida.t('system', '长度必须在 {0} 到 {1} 之间')),
+      range: $.validator.format(Dida.t('system', '仅允许 {0} 到 {1} 之间的值得')),
+      max: $.validator.format(Dida.t('system', '必须小于或等于 {0}')),
+      min: $.validator.format(Dida.t('system', '必须大于或等于 {0}'))
     });
-    
+
     $.validator.addMethod("required", function(value, element, param) {
       if ( !this.depend(param, element) )
         return "dependency-mismatch";
@@ -825,25 +884,30 @@ $(function() {
           return $.trim(value).length > 0;
       }
     });
-    
+ 
+    $(Dida.settings.ajax_validate).each(function(i) {
+      var o = this;
+      if (o.ajax_submit) {
+        o.submitHandler = function(form) {
+          $(form).ajaxSubmit(o.options);
+        };
+      }
+      $('#'+ o.form_id).validate(o);
+    });
+       
   };
   
-  // @TODO 之前时间控件使用 settings.uidata，将更改为 uidate
-  if (settings.uidata) {
-    settings.uidata = settings.uidate;
-  }
-
   /**
    * jquery ui 时间控件
    */
-  if (settings.uidate) {
+  if (Dida.settings.uidate) {
     $.datepicker.setDefaults($.datepicker.regional['zh-CN']);
-    var element = settings.uidate;
+    var element = Dida.settings.uidate;
     $(element).each(function(i) {
       var o = this;
       o.showStatus = true;
       o.showOn = "both";
-      o.buttonImage = settings.base_path + "misc/images/calendar.gif";
+      o.buttonImage = Dida.settings.base_path + "misc/images/calendar.gif";
       o.buttonImageOnly = true;
       
       if (o.start || o.end) {
@@ -890,7 +954,7 @@ $(function() {
       val_start = val_start.replace(re, '');
       if (val_end <= val_start) {
         $(instance.settings.dom).eq(0).val('');
-        alert('结束日期必须大于开始日期');
+        alert(Dida.t('system', '结束日期必须大于开始日期'));
       }
     }
     return false;

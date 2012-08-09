@@ -29,7 +29,7 @@ fields.ajaxSuccess = function(id, obj, json) {
   obj.nextAll('select').remove();
   if (!json.error) {
     var tmp;
-    var label = json.label || '不限';
+    var label = json.label || Dida.t('field', '不限');
     
     tmp = '<option value="">'+label+'</option>';
     $.each(json.contents, function(i, item) {
@@ -79,7 +79,7 @@ $(function() {
           }
         });
         var html = '<input type="hidden" value="'+tid+'" name="fields['+cid+']['+tid+']" class="field_form_selects_option_'+tid+'" />';
-        html += '<span>'+ name + '<a href="javascript:void(0);" alt="'+tid+'" onClick="fields.deleteOption($(this));">(移除)</a></span>';
+        html += '<span>'+ name + '<a href="javascript:void(0);" alt="'+tid+'" onClick="fields.deleteOption($(this));">' + Dida.t('field', '(移除)') + '</a></span>';
         root.find('.field_form_selects_view').eq(0).append(html);
       }
     }

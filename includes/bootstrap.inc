@@ -711,24 +711,32 @@ function t($module, $index, $args = array(), $language = NULL) {
         include $lang_file . $language . '.php';
 
         $lang[$language] = $l;
-        
+        $_j = $j;
+
+        $j = NULL;
         // 加载自定义翻译文件
         if (is_file($lang_file . 'custom_' . $language . '.php')) {
           $l = array();
           include $lang_file . 'custom_' . $language . '.php';
           $lang[$language] = array_merge($lang[$language], $l);
+          if (!empty($j)) $_j = array_merge($_j, $j);
         }
-
+        
+        // 输出 js 文件中使用到的翻译字符串
+        if ($language_code == $language && $_j) {
+          dd_add_js('Dida.locale = ' . dd_to_js($_j), 'inline_nojq', 0, 'footer');
+        }
+        
       } else {
         $lang[$language] = false;
       }
     }
 
-    if ($module && $lang[$language] && !empty($lang[$language][$index])) {
-      if (!is_array($lang[$language]['__'.$module]) || $lang[$language]['__'.$module][$index]) {
-        $index = $lang[$language][$index];
-      } else {
+    if ($module && !empty($lang[$language]) && !empty($lang[$language][$index])) {
+      if (!empty($lang[$language]['__' . $module]) && !empty($lang[$language]['__' . $module][$index])) {
         $index = $lang[$language]['__'.$module][$index];
+      } else {
+        $index = $lang[$language][$index];
       }
     }
 
@@ -788,7 +796,7 @@ function dd_set_lang($lists = NULL, $language = array()) {
       }
     }
   }
-
+  
   if (empty($language)) {
     if ($conf['languages']) {
       foreach ($conf['languages'] as $key => $name) {
@@ -808,18 +816,26 @@ function dd_set_lang($lists = NULL, $language = array()) {
     }
 
     foreach ($language as $code) {
+      // 所有翻译字符串
       $l = array();
+      // 在 js 文件中使用的字符串
+      $j = array();
        	
       foreach ($lists as $module => $path) {
-        $lang = array();
+        $lang = $js_lang = array();
+
         $path = DIDA_ROOT . '/' .  $path . '/languages/' . $code . '.php';
 
         if (!is_file($path)) continue;
 
         include $path;
+        
         if (empty($lang) || !is_array($lang)) continue;
 
+        if (!empty($js_lang)) $j += $js_lang;
+
         $newLang = array_diff_key($lang, $l);
+        
         $reLang = array_intersect_key($lang, $l);
 
         if ($newLang) {
@@ -835,7 +851,7 @@ function dd_set_lang($lists = NULL, $language = array()) {
         }
 
         if ($reLang) {
-          $moduleKey = '__'.$module;
+          $moduleKey = '__' . $module;
           if (empty($l[$moduleKey])) {
             $l[$moduleKey] = $reLang;
           } else {
@@ -844,10 +860,28 @@ function dd_set_lang($lists = NULL, $language = array()) {
         }
 
       }
-      	
+      
       if ($l) {
-        // 合并为缓存文件
-        if ($path = cache_system_set_file($code.'.php', 'l', $l, $GLOBALS['conf_dir'].'/cache/languages')) {
+        if (!empty($j)) {
+          foreach ($j as $key => $_v) {
+            $j[$key] = $l[$key];
+          }
+        } 
+        // 合并为翻译缓存文件
+        $output = '<?php';
+        $output .= "\n";
+
+        $message = "\n\n/**\n";
+        $message .= ' * 翻译语言：' . $conf['languages'][$code] . '(' . $code . ")\n";
+        $message .= ' * 共有 ' . count($l) . " 条翻译\n";
+        $message .= " */\n\n";
+
+        $output .= '$l = ' . var_export($l, true) . ";\n";
+        $output .= '$j = ' . var_export($j, true) . ";\n";
+
+        $path =  DIDA_ROOT . '/'  . $GLOBALS['conf_dir'] . '/cache/languages/' . $code . '.php';
+        
+        if (file_put_contents($path, $output)) {
           chmod($path, 0777);
           dd_set_message(t('system', '%name 导入成功', array('%name' => $code)));
         } else {
@@ -2920,7 +2954,7 @@ function dd_add_js($data = NULL, $type = 'module', $cached = true, $scope = 'hea
  * @return (string)
  */
 function dd_get_js($scope = 'header', $js = NULL) {
-  global $conf, $base_path, $base_theme_name;
+  global $conf, $base_path, $base_theme_name, $language_code;
   static $init;
   
   if (empty($init)) {
@@ -2928,6 +2962,7 @@ function dd_get_js($scope = 'header', $js = NULL) {
       'cache_css_and_js_timestamp' => $conf['cache_css_and_js_timestamp'],
       'base_theme' => $conf['base_theme'],
       'base_path' => $base_path,
+      'language_code' => $language_code, 
       'clean_url' => $conf['clean_url'] ? true : false,
       'user_is_login' => !empty($GLOBALS['user']->uid)
     ), 'setting');
@@ -2951,8 +2986,14 @@ function dd_get_js($scope = 'header', $js = NULL) {
   $output = $inline = '';
 
   if (!empty($js['setting'])) {
+    /**
+     * 将 js 中的 Dida 对象，在这儿初始化，输出在页面顶端。
+     * @TODO 为避免和其它 js 库内部变量造成冲突，将之前的全局配置变量 settings，修改为 Dida.settings
+     *       为兼容之前的代码，暂不取消 settings 变量，做为过渡
+     */
     $output = "<script type=\"text/javascript\">\n<!--//--><![CDATA[//><!--\n" 
-      . 'var settings = ' . dd_to_js(call_user_func_array('array_merge_recursive', $js['setting']))
+      . 'var Dida = {cache: {}}, settings = {};'
+      . 'Dida.settings = settings = ' . dd_to_js(call_user_func_array('array_merge_recursive', $js['setting']))
       . "\n//--><!]]>\n</script>\n";
   }
 
