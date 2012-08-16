@@ -4,7 +4,7 @@
 /**
  * 默认语言：Chinese, Simplified(简体中文)(zh-hans)
  * 翻译语言：English(en)
- * 共有 48 条翻译
+ * 共有 45 条翻译
  */
 
 $lang = array (
@@ -30,10 +30,10 @@ $lang = array (
   '在下列页面显示' => '在下列页面显示',
   '除下列页面外的其它页面显示' => '除下列页面外的其它页面显示',
   '根据系统路径设置区块显示，可使用以下三种匹配模式：' => '根据系统路径设置区块显示，可使用以下三种匹配模式：',
-  '普通模式：一行一个。斜杠(/' => '普通模式：一行一个。斜杠(/',
+  '普通模式：一行一个。斜杠(/)代表整个路径。如：user 匹配单个页面，而 user/ 匹配以 user 下的所有页面。&lt;front&gt; 代表首页' => '普通模式：一行一个。斜杠(/)代表整个路径。如：user 匹配单个页面，而 user/ 匹配以 user 下的所有页面。&lt;front&gt; 代表首页',
   '当 PHP 代码返回 TRUE 时显示' => '当 PHP 代码返回 TRUE 时显示',
-  'PHP模式：如：if ($GLOBALS[\\' => 'PHP模式：如：if ($GLOBALS[\\',
-  '数据已过期，模块(%string' => '数据已过期，模块(%string',
+  'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo' => 'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo',
+  '数据已过期，模块(%string)中已不存在这个区块，请更新 <a href="!url">区块列表缓存</a>' => '数据已过期，模块(%string)中已不存在这个区块，请更新 <a href="!url">区块列表缓存</a>',
   '标题长度不超过 %length 字符' => '标题长度不超过 %length 字符',
   '设置成功' => '设置成功',
   '清除区块列表缓存' => '清除区块列表缓存',
@@ -53,9 +53,6 @@ $lang = array (
   '删除' => '删除',
   '名称' => '名称',
   '操作' => '操作',
-  '普通模式：一行一个。斜杠(/)代表整个路径。如：user 匹配单个页面，而 user/ 匹配以 user 下的所有页面。&lt;front&gt; 代表首页' => '普通模式：一行一个。斜杠(/)代表整个路径。如：user 匹配单个页面，而 user/ 匹配以 user 下的所有页面。&lt;front&gt; 代表首页',
-  'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo' => 'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo',
-  '数据已过期，模块(%string)中已不存在这个区块，请更新 <a href="!url">区块列表缓存</a>' => '数据已过期，模块(%string)中已不存在这个区块，请更新 <a href="!url">区块列表缓存</a>',
 );
 $js_lang = array (
 );

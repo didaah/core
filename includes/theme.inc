@@ -2,12 +2,12 @@
 // $Id$
 
 function theme_init() {
-  global $conf, $base_path, $base_theme_name, $base_theme_info, $language_code; 
+  global $conf, $base_path, $base_theme_name, $base_theme_info, $language_code, $user; 
 
-  // 当前用户所选择的界面的语言，若未选择，则使用网站默认语言
-  $language_code = empty($GLOBALS['user']->language) ? var_get('default_language', 'zh-hans') : $GLOBALS['user']->language;
-
-  $base_theme_name = !$GLOBALS['user']->theme ? $conf['default_theme'] : $GLOBALS['user']->theme;
+  // 用户界面语言
+  _theme_get_language();
+  
+  $base_theme_name = empty($GLOBALS['user']->theme) ? $conf['default_theme'] : $GLOBALS['user']->theme;
   
   $base_theme_info = $conf['themes'][$base_theme_name];
 
@@ -40,6 +40,46 @@ function theme_init() {
   dd_add_js('misc/jquery.js', 'core');
   dd_add_js('misc/dida.js', 'core');
   dd_add_js('misc/jquery.dida.js', 'core');
+}
+
+/**
+ * 获取当前用户的语言，语言优先级：
+ *  1、用户自行选择的语言；
+ *  2、cookie 中设置的语言；
+ *  3、浏览器中设置的语言；
+ *  4、站点默认语言
+ * @access public
+ * @return void
+ */
+function _theme_get_language() {
+  global $user, $language_code;
+ 
+  $language_code = var_get('default_language', 'zh-hans');
+
+  // 若用户没有选择默认语言，且站点启用了 1 种以上的语言，则为用户设置默认语言，通常为游客
+  if (!empty($user->language)) {
+    $language_code = $user->language;
+  } else if (!empty($GLOBALS['conf']['languages'])) {
+    if (dd_get_cookie('lang')) {
+      // 检查 cookie 中的语言设置
+      $language_code = dd_get_cookie('lang');
+    } else if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+      // 检查浏览器中的语言设置
+      if ($lang = preg_replace('/q=[0-9|.|,]*/', '', $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $lang = str_replace(array('zh-cn', 'zh-tw', 'zh-hk'), array('zh-hans', 'zh-hant', 'zh-hant'), $lang);
+        if ($langs = explode(',', $lang)) {
+          foreach ($langs as $key) {
+            if (!empty($GLOBALS['conf']['languages'][$key])) {
+              $language_code = $key;
+              dd_set_cookie('lang', $key);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+ 
 }
 
 /**

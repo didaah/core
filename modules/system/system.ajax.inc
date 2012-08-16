@@ -78,6 +78,7 @@ function system_system_tools_ajax($v, $g) {
           if ($user->uid > 0) {
             db_exec('UPDATE {users} SET language = ? WHERE uid = ?', array($g['lang'], $user->uid));
             user_clear_session($user->uid);
+            dd_set_cookie('lang', $g['lang']);
           }
         } else {
           dd_set_message(t('system', '沒有语言供选择'));

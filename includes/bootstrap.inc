@@ -1045,6 +1045,10 @@ function dd_user_validate() {
       }
     }
   }
+ 
+  if (empty($user->language)) {
+    $user->language = $GLOBALS['language_code'];
+  }
 
   if (empty($user->uid)) {
     $user = user_anonymous($user);  // 游客
@@ -1327,7 +1331,7 @@ function dd_get_cookie($name) {
  */
 function dd_to_install() {
   conf_init();
-  header('Location: '.$GLOBALS['base_path'].'install.php');
+  header('Location: ' . $GLOBALS['base_path'] . 'install.php');
   exit;
 }
 
@@ -1470,6 +1474,7 @@ function format_get_current() {
   }
   return $time;
 }
+
 /**
  * 处理 PHP 错误信息
  */

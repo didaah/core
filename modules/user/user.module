@@ -498,7 +498,7 @@ function user_edit_form($ac, $op = 'user') {
     '#title' => t('user', '上次登录时间')
   );
   
-  if ($op == 'user') {
+  if ($op == 'user' && var_get_key('user', 'is_pass', 1)) {
     $form['fields']['pass'] = array(
       '#type' => 'password',
       '#title' => t('user', '密码'),
@@ -517,6 +517,7 @@ function user_edit_form($ac, $op = 'user') {
 	    '#options' => array('' => t('user', '默认')) + $conf['languages'],
 	  );
 	}
+
 	if (($conf['user']['select_theme'] || $op == 'admin') && count($conf['themes']) > 1) {
 		
 	  foreach ($conf['themes'] as $theme) {
@@ -602,7 +603,7 @@ function user_edit_validate($form, &$value) {
   }
   
   // 验证密码
-  if (!$error && $value['op'] == 'user' && !user_is_login_pass(array('uid' => $ac->uid), $value['pass'])) {
+  if (!$error && $value['op'] == 'user' && var_get_key('user', 'is_pass', 1) && !user_is_login_pass(array('uid' => $ac->uid), $value['pass'])) {
     $error['pass']['#error'][] = t('user', '密码不匹配');
   }
   

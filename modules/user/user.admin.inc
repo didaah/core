@@ -315,6 +315,7 @@ function user_admin_add_submit($form, $value) {
 
 function user_set_settings() {
   _user_admin_tabs();
+
   $form['fields']['user']['register'] = array(
     '#type' => 'radio',
     '#title' => t('user', '允许注册'),
@@ -322,6 +323,7 @@ function user_set_settings() {
     '#default_value' => var_get_key('user', 'register', 1),
     '#options' => array(t('user', '否'), t('user', '是')),
   );
+
   $form['fields']['user']['status'] = array(
     '#type' => 'radio',
     '#title' => t('user', '激活帐号'),
@@ -329,12 +331,14 @@ function user_set_settings() {
     '#default_value' => var_get_key('user', 'status', 1),
     '#options' => array(t('user', '通过邮箱激活'), t('user', '不需要激活'), -1 => t('user', '手动激活')),
   );
+
   $form['fields']['user']['anonymous'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '游客名称'),
     '#required' => true,
     '#default_value' => var_get_key('user', 'anonymous', t('user', '游客')),
   );
+
   $form['fields']['user']['select_theme'] = array(
     '#type' => 'radio',
     '#title' => t('user', '允许选择主题'),
@@ -342,6 +346,7 @@ function user_set_settings() {
     '#default_value' => var_get_key('user', 'select_theme', 0),
     '#options' => array(t('user', '否'), t('user', '是')),
   );
+
   $form['fields']['user']['select_lang'] = array(
     '#type' => 'radio',
     '#title' => t('user', '允许选择语言'),
@@ -349,6 +354,7 @@ function user_set_settings() {
     '#default_value' => var_get_key('user', 'select_lang', 0),
     '#options' => array(t('user', '否'), t('user', '是')),
   );
+
   $form['fields']['user']['redirect'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '登录后跳转至'),
@@ -356,12 +362,14 @@ function user_set_settings() {
     '#default_value' => var_get_key('user', 'redirect'),
     '#description' => t('user', '可使用 user、system 通配符，<a href="!url">通配符列表</a>', array('!url' => url('admin/token')))
   );
+
   $form['fields']['user']['default_avatar'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '用户默认头像'),
     '#required' => 1,
     '#default_value' => var_get_key('user', 'default_avatar', 'misc/images/avatar.gif'),
   );
+
   $form['fields']['user']['default_role'] = array(
     '#type' => 'select',
     '#title' => t('user', '用户默认角色'),
@@ -370,6 +378,7 @@ function user_set_settings() {
     '#options' => user_roles_opt(),
     '#description' => t('user', '注册用户的默认角色权限'),
   );
+
   $form['fields']['user']['anonymous_role'] = array(
     '#type' => 'select',
     '#title' => t('user', '游客默认角色'),
@@ -378,6 +387,7 @@ function user_set_settings() {
     '#options' => user_roles_opt(),
     '#description' => t('user', '游客的默认角色权限'),
   );
+
   $form['fields']['user']['custom_view'] = array(
     '#type' => 'select',
     '#title' => t('user', '用户主页'),
@@ -386,13 +396,23 @@ function user_set_settings() {
     '#options' => array(t('user', '系统默认'), t('user', '自定义')),
     '#description' => t('user', '若选择自定义，用户主页将不会有任何显示，仅传递可用变量，请自行在 user.tpl.php 中布局'),
   );
-  
+ 
+  $form['fields']['user']['is_pass'] = array(
+    '#type' => 'radio',
+    '#title' => t('user', '验证密码'),
+    '#required' => true,
+    '#default_value' => var_get_key('user', 'is_pass', 1),
+    '#options' => array(t('user', '否'), t('user', '是')),
+    '#description' => t('user', '用户编辑个人资料时是否验证密码'),
+  );
+ 
   $options = array(0 => t('user', '默认'));
   if ($modules = var_get('modules')) {
     foreach ($modules as $module => $info) {
       $options[$module] =  $info['name'];
     }
   }
+
   $form['fields']['user']['custom_view_module'] = array(
     '#type' => 'select',
     '#title' => t('user', '交给模块处理'),
@@ -400,13 +420,16 @@ function user_set_settings() {
     '#options' => $options,
     '#description' => t('user', '将用户首页完全交给某个模块处理，除非某个模块建议这么做，否则请不要选择'),
   );
+
   $form['settings'] = array(
     '#validate' => array('user_set_settings_validate')
   );
+
   $form['fields']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('user', '确认设置'),
   );
+
   return $form;
 }
 

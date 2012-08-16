@@ -15,7 +15,12 @@
  *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --lang en --export_value 1
  *    生成所有已启用模块的英文语言文件，如语言文件已存在，直接替换
  *     php scripts/common.inc --host www.didaah.org --bootstrap full --script_name lang_export.inc --clear_cache 1 --lang en
- *
+ *    
+ *    @param
+ *      --lang 指定语言，如 en，默认空
+ *      --clear_cache 1 直接替换已有文件，0 备份已有文件，默认 0
+ *      --export_value 1 导出已有翻译值，默认为 0
+ *      --is_new 1 忽略已有文件中的待翻译列表，以当前解析的待翻译列表为准 默认 0
  *
  * @TODO js 中的多语言待确定
  */
@@ -95,7 +100,7 @@ function _lang_export($lang_code, $module) {
       // 所有待翻译的界面字符串
       $lang = array();
 
-      if (is_file($lang_file)) {
+      if (empty($_args['is_new']) && is_file($lang_file)) {
         include_once $lang_file;
       }
 
