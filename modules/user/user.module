@@ -912,12 +912,12 @@ function user_register_form($op = 'user') {
       'class' => "{equalTo:'#password'}"
     ),
   );
-
+  
   if (($conf['user']['select_lang'] || $op == 'admin') && count($conf['languages']) > 1) {
 	  $form['fields']['language'] = array(
 	    '#type' => 'select',
 	    '#title' => t('user', '语言'),
-	    '#default_value' => $conf['default_language']['language'],
+	    '#default_value' => $GLOBALS['language_code'],
 	    '#options' => array('' => t('user', '默认')) + $conf['languages'],
 	  );
 	}

@@ -160,9 +160,10 @@ function theme() {
      */
     $functions = array(
       'template_preprocess',
-      'template_preprocess_'.$hook,
-      $theme['module'].'_template_preprocess_'.$hook,
-      $temp['filename']. '_preprocess_'. $hook
+      'template_preprocess_' . $hook,
+      $theme['module'] . '_template_preprocess_' . $hook,
+      $temp['filename'] . '_preprocess_' . $hook,
+      '_template_preprocess_language'
     );
     
     foreach ($functions as $function) {
@@ -205,15 +206,15 @@ function theme() {
       /**
        * 在当前主题中覆盖。将 tpl 文件复制到主题文件夹下，必须以模块名为目录名，即：themename/modulename/
        */
-      if (is_file($temp['path'].'/'.$theme['module'].'/'.$tpl)) {
+      if (is_file($temp['path'] . '/' . $theme['module'] . '/' . $tpl)) {
         
-        return theme_render_tpl($temp['path'].'/'.$theme['module'].'/'.$tpl, $var, $hook);
+        return theme_render_tpl($temp['path'] . '/' . $theme['module'] . '/' . $tpl, $var, $hook);
         
-      } else if (is_file($module_path.'/tpl/'.$tpl)) {
+      } else if (is_file($module_path . '/tpl/' . $tpl)) {
         /**
          * 调用模块目录中的 tpl
          */
-        return theme_render_tpl($module_path.'/tpl/'.$tpl, $var, $hook);
+        return theme_render_tpl($module_path . '/tpl/' . $tpl, $var, $hook);
         
       }
     }
@@ -232,9 +233,29 @@ function theme() {
   }
 }
 
+/** 
+ * 所有主题基本预处理函数，将为多语言设置，可为每种语言使用不同的模板，命名规则示例：
+ *  如基本模板为 user.tpl.php，则 en_user.tpl.php 表示英文界面下使用此模板，jp_user.tpl.php 表示日文界面下使用此模板
+ * 该模板的优先级最高
+ * @param array $var 
+ * @param string $hook 
+ * @access public
+ * @return void
+ */
+function _template_preprocess_language(&$var, $hook) {
+  if (is_array($var['theme_config']->tpl)) {
+    $var['theme_config']->tpl[] =  $GLOBALS['language_code'] . '_' . $var['theme_config']->tpl[0];
+  }
+}
+
 /**
- * 传递给所有模板文件的变量，以 site_ 开头
+ * 所有主题基本预处理函数 
+ * 将传递给所有模板文件的变量，以 site_ 开头
  * 模块应尽量避免使用 site_ 开头来命名模板变量
+ * @param array $var 
+ * @param string $hook 
+ * @access public
+ * @return void
  */
 function template_preprocess(&$var, $hook) {
   static $count = array();
@@ -256,6 +277,7 @@ function template_preprocess(&$var, $hook) {
   } else {
     $var['is_login'] = 0;
   }
+
   $var['base_theme'] = $GLOBALS['conf']['base_theme'];
   $var['base_path'] = $GLOBALS['base_path'];
 }
@@ -323,9 +345,9 @@ function template_preprocess_page(&$var, $args) {
         $args_id .= '_'.$arg;
         $args_value .= 'page_wrapper'.$args_id . ' ';
       }
-      $var['theme_config']->tpl[] = $tpl .'_'. $arg . '.tpl.php';
+      $var['theme_config']->tpl[] = $tpl . '_' . $arg . '.tpl.php';
       if (!is_numeric($arg)) {
-        $tpl .= '_'. $arg;
+        $tpl .= '_' . $arg;
       }
     }
     $var['args_id'] = rtrim(strip_tags($args_value), ' ');
