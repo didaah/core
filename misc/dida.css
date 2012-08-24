@@ -660,6 +660,10 @@ span.ja_loading {
   text-align: right;
 }
 
+#user_edit_form .form_textarea {
+  margin-left: 100px;
+}
+
 /*swfupload*/
 .su_files_table {
 	max-height: 300px;

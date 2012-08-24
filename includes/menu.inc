@@ -48,6 +48,7 @@ function menu_get_item($path = NULL) {
     }
     
     $systemUrl = $cacheUrl = $url;
+
     $item = NULL;
     
     if ($get_view) {
@@ -60,12 +61,11 @@ function menu_get_item($path = NULL) {
       $item = $cache->data;
     }
       
-    if (!$item) {
-      
+    if (empty($item)) {
       if ($toPath = menu_get_alias_path($url, 'alias')) {
       	$systemUrl = $url = $toPath;
       }
-      
+
       $t = arg(NULL, $url);
       
       $parts = array_slice($t, 0, 10);
@@ -99,10 +99,15 @@ function menu_get_item($path = NULL) {
         $access[$path] = false;
         return $access[$path];
       }
-      
       return MENU_NOT_FOUND;
     }
     
+    /**
+     * 如果当前路径是别名，则将 $_GET['q'] 重写为真实路径
+     * 即使用 $_GET['q'] 获取到的永远是系统路径，可能和浏览器中显示的地址不一样
+     */
+    $_GET['q'] = $item['systemUrl'];   
+
     $page_args = $title_args = array();
     
     if ($item['load_functions']) {
