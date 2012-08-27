@@ -22,7 +22,12 @@ if (empty($conf_dir)) {
   }
 }
 
+$_conf_dir = $conf_dir;
+
+$conf_dir = DIDA_ROOT . '/' . $conf_dir;
+
 $conf_file = $conf_dir .'/cache/conf.php';
+
 $setting_file = $conf_dir .'/setting.php';
 
 if (is_file($conf_file)) {
@@ -145,7 +150,7 @@ function dida_is_setup() {
     }
   } else if (is_file('sites/cache/default.conf.php')) {
     if (file_put_contents($conf_file, file_get_contents('sites/cache/default.conf.php'))) {
-      chmod($conf_file, 0777);
+      @chmod($conf_file, 0777);
     } else {
       $error[] = $conf_file . '文件必须有读写权限';
     }
@@ -166,7 +171,7 @@ function dida_is_setup() {
     	$error[] = $setting_file . '必须有读写权限';
     }
   } else if ($handle = fopen($setting_file, "wb")) {
-    chmod($setting_file, 0777);
+    @chmod($setting_file, 0777);
     fclose($handle);
   } else {
     $error[] = $setting_file.'不存在且无法自动创建，请复制 sites/default.setting.php 并重命名为 setting.php';
@@ -204,7 +209,7 @@ function dida_setup_data_select() {
 }
 
 function dida_setup_data_form() {
-  global $database, $error, $conf_dir, $setting_file;
+  global $database, $error, $conf_dir, $_conf_dir, $setting_file;
   
   $type = db_info();
   
@@ -213,14 +218,14 @@ function dida_setup_data_form() {
     dd_goto(f('install.php?setup=1'));
   }
   
-  require_once './includes/database/install.'.$database['default']['driver'].'.inc';
+  require_once DIDA_ROOT . '/includes/database/install.'.$database['default']['driver'].'.inc';
   
   $form = '<input type="hidden" name="driver" value="'.$database['default']['driver'].'" />';
   
   if ($_POST) {
     if (!$error = db_install_test($_POST)) {
-      require_once './includes/cache.inc';
-      if (cache_system_set_file('setting.php', 'database[\'default\']', $_POST, $conf_dir)) {
+      require_once DIDA_ROOT . '/includes/cache.inc';
+      if (cache_system_set_file('setting.php', 'database[\'default\']', $_POST, $_conf_dir)) {
         dd_goto(f('install.php?setup=3'));
       } else {
         $error[] = '保存失败，请删除 ' . $setting_file;
@@ -334,9 +339,9 @@ function dida_setup() {
       $error[] = '请设置网站访问状态。';
     } else if (db_connect('default')) {
       
-      require_once './modules/system/system.install';
-      require_once './includes/module.inc';
-      require_once './includes/menu.inc';
+      require_once DIDA_ROOT . '/modules/system/system.install';
+      require_once DIDA_ROOT . '/includes/module.inc';
+      require_once DIDA_ROOT . '/includes/menu.inc';
       
       if (_system_install()) {
         if (module_set_list('theme') && module_set_list('module')) {
@@ -441,11 +446,11 @@ function dida_setup() {
 }
 
 function _install_bootstrap() {
-  require_once './includes/cache.inc';
-  require_once './includes/menu.inc';
-  require_once './includes/file.inc';
+  require_once DIDA_ROOT . '/includes/cache.inc';
+  require_once DIDA_ROOT . '/includes/menu.inc';
+  require_once DIDA_ROOT . '/includes/file.inc';
   foreach (module_list('module', 'enabled') as $module => $info) {
-    if ($error = module_load($module.'.module', $info['path'])) {
+    if ($error = module_load($module . '.module', $info['path'])) {
       echo "模块 $module 主文件 $error 不存在。";
       exit;
     }
@@ -453,7 +458,7 @@ function _install_bootstrap() {
 }
 
 function _install_setting_chmod() {
-  global $database, $conf_dir, $setting_file;
+  global $database, $conf_dir, $_conf_dir, $setting_file;
   
   $text[] = '$database[\'default\'] = ' . var_export($database['default'], true).";\n\n";
   $text[] = '$installed = true; // 不允许运行 install.php ';
@@ -474,8 +479,8 @@ function _install_setting_chmod() {
   $text[] = 'ini_set(\'mbstring.internal_encoding\', \'utf-8\');';
   $text[] = 'ini_set(\'mbstring.encoding_translation\', \'off\');';
  
-  if (cache_system_set_file('setting.php', NULL, implode("\n", $text), $conf_dir)) {
-    if (!chmod($setting_file, 0644)) {
+  if (cache_system_set_file('setting.php', NULL, implode("\n", $text), $_conf_dir)) {
+    if (!@chmod($setting_file, 0644)) {
       dd_set_message("无法修改 $file 文件权限，为了安全，应将该文件修改为只读。", 'warning');
     }
   }
