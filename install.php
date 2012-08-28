@@ -22,13 +22,9 @@ if (empty($conf_dir)) {
   }
 }
 
-$_conf_dir = $conf_dir;
-
-$conf_dir = DIDA_ROOT . '/' . $conf_dir;
-
 $conf_file = $conf_dir .'/cache/conf.php';
 
-$setting_file = $conf_dir .'/setting.php';
+$setting_file = DIDA_ROOT . '/' . $conf_dir .'/setting.php';
 
 if (is_file($conf_file)) {
   require_once $conf_file;
@@ -209,7 +205,7 @@ function dida_setup_data_select() {
 }
 
 function dida_setup_data_form() {
-  global $database, $error, $conf_dir, $_conf_dir, $setting_file;
+  global $database, $error, $conf_dir, $setting_file;
   
   $type = db_info();
   
@@ -225,7 +221,7 @@ function dida_setup_data_form() {
   if ($_POST) {
     if (!$error = db_install_test($_POST)) {
       require_once DIDA_ROOT . '/includes/cache.inc';
-      if (cache_system_set_file('setting.php', 'database[\'default\']', $_POST, $_conf_dir)) {
+      if (cache_system_set_file('setting.php', 'database[\'default\']', $_POST, $conf_dir)) {
         dd_goto(f('install.php?setup=3'));
       } else {
         $error[] = '保存失败，请删除 ' . $setting_file;
@@ -458,7 +454,7 @@ function _install_bootstrap() {
 }
 
 function _install_setting_chmod() {
-  global $database, $conf_dir, $_conf_dir, $setting_file;
+  global $database, $conf_dir, $setting_file;
   
   $text[] = '$database[\'default\'] = ' . var_export($database['default'], true).";\n\n";
   $text[] = '$installed = true; // 不允许运行 install.php ';
@@ -479,7 +475,7 @@ function _install_setting_chmod() {
   $text[] = 'ini_set(\'mbstring.internal_encoding\', \'utf-8\');';
   $text[] = 'ini_set(\'mbstring.encoding_translation\', \'off\');';
  
-  if (cache_system_set_file('setting.php', NULL, implode("\n", $text), $_conf_dir)) {
+  if (cache_system_set_file('setting.php', NULL, implode("\n", $text), $conf_dir)) {
     if (!@chmod($setting_file, 0644)) {
       dd_set_message("无法修改 $file 文件权限，为了安全，应将该文件修改为只读。", 'warning');
     }
