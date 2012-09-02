@@ -680,13 +680,22 @@ function var_init() {
 
 /**
  * 多语言
- * @param (string) $index
- *  语言字符串键名，若无对应值，则返回键名
- * @param (string) $module
+ * 
+ * Dida 的多语言机制较为灵活，模块开发者可以使用自己熟悉的语言，并不强制使用中文或英文，在 module.info 设置语言即可
+ * 在代码中使用 t() 函数实现多语言，例如：t('user', '登录') 第一个参数为模块名称
+ *
+ * 有些情况下，需要实现多语言的内容是管理员在设置中输入的，模块开发者预先并不知道输入内容和语言
+ * 为这种情况，在全局设置增加了管理语言，管理员可设置该选项，系统默认所有动态字符串，均为所设置的语言
+ * 模块可提供输入表单，将管理员的输入保存在数据库中，同时模块在输出时，第一个参数使用 NULL，例如：t(NULL, $text) 即可
+ * 此时，不管 $text 的语言是什么，均视作管理语言(admin_language)
+ *
+ * @param string $module
  *  默认系统名称，赋值则优先使用该模块定义的值
- * @param (array) $args
+ * @param string $index
+ *  语言字符串键名，若无对应值，则返回键名
+ * @param array $args
  *  要转换的字符串参数
- * @param (string) $language
+ * @param string $language
  *  指定语言
  * 所有模块的语言文件缓存在 {$conf_dir}/cache/{$language}.php
  * 可在相同目录自定义语言翻译文件，命名为 custom_{$language}.php，自定义翻译，优先级最高
@@ -698,10 +707,10 @@ function t($module, $index, $args = array(), $language = NULL) {
   if (empty($language)) $language = $language_code;
 
   /**
-   * 1、$module 为空，需要加载翻译文件
-   * 2、请求的语言 $language 与模块 ($module) info 中指定的界面语言不相同，也需要加载翻译文件
+   * 1、$module 为空，需要加载翻译文件并翻译
+   * 2、请求的语言 $language 与模块 ($module) info 中指定的界面语言不相同，需要加载翻译文件并翻译
    */ 
-  if (empty($module) || empty($conf['module_theme'][$module]) || $language != $conf['module_theme'][$module]['language']) {
+  if ((!empty($module) && !empty($conf['module_theme'][$module]) && $language != $conf['module_theme'][$module]['language']) || (empty($module) && $conf['admin_language'] != $language)) {
     if (!isset($lang[$language])) {
 
       $lang_file = DIDA_ROOT . '/' . $GLOBALS['conf_dir'] . '/cache/languages/';
@@ -732,16 +741,16 @@ function t($module, $index, $args = array(), $language = NULL) {
       }
     }
 
-    if ($module && !empty($lang[$language]) && !empty($lang[$language][$index])) {
-      if (!empty($lang[$language]['__' . $module]) && !empty($lang[$language]['__' . $module][$index])) {
-        $index = $lang[$language]['__'.$module][$index];
+    if (!empty($lang[$language]) && !empty($lang[$language][$index])) {
+      if (!empty($module) && !empty($lang[$language]['__' . $module]) && !empty($lang[$language]['__' . $module][$index])) {
+        $index = $lang[$language]['__' . $module][$index];
       } else {
         $index = $lang[$language][$index];
       }
     }
 
   }
-
+  
   if (empty($args)) {
     return $index;
   } else {

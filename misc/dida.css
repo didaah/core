@@ -664,6 +664,10 @@ span.ja_loading {
   margin-left: 100px;
 }
 
+#user_edit_form .form_item_textarea .description {
+  margin-left: 100px;
+}
+
 /*swfupload*/
 .su_files_table {
 	max-height: 300px;

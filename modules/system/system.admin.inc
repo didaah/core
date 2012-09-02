@@ -515,11 +515,21 @@ function system_site_settings() {
       t('system', '超级管理员可访问')
     ),
   );
+
   $form['fields']['default_language'] = array(
     '#type' => 'select',
     '#title' => t('system', '默认语言'),
     '#required' => true,
     '#default_value' => var_get('default_language', 'zh-hans'),
+    '#options' => $conf['languages'],
+  );
+
+  $form['fields']['admin_language'] = array(
+    '#type' => 'select',
+    '#title' => t('system', '管理语言'),
+    '#required' => true,
+    '#default_value' => var_get('admin_language', 'zh-hans'),
+    '#description' => t('system', '管理语言是指管理员在管理设置中输入的语言，如：站点名称、站点口号等，这些内容是动态的，必须知道它们的输入语言才能提供多语言支持(即生成语言翻译)。注意：这个设置是全站通用的，也就是说，在所有需要输入的站点设置选项内，必须输入同一种文字'),
     '#options' => $conf['languages'],
   );
 

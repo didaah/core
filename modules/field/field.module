@@ -2843,6 +2843,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
   dd_add_css('modules/field/field.css');
   
   global $conf;
+
   foreach ($datas as $field_id => $data) {
     if (!field_access('update', $data, $node, $ac)) {
       continue;
@@ -2857,12 +2858,12 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
         switch ($data->field_type) {
           case 'radio':
             $form['fields']['fields'][$data->field_key] = array(
-              '#title' => $data->name,
+              '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
               '#default_value' => $node->fields[$data->field_key] ? $node->fields[$data->field_key]->tid : '',
               '#required' => $required,
               '#options' => field_get_term_options($options[$field_id], $required),
-              '#description' => $data->data['input_description']
+              '#description' => t(NULL, $data->data['input_description'])
             );
           break;
           case 'checkbox':
@@ -2872,12 +2873,12 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               }
             }
             $form['fields']['fields'][$data->field_key] = array(
-              '#title' => $data->name,
+              '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
               '#default_value' => $field_value,
               '#required' => $required,
               '#options' => field_get_term_options($options[$field_id], 1),
-              '#description' => $data->data['input_description']
+              '#description' => t(NULL, $data->data['input_description'])
             );
           break;
           case 'select':
@@ -2888,7 +2889,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             		)
             	)), 'setting');
               $form['fields']['fields']['field_root_'.$data->field_key] = array(
-                '#title' => $data->name,
+                '#title' => t(NULL, $data->name),
                 '#type' => 'select',
                 '#required' => $required,
                 '#attributes' => array(
@@ -2896,7 +2897,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
                   'alt' => $data->field_key
                 ),
                 '#options' => field_get_term_options($options[$field_id]),
-                '#description' => $data->data['input_description']
+                '#description' => t(NULL, $data->data['input_description'])
               );
               $default_value = NULL;
               if ($_POST['fields'][$data->field_key]) {
@@ -2938,12 +2939,12 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               );
             } else {
               $form['fields']['fields'][$data->field_key] = array(
-                '#title' => $data->name,
+                '#title' => t(NULL, $data->name),
                 '#type' => 'select',
                 '#default_value' => $node->fields[$data->field_key] ? $node->fields[$data->field_key]->tid : '',
                 '#required' => $required,
                 '#options' => field_get_term_options($options[$field_id], $required),
-                '#description' => $data->data['input_description']
+                '#description' => t(NULL, $data->data['input_description'])
               );
             }
           break;
@@ -2955,7 +2956,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             		)
             	)), 'setting');
               $form['fields']['fields']['field_root_'.$data->field_key] = array(
-                '#title' => $data->name,
+                '#title' => t(NULL, $data->name),
                 '#type' => 'select',
                 '#required' => $node->fields[$data->field_key] ? false : $required,
                 '#attributes' => array(
@@ -2965,7 +2966,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
                 '#prefix' => '<div class="form_item form_item_select form_item_selects" id="user_edit_form_field_field_root_'.$data->field_key.'">',
                 '#field_suffix' => '<input type="button" value="'.t('field', '增加').'" class="form_select_multiple_button" alt="'.$data->field_key.'" />',
                 '#options' => field_get_term_options($options[$data->field_id]),
-                '#description' => $data->data['input_description']
+                '#description' => t(NULL, $data->data['input_description'])
               );
               
               $defaults = NULL;
@@ -3012,12 +3013,12 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
                 }
               }
               $form['fields']['fields'][$data->field_key] = array(
-                '#title' => $data->name,
+                '#title' => t(NULL, $data->name),
                 '#type' => 'selects',
                 '#default_value' => $defaults,
                 '#required' => $required,
                 '#options' => field_get_term_options($options[$field_id], 1),
-                '#description' => $data->data['input_description']
+                '#description' => t(NULL, $data->data['input_description'])
               );
             }
           break;
@@ -3029,12 +3030,12 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               }
             }
             $form['fields']['fields'][$data->field_key] = array(
-              '#title' => $data->name,
+              '#title' => t(NULL, $data->name),
               '#type' => 'textfield',
               '#default_value' => $field_value ? rtrim($field_value, ',') : '',
               '#required' => $required,
               '#attributes' => array('size' => 50),
-              '#description' => $data->data['input_description']
+              '#description' => t(NULL, $data->data['input_description'])
             );
           
             if (!empty($data->data['validate']['type'])) {
@@ -3056,12 +3057,12 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
           case 'textfield':
             // 单行文本
             $form['fields']['fields'][$data->field_key] = array(
-              '#title' => $data->name,
+              '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
               '#default_value' => $node->fields[$data->field_key]->text,
               '#required' => $required,
               '#attributes' => array('size' => 50),
-              '#description' => $data->data['input_description']
+              '#description' => t(NULL, $data->data['input_description'])
             );
             if ($data->data['validate']['type']) {
               if ($textfield_opt = module_invoke_all('field_type_textfield', 'node_form', $data->data['validate']['type'], $data)) {
@@ -3072,11 +3073,11 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
           case 'textarea':
             // 多行文本
             $form['fields']['fields'][$data->field_key] = array(
-              '#title' => $data->name,
+              '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
               '#default_value' => $node->fields[$data->field_key]->text,
               '#required' => $required,
-              '#description' => $data->data['input_description']
+              '#description' => t(NULL, $data->data['input_description'])
             );
           break;
           case 'file': // 文件
@@ -3093,7 +3094,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               $multi = 0;
             }
             $form['fields']['fields'][$data->field_key] = array(
-              '#title' => $data->name,
+              '#title' => t(NULL, $data->name),
               '#type' => 'file',
               '#multi' => $multi,
               '#disabled' => $disabled,
@@ -3124,13 +3125,13 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               }
               $description .= '</span><span class="clear"></span>';
             }
-            $form['fields']['fields'][$data->field_key]['#description'] = $data->data['input_description']. $description;
+            $form['fields']['fields'][$data->field_key]['#description'] = t(NULL, $data->data['input_description']) . $description;
         }
       } else {
         /**
          * 其它模块定义的类型，模块名_字段类型_call_form 函数
          */
-        $function = $data->field_module.'_'.$data->field_type.'_field_node_form';
+        $function = $data->field_module . '_' . $data->field_type . '_field_node_form';
         if (function_exists($function)) $function($data, $node, $form);
       }
     } else {
