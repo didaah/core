@@ -69,6 +69,7 @@ $database['default'] = array(
  *  $db['more']->exec($sql);
  */
 
+define('DD_ADMIN_PATH', 'admin'); // 管理路径 
 ini_set('arg_separator.output', "&amp;");
 ini_set('magic_quotes_runtime', 0);
 ini_set('magic_quotes_sybase', 0);
@@ -79,3 +80,8 @@ ini_set('session.gc_maxlifetime', 2592000);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.use_trans_sid', 0);
 ini_set('url_rewriter.tags', '');
+ini_set('mbstring.http_input', 'pass');
+ini_set('mbstring.http_output', 'pass');
+ini_set('mbstring.internal_encoding', 'utf-8');
+ini_set('mbstring.encoding_translation', 'off');
+

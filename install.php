@@ -213,7 +213,7 @@ function dida_setup_data_form() {
   || empty($database['default']['driver']) || empty($type[$database['default']['driver']])) {
     dd_goto(f('install.php?setup=1'));
   }
-  
+
   require_once DIDA_ROOT . '/includes/database/install.'.$database['default']['driver'].'.inc';
   
   $form = '<input type="hidden" name="driver" value="'.$database['default']['driver'].'" />';
@@ -229,13 +229,11 @@ function dida_setup_data_form() {
     } else {
       $database['default'] = $_POST;
     }
-  } else {
-    $database['default'] = NULL;
   }
   
   if ($fields = db_install_form($database['default'])) {
     foreach ($fields as $field) {
-      $form .= '<div class="form_item">'.$field.'</div>';
+      $form .= '<div class="form_item">' . $field . '</div>';
     }
     return $form;
   }
