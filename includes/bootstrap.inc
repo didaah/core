@@ -891,7 +891,7 @@ function dd_set_lang($lists = NULL, $language = array()) {
         $path =  DIDA_ROOT . '/'  . $GLOBALS['conf_dir'] . '/cache/languages/' . $code . '.php';
         
         if (file_put_contents($path, $output)) {
-          chmod($path, 0777);
+          @chmod($path, 0777);
           dd_set_message(t('system', '%name 导入成功', array('%name' => $code)));
         } else {
           dd_set_message(t('system', '%name 导入失败，请检查缓存目录权限', array('%name' => $code)), 'error');
