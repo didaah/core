@@ -64,10 +64,15 @@ Dida.url = function(q, opt) {
     } else {
       url += '&';
     }
-    for (var attr in opt) {
-      url += attr + '=' +opt[attr] + '&';
+    
+    if (typeof opt == 'object') {
+      for (var attr in opt) {
+        url += attr + '=' +opt[attr] + '&';
+      }
+      url = url.substr(0, url.length - 1);
+    } else {
+      url += opt;
     }
-    url = url.substr(0, url.length - 1);
   }
   return url;
 };

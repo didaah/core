@@ -1034,8 +1034,12 @@ function form_util_all_check($att = NULL, $value = NULL) {
  * @param array $att
  */
 function form_util_all_check_dom($att = NULL) {
-  $output = '<input type="checkbox" name="form_field_all_list_check[]" ';
+  $output = '<input type="checkbox" ';
   
+  if (empty($att['name'])) {
+    $output .= 'name="form_field_all_list_check[]" ';
+  }
+
   if (!isset($att['class'])) {
     $att['class'] = 'form_field_check_dom';
   }
