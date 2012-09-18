@@ -580,7 +580,7 @@ $(function() {
     }
   });
   
-  $('.form_all_check').click(function() {
+  $('.form_field_all_check').click(function() {
     dom = $(this).attr('alt');
     $('.' + dom).attr('checked', this.checked ? true : false);
   });
@@ -625,11 +625,11 @@ $(function() {
     return false;
   });
   
-  $('input[class="admin_delete_button"]').click(function() {
+  $('input[class="form_field_all_button"]').click(function() {
     if (confirm(Dida.t('system', '确认此操作吗？'))) {
       var href = $(this).attr('alt');
       var c = $(this).attr('rel');
-      $('.' + c).not($('input.form_all_check')).each(function() {
+      $('.' + c).each(function() {
         if (this.checked) {
           var $$ = $(this);
           $$.after('<span class="ja_loading"></span>');

@@ -1012,14 +1012,14 @@ function dd_form_ajax_form($url, $title = '', $att = NULL) {
  * @param (array) $att
  * @param (string) $value
  */
-function dd_form_ajax_all_check($att = NULL, $value = NULL) {
-  $output = '<input type="checkbox" name="admin_check_all[]" ';
+function form_util_all_check($att = NULL, $value = NULL) {
+  $output = '<input type="checkbox" name="form_field_check_all[]" ';
   
   if (!isset($att['class'])) {
-    $att['class'] = 'form_all_check';
+    $att['class'] = 'form_field_all_check';
   }
   if (!isset($att['alt'])) {
-    $att['alt'] = 'field_check_dom';
+    $att['alt'] = 'form_field_check_dom';
   }
   
   $output .= dd_attributes($att);
@@ -1031,16 +1031,16 @@ function dd_form_ajax_all_check($att = NULL, $value = NULL) {
 
 /**
  * 配合全选按钮，class 对应全选按钮 alt 属性
- * @param (array) $att
+ * @param array $att
  */
-function dd_form_ajax_check($att = NULL) {
-  $output = '<input type="checkbox" name="admin_delete_check[]" ';
+function form_util_all_check_dom($att = NULL) {
+  $output = '<input type="checkbox" name="form_field_all_list_check[]" ';
   
   if (!isset($att['class'])) {
-    $att['class'] = 'admin_field_check_dom';
+    $att['class'] = 'form_field_check_dom';
   }
   
-  $output .= drupal_attributes($att);
+  $output .= dd_attributes($att);
   $output .= ' />';
   
   return $output;
@@ -1048,19 +1048,19 @@ function dd_form_ajax_check($att = NULL) {
 
 /**
  * 配合全选，通过 ajax 执行批量操作，rel 对应被选中对象的 class 属性
- * @param (array) $att
+ * @param array $att
  */
-function dd_form_ajax_button($att = NULL) {
-  $output = '<input name="admin_delete_button[]" type="button" ';
+function form_util_all_check_button($att = NULL) {
+  $output = '<input name="form_field_all_button[]" type="button" ';
   if (!isset($att['value'])) {
     $att['value'] = t('system', '确认删除');
   }
   
   if (!isset($att['rel'])) {
-    $att['rel'] = 'admin_field_check_dom';
+    $att['rel'] = 'form_field_check_dom';
   }
   
-  $att['class'] = 'admin_delete_button';
+  $att['class'] = 'form_field_all_button';
   
   $output .= dd_attributes($att);
   $output .= ' />';
@@ -1184,6 +1184,9 @@ function dd_form_label($field) {
 function form_set_auto($field = NULL) {
   if ($field['#autocomplete']) {
     dd_jqui();
+    if (empty($field['#autocomplete']['dom']) && !empty($field['#attributes']['id'])) {
+      $field['#autocomplete']['dom'] = '#' . $field['#attributes']['id'];
+    }
     foreach ($field['#autocomplete'] as $key => $value) {
       if ($value) {
         $auto_val[$key] = $value;
