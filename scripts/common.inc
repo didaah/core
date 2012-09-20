@@ -19,42 +19,47 @@
  * 如：php test.php --m test --k --p a -p b
  * 解析为 array('m' => 'test', 'k' => true, 'p' => array('a', 'b'));
  * 
- * @param (string) $key
+ * @param string $key
  * 	获取指定参数
- * @return (array|*)
+ * @param string $argc
+ *  指定参数长度，通常用于代码中调用本函数
+ * @param array $argv
+ *  指定待解析的数组，通常用于代码中调用本函数
+ * @return array|*
  */
-function args($key = NULL) {
-  static $args;
-  
-  if (!isset($args)) {
-    $_args = array();
-    for ($i = 1; $i < $_SERVER['argc']; ++$i) {
-      if (preg_match('/--(\S+)/', $_SERVER['argv'][$i], $mat)) {
-        $i++;
-        if (substr($_SERVER['argv'][$i], 0, 2) != '--') {
-          $_args[$mat[1]][] = $_SERVER['argv'][$i];
-        } else {
-          $i--;
-          $_args[$mat[1]][] = true;
-        }
+function args($key = NULL, $argc = NULL, $argv = NULL) {
+
+  if (empty($argc)) $argc = $_SERVER['argc'];
+  if (empty($argv)) $argv = $_SERVER['argv'];
+
+  $_args = array();
+
+  for ($i = 1; $i < $argc; ++$i) {
+    if (preg_match('/--(\S+)/', $argv[$i], $mat)) {
+      $i++;
+      if (substr($argv[$i], 0, 2) != '--') {
+        $_args[$mat[1]][] = $argv[$i];
       } else {
-        $_args[$i] = $_SERVER['argv'][$i];
+        $i--;
+        $_args[$mat[1]][] = true;
       }
+    } else {
+      $_args[$i] = $argv[$i];
     }
-    
-    $args = array();
-    
-    foreach ($_args as $_key => $v) {
-      if (count($v) == 1) {;
-        $args[$_key] = $v[0];
-      } else {
-        $args[$_key] = $v;
-      }
-    }
-    
-    unset($_args);
   }
   
+  $args = array();
+  
+  foreach ($_args as $_key => $v) {
+    if (count($v) == 1) {;
+      $args[$_key] = $v[0];
+    } else {
+      $args[$_key] = $v;
+    }
+  }
+  
+  unset($_args);
+
   return isset($key) ? $args[$key] : $args;
 }
 

@@ -24,7 +24,7 @@ function system_cronjobs($timestamp) {
   $cronjobs['test'] = array(
     'name' => t('system', '测试任务'), // 显示名，必需
     'scripts' => 'test.inc', // 必需，对应的脚本，该脚本必须位于模块的 scripts 目录，如：system/scripts，将调用 php 执行该脚本
-    'params' => '--date 20120102 --id 100', // 可选，数据类型：array|string。将做为参数传递给 scripts
+    'param' => array('date' => 20120102, 'id' => 'name'), // 可选参数，数据类型：array。将做为参数传递给 scripts
     'date' => array( // 可选，执行时间，若不设置，则相当于不限制。参数与 linux 系统 cron 相同
       'year' => '*', // 年，每一年
       'month' => '*', // 月，每一月

@@ -3,12 +3,39 @@
 
 /**
  * 计划任务统一管理脚本，请将此脚本加入到系统计划任务中，间隔时间自行控制，建议为 1-3 分钟。
- * 如：* * * * * php $path/scripts/cron.inc --host www.didaah.org
+ *  如：* * * * * php $path/scripts/cron.inc --host www.didaah.org
+ * 
+ * 可使用本脚本手动执行任务，必须指定模块名称及任务机器名，手动执行时，不检查条件限制
+ *  如：php $path/scripts/cron.inc --host www.didaah.org --module system --name test
+ *  执行 system 模块的 test 任务
  */
 
 $is_cron = true;
 
 require_once 'common.inc';
+
+if (!empty($_args['module']) && !empty($_args['name'])) {
+  module_include_file('cronjobs.inc', $_args['module']);
+  $cronjobs = module_invoke($_args['module'], 'cronjobs');
+
+  if ($cronjobs[$_args['name']]) {
+    $cron = $cronjobs[$_args['name']];
+    $module = !empty($cron['module']) ? $cron['module'] : $_args['module'];
+    $file = DIDA_ROOT . '/' . dd_get_path('module', $module) . '/scripts/' . $cron['script'];
+    if (is_file($file)) {
+      if (!empty($cron['param']) && is_array($cron['param'])) {
+        // 合并参数
+        $_args = array_merge($_args, $cron['param']);
+      }
+      require_once $file;
+    } else {
+      message(t('system', '脚本 !file 不存在', array('!module' => $file)));
+    }
+  } else {
+    message(t('system', '!module 模块没有任务 !name', array('!module' => $_args['module'], '!name' => $_args['name'])));
+  }
+  exit;
+}
 
 // protected _cron_database() {{{ 
 /**
@@ -158,8 +185,10 @@ function _cron_jobs() {
       $module = !empty($data['module']) ? $data['module'] : $_module;
       $command = 'php ' . DIDA_ROOT . '/scripts/common.inc --bootstrap full --host ' . $_args['host'];
       $command .= ' --is_dida_cron 1 --module_scripts ' . $module . ' --script_name '  . $data['script'];
-      if (!empty($data['param'])) {
-        $command .= ' ' . $data['param'];
+      if (!empty($data['param']) && is_array($data['param'])) {
+        foreach($data['param'] as $param_key => $param_value) {
+          $command .= ' --' . $param_key . ' ' . addcslashes($param_value);
+        }
       }
       
       // 上一次执行还没有结束
