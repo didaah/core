@@ -98,7 +98,7 @@ $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 require_once DIDA_ROOT . '/includes/bootstrap.inc';
 
 // 初始化程序
-if (!empty($_args['bootstrap'])) {
+if (!empty($_args['bootstrap']) || !empty($is_cron)) {
   bootstrap(($_args['bootstrap'] == 'data' ? 'data' : 'full'));
 }
 
