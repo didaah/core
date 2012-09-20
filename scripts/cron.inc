@@ -178,19 +178,19 @@ function _cron_jobs() {
   $day = date('j');
   $hour = date('G');
   $minute = date('i');
-
+  
   foreach ($cronjobs as $_module => $jobs) {
     foreach ($jobs as $key => $data) {
 
       $module = !empty($data['module']) ? $data['module'] : $_module;
       $command = 'php ' . DIDA_ROOT . '/scripts/common.inc --bootstrap full --host ' . $_args['host'];
-      $command .= ' --is_dida_cron 1 --module_scripts ' . $module . ' --script_name '  . $data['script'];
+      $command .= ' --is_cron_name ' . $key . ' --is_dida_cron 1 --module_scripts ' . $module . ' --script_name '  . $data['script'];
       if (!empty($data['param']) && is_array($data['param'])) {
         foreach($data['param'] as $param_key => $param_value) {
-          $command .= ' --' . $param_key . ' ' . addcslashes($param_value);
+          $command .= ' --' . $param_key . " '" . $param_value . "'";
         }
       }
-      
+
       // 上一次执行还没有结束
       if (!empty($process[$command])) {
         // 检查已耗费的时间
