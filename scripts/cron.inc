@@ -24,8 +24,8 @@ if (!empty($_args['module']) && !empty($_args['name'])) {
     $file = DIDA_ROOT . '/' . dd_get_path('module', $module) . '/scripts/' . $cron['script'];
     if (is_file($file)) {
       if (!empty($cron['param']) && is_array($cron['param'])) {
-        // 合并参数
-        $_args = array_merge($_args, $cron['param']);
+        // 合并参数，以命令传递的参数为优先
+        $_args = array_merge($cron['param'], $_args);
       }
       require_once $file;
     } else {
