@@ -185,6 +185,7 @@ function _cron_jobs() {
       $module = !empty($data['module']) ? $data['module'] : $_module;
       $command = 'php ' . DIDA_ROOT . '/scripts/common.inc --bootstrap full --host ' . $_args['host'];
       $command .= ' --is_cron_name ' . $key . ' --is_dida_cron 1 --module_scripts ' . $module . ' --script_name '  . $data['script'];
+
       if (!empty($data['param']) && is_array($data['param'])) {
         foreach($data['param'] as $param_key => $param_value) {
           $command .= ' --' . $param_key . " '" . $param_value . "'";
@@ -208,7 +209,18 @@ function _cron_jobs() {
         // 检查是否需要执行
         $is_command = false;
 
-        // @TODO 年月不允许使用 */3 这种格式
+        /**
+         *  最小时间，当时小时必须大于设定数字，才允许执行
+         *  应用场景，如：设置某任务在每天夜里 11 点后，每隔 1 小时执行 1 次
+         */
+        if (!empty($data['minHour'])) {
+          if ($hour < $data['minHour']) {
+            continue;
+          }
+        }
+
+        // 计划任务时间格式与 linux 系统一致，可使用具体数字，如：2012，也可使用 *，还可以使用 */3
+        // 注意：年月不允许使用 */3 这种格式
         if ($data['year'] != '*' && $data['year'] != $year) continue;
         if ($data['month'] != '*' && $data['month'] != $month) continue;
 

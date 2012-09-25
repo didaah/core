@@ -25,14 +25,13 @@ function system_cronjobs($timestamp) {
     'name' => t('system', '测试任务'), // 显示名，必需
     'scripts' => 'test.inc', // 必需，对应的脚本，该脚本必须位于模块的 scripts 目录，如：system/scripts，将调用 php 执行该脚本
     'param' => array('date' => 20120102, 'id' => 'name'), // 可选参数，数据类型：array。将做为参数传递给 scripts
-    'date' => array( // 可选，执行时间，若不设置，则相当于不限制。参数与 linux 系统 cron 相同
-      'year' => '*', // 年，每一年
-      'month' => '*', // 月，每一月
-      'day' => '*', // 日，每一天
-      //'day' => '*/5', // 每 5 天
-      //'day' => '12', // 每月 12 号
-      'minute' => '5', // 分，0-59
-    ),
+    'minHour' => 13, // 可选参数，设置最小时间，当前小时必须大于该数字，才启动任务
+    'year' => '*', // 年，每一年
+    'month' => '*', // 月，每一月
+    'day' => '*', // 日，每一天
+    //'day' => '*/5', // 每 5 天
+    //'day' => '12', // 每月 12 号
+    'minute' => '5', // 分，0-59
   );
   /**
    * 以上 test 任务，基本等同于 5 * * * * php {$path}/test.inc --date 20120102 --id 100
