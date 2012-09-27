@@ -2554,6 +2554,11 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
     if ($fisrt) dd_add_js('$(\'.site_menu\').menuLevel();', 'inline');
 
     foreach ($menus as $key => $lists) {
+      if (!empty($fisrt)) {
+        // 可通过 hook_site_menu_alter() 覆写 menu
+        module_alter_all('site_menu_alter', $key, $lists);
+      }
+
       if (is_array($lists)) {
         if ($lists['#data']) {
           $data = '';
