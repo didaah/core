@@ -159,7 +159,7 @@ function _cron_jobs() {
   if ($process = _cron_get_php_ps()) {
     $count = count($process);
     if ($count > 20) {
-      dd_log('cron', t('system', '已有 !count 个任务正在执行中', array('!count' => $count)));
+      dd_log('cron_info', t('system', '已有 !count 个任务正在执行中', array('!count' => $count)));
       return;
     }
   }
@@ -200,9 +200,9 @@ function _cron_jobs() {
           // 已超时，终止进程
           if (!empty($data['timeout']) && $time > $data['timeout']) {
             exec('kill -9 ' . $process[$command]);
-            dd_log('cron', t('wb', '已终止超时任务 !command，pid：!pid', array('!command' => $command, '!pid' => $process[$command]['pid'])));
+            dd_log('cron_timeout', t('wb', '已终止超时任务 !command，pid：!pid', array('!command' => $command, '!pid' => $process[$command]['pid'])));
           } else if ($time > 3600) {
-            dd_log('cron', t('wb', '任务 !command 已运行超过 !time 秒了，pid：!pid', array('!command' => $command, '!time' => $time, '!pid' => $process[$command]['pid'])));
+            dd_log('cron_timeout', t('wb', '任务 !command 已运行超过 !time 秒了，pid：!pid', array('!command' => $command, '!time' => $time, '!pid' => $process[$command]['pid'])));
           }
         }
       } else {
@@ -290,7 +290,7 @@ function _cron_jobs() {
         // 立即执行
         $timestamps[$command] = time(); // 设置执行时间
         exec($command . ' > /dev/null &');
-        dd_log('cron', t('system', '任务 !command 开始执行(!id)', array('!command' => $command, '!id' => $id)));
+        dd_log('cron_info', t('system', '任务 !command 开始执行(!id)', array('!command' => $command, '!id' => $id)));
       }
     }
   }
