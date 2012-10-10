@@ -930,9 +930,8 @@ function file_delete($fid, $thumb = true, $filepath = 0) {
  */ 
 function file_delete_file($filepath, $fid = NULL) {
   if ($fid) {
-    $filename = basename($filepath);
     // 删除缩略图文件夹
-    file_delete_dir(str_replace(end(explode('/', $filepath)), $fid, $filepath));
+    file_delete_dir(dirname($filepath) . '/' . $fid);
   }
   return @unlink($filepath);
 }

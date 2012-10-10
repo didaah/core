@@ -31,7 +31,7 @@ function default_settings_form(&$form, $conf) {
   );
 
   /**
-   * 在系统任何地方可以此方法获取以上自定义字段：
+   * 在主题任何地方可以此方法获取以上自定义字段：
    * global $conf;
    * echo $conf['themes']['default']['settings']['theme_test'];
    * // default 为主题名

@@ -23,6 +23,10 @@ jQuery.fn.extend({
       $(this).removeClass('active').children('ul').eq(0).hide();
     });
     
+    $('.site_menu_children .active').each(function() {
+      $(this).parents('li').addClass('js_active');
+    });
+
     $('.js_menu_level_children').css({position: 'relative'}).hover(function() {
       var _c = $(this).children('ul').eq(0);
       var _s = {left:this.offsetWidth-2, top: -1, display: 'block'};
@@ -177,31 +181,74 @@ jQuery.fn.extend({
     var opt = {
       fadeOutTime: o.fadeOutTime || 500,
       fadeInTime: o.fadeInTime || 500,
-      dom: o.dom || '#' + this.attr('id'),
-      varyTime: o.varyTime || 5000
+      dom: o.dom,
+      isTab: o.isTab || true,
+      varyTime: o.varyTime || 3000
     }
     
+    var _data, _self, _dataBtn;
+
+    if (opt.dom) {
+      _data = $(opt.dom + ' .focus_change_list li');
+      _self = $(opt.dom);
+    } else if (this.attr('id')) {
+      _data = $('#' + this.attr('id') + ' .focus_change_list li');
+      _self = $('#' + this.attr('id'));
+    } else {
+      _data = $('.focus_change_list li', this);
+      _self = $(this);
+    }
+
     var currentId, timeInt, imgCount, showTimer;
     
-    imgCount = $(opt.dom + ' .focus_change_list li').size();
+    imgCount = _data.size();
+
     if (imgCount > 0) {
-      $(opt.dom + ' .focus_change_list li').each(function(i) {
+    
+      if (opt.isTab) {
+        var html = '<div class="focus_change_btn">';
+        for (var i = 1; i <= imgCount; i++) {
+          html += '<a href="#" class="focus_change_btn_item_' + i + '">' + i + '</a>';
+        }
+        html += '</div>';
+
+        _self.append(html);
+        
+        _dataBtn = _self.find('.focus_change_btn a');
+        _dataBtn.eq(0).addClass('current');
+      }
+      
+      _data.each(function(i) {
         if (i > 0) $(this).hide();
         currentId = 0;
       });
-      
-      function show() {
-        $(opt.dom + ' .focus_change_list li').eq(currentId).fadeOut(opt.fadeOutTime);
+     
+      var is_show = 1;
+
+      function show(id) {
+        if (!is_show) return;
+
+        is_show = 0;
+
+        if (opt.isTab) {
+          _dataBtn.eq(currentId).removeClass('current');
+        }
+
         currentId += 1;
-        if (currentId == imgCount) currentId = 0;
-        $(opt.dom + ' .focus_change_list li').eq(currentId).fadeIn(opt.fadeInTime);
-        $(opt.dom + ' .focus_change_btn li').each(function(i) { 
-          if (i == currentId) {
-            $(this).addClass('current');
-          } else {
-            $(this).removeClass('current');
+        if (currentId >= imgCount) currentId = 0;
+
+        _data.each(function(i) {
+          if (i != currentId) {
+            if ($(this).is(':visible')) {
+              $(this).animate({width: 'toggle', height: '100%'}, opt.fadeOutTime);
+            }
           }
         });
+
+        _data.eq(currentId).animate({width: 'toggle', height: '100%'}, opt.fadeInTime, function() { is_show = 1; });
+        if (opt.isTab) {
+          _dataBtn.eq(currentId).addClass('current');
+        }
       }
       
       showTimer = window.setInterval(show, opt.varyTime);
@@ -211,19 +258,31 @@ jQuery.fn.extend({
       }, function() {
         showTimer = window.setInterval(show, opt.varyTime);
       });
-      
-      $(opt.dom + ' .focus_change_btn li').hover(function() {
-        var h = $(this).index();
-        if (h != currentId) {
-          $(opt.dom + ' .focus_change_list li').eq(currentId).fadeOut(opt.fadeOutTime);
-          if (h > 0) {
-            currentId = h - 1;
-          } else {
-            currentId = imgCount-1;
+     
+      if (opt.isTab) {
+        _self.find('.focus_change_btn').eq(0).hover(function() {
+          clearInterval(showTimer)
+          showTimer = null;
+        }, function() {
+          if (!showTimer) {
+            showTimer = window.setInterval(show, opt.varyTime);
           }
-          show();
-        }
-      });
+        });
+
+        _dataBtn.click(function() {
+          return false;
+        });
+
+        _dataBtn.hover(function() {
+          _dataBtn.removeClass('current');
+          if (!is_show) return;
+          var h = $(this).index();
+          if (h != currentId) {
+            currentId = h > 0 ? h - 1 : imgCount-1;
+            show();
+          }
+        });
+      }
     }
   },
   didaScroll: function(o) {

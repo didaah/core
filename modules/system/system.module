@@ -273,6 +273,7 @@ function system_init() {
   $_filter_is_php_code = true;
   
   if (arg(0) == 'admin') {
+    $is_admin = true; // 当前为管理页面
     system_is_admin();
   }
   

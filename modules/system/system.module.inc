@@ -353,26 +353,38 @@ function system_themes_setting($theme) {
     l(t('system', '主题设置'), $_GET['q']),
   ));
   
+  $form = array('fields' => array(), 'settings' => array());
+
   $form['fields']['title'] = array(
     '#title' => t('system', '主题名称'),
     '#value' => $conf['themes'][$theme]['name']
   );
+
   $form['fields']['theme'] = array(
     '#type' => 'hidden',
     '#constant' => 1,
     '#default_value' => $theme,
   );
+
   $form['fields']['logo'] = array(
     '#type' => 'file',
     '#title' => t('system', '站点LOGO'),
     '#description' => t('system', '请上传尺寸适合的图片，系统将不做任何处理'),
   );
+
   $form['fields']['favicon'] = array(
     '#type' => 'file',
     '#title' => t('system', 'icon图标'),
     '#description' => t('system', '请上传尺寸适合的图片，系统将不做任何处理'),
   );
   
+  $form['fields']['submit'] = array(
+    '#type' => 'submit',
+    '#weight' => 1000
+  );
+
+  $form['settings']['#validate'][] = 'system_themes_setting_validate';
+
   if (is_file($conf['themes'][$theme]['path'].'/template.php')) {
     
     if (!isset($conf['themes'][$theme]['settings'])) {
@@ -386,13 +398,10 @@ function system_themes_setting($theme) {
     }
   }
   
-  $form['fields']['submit']['#type'] = 'submit';
-  $form['settings']['#validate'][] = 'system_themes_setting_validate';
-  
   return $form;
 }
 
-function system_themes_setting_validate($form, $v) {
+function system_themes_setting_validate(&$form, &$v) {
   if ($theme = db_query('SELECT filename, info FROM {system} WHERE filename = ? AND type = ?',
   array($v['theme'], 'theme'), array('return' => 'one'))) {
     $theme->info = unserialize($theme->info);

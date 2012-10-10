@@ -401,7 +401,12 @@ img.form_captcha_img{
 }
 
 #user_register_form .form_text, #user_login_form .form_text{
-  width: 140px;
+  width: 160px;
+}
+
+#block_user_login #user_login_form span.form_description {
+  text-align: right;
+  display: block;
 }
 
 .user_page_user_view .user_field_view_avatar{
@@ -652,11 +657,17 @@ span.ja_loading {
   padding: 0 2px;
 }
 
+#_user_center_newpass .dd_label,
 #user_edit_form .dd_label {
   display:-moz-inline-box;
   display:inline-block;
   width: 100px;
   text-align: right;
+}
+
+#_user_center_newpass input[type="submit"],
+#user_edit_form input[type="submit"] {
+  margin-left: 105px;
 }
 
 #user_edit_form .form_textarea {
