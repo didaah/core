@@ -78,6 +78,13 @@ function system_menu() {
     'file' => 'system.module.inc',
   );
 
+  $items['admin/site_menu'] = array(
+    'title' => '主导航',
+    'access_arguments' => array('system admin site menu'),
+    'page_callback' => 'system_admin_site_menu',
+    'file' => 'system.admin.inc',
+  );
+
   $items['admin/front'] = array(
     'title' => '首页设置',
     'access_arguments' => array('system admin front'),
@@ -241,6 +248,7 @@ function system_perm() {
     'system admin module' => t('system', '模块管理'),
     'system admin theme' => t('system', '主题管理'),
     'system admin cache' => t('system', '缓存管理'),
+    'system admin site menu' => t('system', '主导航管理'),
     'system admin front' => t('system', '首页设置'),
     'system admin settings' => t('system', '站点设置'),
     'system admin alias' => t('system', '别名管理'),
@@ -556,6 +564,7 @@ function system_system_admin_menus() {
     array(t('system', '语言设置'), 'admin/lang'),
     array(t('system', '文件设置'), 'admin/settings/files'),
     array(t('system', '验证码设置'), 'admin/settings/captcha'),
+    array(t('system', '主导航设置'), 'admin/site_menu'),
     array(t('system', '首页设置'), 'admin/front'),
     array(t('system', '别名管理'), 'admin/alias'),
     array(t('system', '系统日志'), 'admin/logs'),
@@ -1512,26 +1521,6 @@ function front_page() {
   return theme('front', $front);
 }
 
-/**
- * @Implement of hook_token_replace()
- * @param (string) $text
- *  原始字符串
- * @param (*) $value
- *  通配符数据来源，如 $user 或 $node 等
- */
-function system_token_replace($text, $value = NULL) {
-	$args = array(
-		'[date_y]' => date('y'),
-    '[date_Y]' => date('Y'),
-		'[date_d]' => date('d'),
-		'[date_m]' => date('m'),
-    '[front]' => $GLOBALS['base_url'],
-		'[site_name]' => var_get('site_name'),
-		'[site_default_language]' => var_get('default_language'),
-	);
-	return strtr($text, $args);
-}
-
 /*storage*/
 
 /**
@@ -1979,7 +1968,31 @@ function system_token_list() {
 		'[site_default_language]' => array(
 			'title' => t('system', '网站默认语言'),
 		),
+		'[user_language]' => array(
+			'title' => t('system', '用户当前语言'),
+		),
 	);
+}
+
+/**
+ * @Implement of hook_token_replace()
+ * @param (string) $text
+ *  原始字符串
+ * @param (*) $value
+ *  通配符数据来源，如 $user 或 $node 等
+ */
+function system_token_replace($text, $value = NULL) {
+	$args = array(
+		'[date_y]' => date('y'),
+    '[date_Y]' => date('Y'),
+		'[date_d]' => date('d'),
+		'[date_m]' => date('m'),
+    '[front]' => $GLOBALS['base_url'],
+		'[site_name]' => var_get('site_name'),
+		'[site_default_language]' => var_get('default_language'),
+		'[user_language]' => $GLOBALS['language_code'],
+	);
+	return strtr($text, $args);
 }
 
 /**
@@ -2137,4 +2150,151 @@ function system_logs_info() {
   );
 }
 
+/**
+ * @Implement of hook_field_call_group()
+ */
+function system_field_call_group($type = NULL) {
+  $groups = array(
+    'menu' => array(
+    	'title' => t('system', '自定义主导航'),
+      'sum' => 10, // 最多允许 10 个导航
+      'disable_import' => true,
+      'type' => array('select'), // 只允许下拉选择项
+    	'level' => 1, // 分类层级级数，0 则为不限制(实际最多 10 级)
+    )
+  );
+  return $type ? $groups[$type] : $groups;
+}
 
+/**
+ * @Implement of hook_field_call_form()
+ */
+function system_field_call_form(&$field, &$form) {
+  if ($field->module != 'system') return;
+
+  $form['fields']['data']['#weight'] = -10;
+  $form['fields']['data']['path'] = array(
+    '#title' => t('system', '路径'),
+    '#type' => 'textfield',
+    '#weight' => -100,
+    '#default_value' => $field->data['path'],
+    '#description' => t('system', '站内或站外链接均可，可使用 user、system <a href="!url">通配符</a>', array('!url' => url('admin/token'))),
+    '#required' => 1,
+  );
+
+  $form['fields']['weight']['#type'] = 'textfield';
+  $form['fields']['weight']['#attributes']['class'] = '{number: true}';
+  $form['fields']['weight']['#description'] = t('system', '只能是正负整数');
+
+  unset($form['fields']['_field_type'], $form['fields']['required'], $form['fields']['data']['description']);
+  
+  $access = $form['fields']['access']['view'];
+  $form['fields']['access'] = array();
+  $access['#title'] = t('system', '权限');
+  $access['#description'] = t('system', '设置可见该导航的用户组');
+  $form['fields']['access']['view'] = $access;
+
+  $form['fields']['data']['input_description']['#title'] = t('system', '描述');
+  $form['fields']['data']['input_description']['#description'] = t('system', '该导航的描述');
+}
+
+/**
+ * @Implement of hook_field_call_term_form()
+ */
+function system_field_call_term_form(&$form, &$field, &$term) {
+  if ($field->module != 'system') return;
+  $form['fields']['_pid'] = array(
+    '#title' => t('system', '上级'),
+    '#weight' => -100,
+    '#value' => $form['fields']['pid']['#options'][0],
+  );
+
+  $form['fields']['pid'] = array(
+    '#type' => 'hidden',
+    '#default_value' => 0,
+    '#constant' => 1
+  );
+
+  $form['fields']['description'] = array('#weight' => -1);
+
+  $form['fields']['description']['path'] = array(
+    '#title' => t('system', '路径'),
+    '#type' => 'textfield',
+    '#default_value' => $term->description['path'],
+    '#description' => t('system', '站内或站外链接均可，可使用 user、system <a href="!url">通配符</a>', array('!url' => url('admin/token'))),
+    '#required' => 1,
+  );
+
+  $form['fields']['description']['description'] = array(
+    '#title' => t('system', '描述'),
+    '#type' => 'textfield',
+    '#default_value' => $term->description['description'],
+    '#description' => t('system', '该导航的描述'),
+  );
+
+  $form['fields']['weight']['#type'] = 'textfield';
+  $form['fields']['weight']['#weight'] = 1;
+  $form['fields']['weight']['#attributes']['class'] = '{number: true}';
+  $form['fields']['weight']['#description'] = t('system', '只能是正负整数');
+}
+
+/**
+ * @Implement of hook_field_call_term_validate()
+ */
+function system_field_call_term_validate($field, $term) {
+  if ($field->module != 'system') return;
+  $term->description = serialize($term->description);
+}
+
+/**
+ * @Implement of hook_field_call_term_load()
+ */
+function system_field_call_term_load($field, $term) {
+  if ($field->module != 'system') return;
+  $term->description = unserialize($term->description);
+}
+
+/**
+ * @Implement of hook_field_call_links()
+ */
+function system_field_call_links($field, &$links) {
+  if ($field->module != 'system') return;
+  unset($links['export']);
+}
+
+/**
+ * @Implement of hook_site_menu()
+ */
+function system_site_menu(&$menu) {
+  // 自定义主导航
+  if (!$datas = field_get_cache_field_group('system', 'menu')) return;
+
+  // 子导航
+  $term = field_get_cache_term('system', 'menu');
+
+  foreach ($datas as $field) {
+    if (field_access('view', $field)) {
+      if (!empty($field->data['input_description'])) {
+        $att = array('attributes' => array('title' => $field->data['input_description']));
+      } else {
+        $att = array();
+      }
+
+      $menu['system_' . $field->field_key] = array(
+        '#data' => l($field->name, dd_get_token($field->data['path'], NULL, array('user', 'system')), $att),
+        '#weight' => $field->weight,
+      );
+
+      if (!empty($term[$field->field_id])) {
+        $menu['system_' . $field->field_key]['#childrens'] = array();
+        foreach ($term[$field->field_id] as $o) {
+          $d = unserialize($o->description);
+          $menu['system_' . $field->field_key]['#childrens'][] = array(
+            '#data' => l($o->name,  dd_get_token($d['path'], NULL, array('user', 'system')), $att),
+            '#weight' => $o->weight
+          );
+        }
+      }
+    }
+  }
+}

@@ -49,3 +49,16 @@
   overflow: hidden;
   width:450px;
 }
+
+/*site mneu*/
+ul.admin_site_menu {
+  margin-left: 50px;
+}
+
+ul.admin_site_menu ul {
+  margin-left: 24px;
+}
+
+ul.admin_site_menu em {
+  color: #f00;
+}

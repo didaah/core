@@ -751,7 +751,10 @@ span.ja_loading {
 .help {
   padding: 5px 12px;
   margin: 5px 0;
+  color: #333;
+  font-size: 14px;
   background: #FAFAC6;
+  border: 1px solid #ddd;
 }
 
 .clear {

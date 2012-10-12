@@ -1799,7 +1799,7 @@ function user_field_call_group($type = NULL) {
     'field' => array(
     	'title' => t('user', '用户字段'),
       'sum' => 0,
-      //'not_cache' => false, // 不缓存，除非网站大多数地方都需要用到该字段，否则请不要缓存
+      //'not_cache' => false, // 默认会缓存字段到主配置文件。若字段数据较多，请设置为 true，则缓存
       //'term' => 1, // 只允许添加传统型分类，即 标签、下拉框、单选、复选
       //'type' => array('tags'), // 允许的类型，优先级高于 term
     	'level' => 0, // 分类层级级数，0 则为不限制(实际最多 10 级)
@@ -1847,7 +1847,7 @@ function user_field_get_node_access($op, $field, $node = NULL, $ac) {
  * @Implement of hook_field_call_form()
  */
 function user_field_call_form(&$field, &$form) {
-  if ($field->module !== 'user') return;
+  if ($field->module != 'user') return;
   
   $form['fields']['data']['access']['input'] = array(
     '#type' => 'checkbox',

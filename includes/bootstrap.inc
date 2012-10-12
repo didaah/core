@@ -2551,12 +2551,30 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
   if ($menus) {
     static $i;
     
-    if ($fisrt) dd_add_js('$(\'.site_menu\').menuLevel();', 'inline');
+    if (!empty($fisrt)) {
+      dd_add_js('$(\'.site_menu\').menuLevel();', 'inline');
+      $custom_data = var_get('site_menu_system', array());
+    }
 
     foreach ($menus as $key => $lists) {
       if (!empty($fisrt)) {
+        // 已禁用的导航
+        if (!empty($custom_data['disabled']) && isset($custom_data['disabled'][$key])) continue;
+        
         // 可通过 hook_site_menu_alter() 覆写 menu
         module_alter_all('site_menu_alter', $key, $lists);
+
+        // 自定义权重
+        if (!empty($custom_data['weight']) && !empty($custom_data['weight'][$key])) {
+          if (is_array($lists)) {
+            $lists['#weight'] = $custom_data['weight'][$key];
+          } else {
+            $lists = array(
+              '#data' => $lists,
+              '#weight' => $custom_data['weight'][$key],
+            );
+          }
+        }
       }
 
       if (is_array($lists)) {

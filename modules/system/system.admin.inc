@@ -14,6 +14,7 @@ function system_admin_default() {
   }
   
   $output = '<h1>'.t('system', '欢迎进入 %string 管理系统', array('%string' => $conf['site_global']['name'])).'</h1>';
+
   if ($data = _module_invoke_all('system_admin_default')) {
     $i = 0;
     foreach ($data as $module => $content) {
@@ -47,6 +48,144 @@ function system_admin_default() {
     }
   }
   return $output;
+}
+
+/**
+ * 站点主导航设置
+ */
+function system_admin_site_menu() {
+  dd_set_breadcrumb(array(l(t('system', '系统管理'), 'admin'), t('system', '主导航设置')));
+
+  dd_set_tabs(array(
+    l(t('system', '自定义导航'), 'admin/site_menu'),
+    l(t('system', '新增导航'), 'admin/site_menu/add', array('query' => 'field_field_type=select')),
+    l(t('system', '系统导航'), 'admin/site_menu/system'),
+  ));
+
+  switch (arg(2)) {
+    case 'system':
+      $menus = array();
+
+      module_alter_all('site_menu', $menus);
+
+      $item = array();
+
+      foreach ($menus as $key => $menu) {
+        if (is_array($menu)) {
+          $rows = $menu['#data'] . '-----' . t('system', '系统名称：%name', array('%name' => $key));
+          if (!empty($menu['#childrens'])) {
+            $_item = array();
+            foreach ($menu['#childrens'] as $data) {
+              if (is_array($data)) {
+                $_item[] = $data['#data'];
+              } else {
+                $_item[] = $data;
+              }
+            }
+            $rows .= theme('item_list', $_item);
+          }
+        } else {
+          $rows = $menu . '-----' . t('system', '系统名称：!name', array('!name' => $key));
+        }
+        $item[] = $rows;
+      }
+      dd_set_help(t('system', '系统导航由模块生成，只可以禁用，无法删除。以下显示的并非全部，某些导航因权限判断，你可能无法看到。'));
+      $output = dd_get_form('_system_admin_site_menu_system');
+      $output .= theme('item_list', $item, '系统导航', 'ul', array('class' => 'admin_site_menu'));
+    break;
+  	case 'add':
+      if ($_GET['field_field_type'] != 'select') {
+        dd_goto('admin/site_menu/add', 'field_field_type=select');
+      }
+
+      $field->type = 'menu';
+      $field->module = 'system';
+      $field->redirect = url('admin/site_menu');
+  		$output = dd_get_form('field_form', $field);
+  	break;
+    default:
+      // 不允许批量添加
+      if (!empty($_GET['field_custom']) && $_GET['field_custom'] == 'import') {
+        dd_set_message(t('system', '不允许此操作'));
+        dd_goto('admin/site_menu');
+      }
+      $output = field_lists('system', 'menu', array('name', 'links'));
+  }
+
+  return $output;
+}
+
+/**
+ * 系统主导航设置表单
+ */
+function _system_admin_site_menu_system() {
+  $form = array(
+    'fields' => array(),
+    'settings' => array('#validate' => array('_system_admin_site_menu_system_validate'))
+  );
+
+  $disabled = $weight = '';
+
+  if ($data = var_get('site_menu_system')) {
+    if (!empty($data['disabled'])) {
+      $disabled = implode(',', array_flip($data['disabled']));
+    }
+
+    if (!empty($data['weight'])) {
+      foreach ($data['weight'] as $key => $value) {
+        $weight .= ',' . $key . ':' . $value;
+      }
+      $weight = substr($weight, 1);
+    }
+  }
+
+  $form['fields']['disabled'] = array(
+    '#title' => t('system', '禁用导航'),
+    '#default_value' => $disabled,
+    '#type' => 'textfield',
+    '#description' => t('system', '输入需禁用的导航系统名称，多个以逗号分隔，如：user,front')
+  );
+
+  $form['fields']['weight'] = array(
+    '#title' => t('system', '导航权重'),
+    '#default_value' => $weight,
+    '#type' => 'textfield',
+    '#description' => t('system', '自定义导航权重，多个以逗号分隔，如：user:1000,front:1001')
+  );
+
+  $form['fields']['button'] = array('#type' => 'submit');
+
+  return $form;
+}
+
+function _system_admin_site_menu_system_validate(&$form, &$v) {
+  $weight = array();
+  
+  if (!empty($v['weight'])) {
+    if ($array = field_get_string_tags($v['weight'])) {
+      foreach ($array as $value) {
+        if (strpos($value, ':') !== false) {
+          list($name, $id) = explode(':', $value, 2);
+          $weight[$name] = $id;
+        }
+      }
+    }
+  }
+  
+  if ($array = field_get_string_tags($v['disabled'])) {
+    $disabled = array_flip($array);
+  } else {
+    $disabled = '';
+  }
+
+  $data = array(
+    'disabled' => $disabled,
+    'weight' => $weight,
+  );
+
+  var_set('site_menu_system', $data);
+
+  dd_set_message(t('system', '操作成功'));
 }
 
 /**
@@ -1126,7 +1265,7 @@ function system_cache_clear_submit($form, $value) {
 function system_admin_token() {
 	if ($tokens = _module_invoke_all('token_list')) {
 		foreach ($tokens as $module => $lists) {
-			$table[][] = array('data' => $module, 'colspan' => 2);
+			$table[][] = array('data' => dd_get_strong($module), 'colspan' => 2);
 			foreach ($lists as $key => $info) {
 				$table[] = array($key, $info['title']);
 			}

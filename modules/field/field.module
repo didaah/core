@@ -1009,12 +1009,13 @@ function field_field_call_form($field, &$form) {
        * 如自由标签变更为单选，若分类下已存在数据，将难以自动转换
        * 通常在字段下已有数据时，不应该变更它
        */
+      $options = field_get_type_options($field->type, $field->type); // 允许的类型
       $form['fields']['field_type'] = array(
         '#type' => 'select',
         '#title' => t('field', '类型'),
         '#required' => 1,
         '#default_value' => $field->field_type,
-        '#options' => field_get_type_options('___term', array('term' => 1)),
+        '#options' => array_intersect_key(field_get_type_options('___term', array('term' => 1)), $options),
       );
       unset($form['fields']['_field_type']);
     }
@@ -1050,11 +1051,14 @@ function field_form($field) {
     dd_set_message(t('field', '字段组未定义，无法调用表单'), 'error');
     return;
   }
-  
+
+  // 允许的字段类型
+  $options = field_get_type_options($field->type, $group);
+
   /**
    * 添加时，必须先选择字段类型，以便于回调自定义项目
    */
-  if (!$field->field_type && $_GET['field_field_type']) {
+  if (!$field->field_type && !empty($_GET['field_field_type'])) {
     $field->field_type = $_GET['field_field_type'];
   }
   
@@ -1064,7 +1068,7 @@ function field_form($field) {
       '#title' => t('field', '请选择字段类型'),
       '#required' => 1,
       '#default_value' => $field->field_type,
-      '#options' => field_get_type_options($field->type, $group),
+      '#options' => $options 
     );
 
     if (empty($group['disable_import'])) {
@@ -1096,6 +1100,11 @@ function field_form($field) {
     return $form;
   }
   
+  if (empty($options[$field->field_type])) {
+    dd_set_message(t('field', '不允许的字段类型'), 'error');
+    return;
+  }
+
   if (!$field_type) {
     dd_set_message(t('field', '请求的字段类型不存在'), 'error');
     return;
@@ -1107,6 +1116,7 @@ function field_form($field) {
     '#redirect' => $field->redirect,
     '#ajax_validate' => 1,
   );
+
   $form['fields']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('field', '名称'),
@@ -1114,6 +1124,7 @@ function field_form($field) {
     '#default_value' => $field->name,
     '#required' => 1,
   );
+
   $form['fields']['field_key'] = array(
     '#type' => 'textfield',
     '#title' => t('field', '索引'),
@@ -1135,14 +1146,17 @@ function field_form($field) {
     '#title' => t('field', '类型'),
     '#value' => $field_type['title'],
   );
+  
   if (!$field->field_id) {
     $form['fields']['_field_type']['#description'] = l(t('field', '返回重新选择'), $_GET['q'], array('query' => dd_query_string_encode($_GET, array_merge(array('q', 'field_field_type'), array_keys($_COOKIE)))));
   }
+  
   $form['fields']['field_type'] = array(
     '#type' => 'hidden',
     '#constant' => 1,
     '#default_value' => $field->field_type,
   );
+
   $form['fields']['required'] = array(
   	'#type' => 'checkbox',
   	'#title' => t('field', '必需'),
@@ -1454,12 +1468,14 @@ function field_delete($field) {
  * 调用本函数的模块，应避免在相同页面使用上述参数
  * 默认提供删除、编辑操作，提供一个路径用做自定义界面
  * $_GET['field_op'] == 'custom' 时，将调用 {module}_field_call_custom()
- * @param (string) $module
+ * @param string $module
  *  模块系统名称
- * @param (string) $group
+ * @param string $type
  *  字段分组名称
+ * @param array $filter_header
+ *  设置需要输出的 table 表头，如：array('name', 'weight'), 若为空，则输出全部
  */
-function field_lists($module = NULL, $type = NULL) {
+function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
   if ($_POST['field_field_id']) {
     if (isset($_POST['field_change_weight']) && is_numeric($_POST['field_change_weight'])) {
       if (db_exec('UPDATE {fields} SET weight = ? WHERE field_id = ?', array($_POST['field_change_weight'], $_POST['field_field_id']))) {
@@ -1534,13 +1550,15 @@ function field_lists($module = NULL, $type = NULL) {
   $types = field_get_call_lists();
   
   $header = array(
-    t('field', '名称'),
-    t('field', '类型'),
-    t('field', '必需'),
-    t('field', '权重'),
-    t('field', '操作')
+    'name' => t('field', '名称'),
+    'type' => t('field', '类型'),
+    'required' => t('field', '必需'),
+    'weight' => t('field', '权重'),
+    'links' => t('field', '操作')
   );
   
+  if (!empty($filter_header)) $header = array_intersect_key($header, array_flip($filter_header));
+
   if ($get = dd_query_string_encode($_GET, array_merge(array('q', 'field_field_id'), array_keys($_COOKIE)))) {
     $get .= '&';
   }
@@ -1548,25 +1566,39 @@ function field_lists($module = NULL, $type = NULL) {
   foreach ($fetch as $field) {
     $links = array();
     if (!$field->locked) {
-      $links[] = l(t('field', '编辑'), $_GET['q'], array('query' => $get.'field_op=update&field_field_id='.$field->field_id.'&redirect='.rawurlencode($_SERVER['REQUEST_URI'])));
+      $links['locked'] = l(t('field', '编辑'), $_GET['q'], array('query' => $get.'field_op=update&field_field_id='.$field->field_id.'&redirect='.rawurlencode($_SERVER['REQUEST_URI'])));
     }
+
     if ($field->deleted) {
-      $links[] = l(t('field', '删除'), $_GET['q'], array('query' => $get.'field_op=delete&field_field_id='.$field->field_id, 'attributes' => array('class' => 'confirm')));
+      $links['deleted'] = l(t('field', '删除'), $_GET['q'], array('query' => $get.'field_op=delete&field_field_id='.$field->field_id, 'attributes' => array('class' => 'confirm')));
     }
-    $links[] = l(t('field', '导出'), $_GET['q'], array('query' => $get.'field_op=export&field_field_id='.$field->field_id));
+
+    $links['export'] = l(t('field', '导出'), $_GET['q'], array('query' => $get.'field_op=export&field_field_id='.$field->field_id));
     module_alter_all('field_call_links', $field, $links, $get);
+
+    $rows = array();
+
+    if (!empty($header['name'])) {
+      $rows[] = $field->name;
+    }
     
-    $table[] = array(
-      $field->name, $types[$field->field_type]['title'],
-      dd_form_select(
+    if (!empty($header['type'])) {
+      $rows[] = $types[$field->field_type]['title'];
+    }
+    
+    if (!empty($header['required'])) {
+      $rows[] = dd_form_select(
         array(
           '#name' => 'field_list_required',
           '#value' => $field->required,
           '#attributes' => array('alt' => $field->field_id),
           '#options' => array(t('field', '否'), t('field', '是'))
         )
-      ),
-      dd_form_weight(
+      );
+    }
+    
+    if (!empty($header['weight'])) {
+      $rows[] = dd_form_weight(
         array(
           '#name' => 'field_list_weight',
           '#value' => $field->weight,
@@ -1574,9 +1606,14 @@ function field_lists($module = NULL, $type = NULL) {
           '#start' => -20,
           '#end' => 20,
         )
-      ),
-      dd_imp($links)
-    );
+      );
+    }
+
+    if (!empty($header['links'])) {
+      $rows[] = dd_imp($links);
+    }
+
+    $table[] = $rows;
   }
   
   $output = theme('table', $header, $table, array('id' => 'field_admin_list'));
@@ -1631,9 +1668,9 @@ function _field_field_call_export($tid, $terms) {
  */
 function field_field_call_links($field, &$links = NULL, $get = NULL) {
   if (in_array($field->field_type, field_get_term_type())) {
-    $links[] = l(t('field', '浏览子级'), $_GET['q'], array('query' => $get.'field_op=custom&field_custom=view&field_field_id='.$field->field_id));
-    $links[] = l(t('field', '添加子级'), $_GET['q'], array('query' => $get.'field_op=custom&field_custom=add&redirect='.rawurlencode($_SERVER['REQUEST_URI']).'&field_field_id='.$field->field_id));
-    $links[] = l(t('field', '批量添加'), $_GET['q'], array('query' => $get.'field_op=custom&field_custom=import&redirect='.rawurlencode($_SERVER['REQUEST_URI']).'&field_field_id='.$field->field_id));
+    $links['view_children'] = l(t('field', '浏览子级'), $_GET['q'], array('query' => $get.'field_op=custom&field_custom=view&field_field_id='.$field->field_id));
+    $links['add_children'] = l(t('field', '添加子级'), $_GET['q'], array('query' => $get.'field_op=custom&field_custom=add&redirect='.rawurlencode($_SERVER['REQUEST_URI']).'&field_field_id='.$field->field_id));
+    $links['add_batch'] = l(t('field', '批量添加'), $_GET['q'], array('query' => $get.'field_op=custom&field_custom=import&redirect='.rawurlencode($_SERVER['REQUEST_URI']).'&field_field_id='.$field->field_id));
   }
 }
 
@@ -2054,16 +2091,19 @@ function field_term_form($field = NULL, $term = NULL) {
     '#default_value' => $term->name,
     '#required' => 1,
   );
+
   $form['fields']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('field', '描述'),
     '#default_value' => $term->description,
   );
+
   $form['fields']['tid'] = array(
     '#type' => 'hidden',
     '#default_value' => $term->tid,
     '#constant' => 1,
   );
+
   $form['fields']['weight'] = array(
     '#default_value' => $term->weight ? $term->weight : 0,
     '#start' => 20,
@@ -2084,13 +2124,12 @@ function field_term_form($field = NULL, $term = NULL) {
  */
 function field_term_form_validate($form, $v) {
   if ($field = field_load($v['field_id'])) {
-    $term = (object)$v;
     /**
      * 1、触发自定义验证 hook_field_call_term_validate()
      * 2、调用 field_term_save() 保存数据
      * 3、触发自定义保存 hook_field_call_term_save()
      */
-    if ($term = field_term_save($field, $term)) {
+    if ($term = field_term_save($field, $v['_dida_values'])) {
       field_get_cache_field(NULL, 1);
       field_set_cache_term();
       dd_set_message(t('field', '操作成功'));
@@ -2114,10 +2153,12 @@ function field_term_save(&$field, $term, $batch = 0) {
     dd_set_message(implode('<br />', dd_array2_to('value', $error)), 'error');
     return false;
   }
+
   if (mb_strlen($term->name, 'utf-8') > 64) {
 		dd_set_message(t('field', '名称长度不超过 75 个字符'), 'error');
 		return false;
   }
+
 	if (!$group = module_invoke($field->module, 'field_call_group', $field->type)) {
     dd_set_message(t('field', '字段组不存在'), 'error');
     return false;

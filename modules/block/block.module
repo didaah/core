@@ -151,7 +151,8 @@ function block_cache_lists($theme = NULL) {
           db_exec('DELETE FROM {blocks} WHERE bid = ?', array($c->bid));
           unset($blocks[$key]);
         }
-        var_del('theme_'.$theme.'_view');
+        var_del('theme_' . $theme . '_view');
+        var_del('theme_' . $theme . '_boxes_view');
       }
       if ($insert) cache_del('cid', 'theme_'.$theme.'_list', 'cache_block');
     }
@@ -186,14 +187,14 @@ function block_block_list_alter($theme, $module, $delta, &$block) {
  *  主题系统名称
  */
 function _block_get_cache_theme($theme) {
-  if ($cache = cache_get('theme_'.$theme.'_list', 'cache_block')) {
+  if ($cache = cache_get('theme_' . $theme . '_list', 'cache_block')) {
     return $cache->data;
   } else {
     if ($fetch = db_query('SELECT bid, module, delta, weight, visibility, region, title FROM {blocks} WHERE theme = ? ORDER BY weight ASC, bid DESC', array($theme))) {
       foreach ($fetch as $o) {
-        $data[$o->module.'_'.$o->delta] = $o;
+        $data[$o->module . '_' . $o->delta] = $o;
       }
-      cache_set('theme_'.$theme.'_list', $data, 'cache_block');
+      cache_set('theme_' . $theme . '_list', $data, 'cache_block');
     }
     return $data;
   }
@@ -201,8 +202,9 @@ function _block_get_cache_theme($theme) {
 
 /**
  * @Implement of hook_block_list()
- * @param (string) $theme
+ * @param string $theme
  *  主题系统名称
+ * @return array
  */
 function block_block_list($theme) {
   if ($fetch = db_query('SELECT * FROM {boxes}')) {
@@ -221,40 +223,33 @@ function block_block_list($theme) {
 }
 
 /**
- * hook_block
- * @param $op
- *  类型：list, view, config, save
- *   list: 列表，读取模块所有区块
- *   view: 显示，当前主题设定的区块，传递 delta
- *   setting: 配置表单
- *   save: 设置表单提交
- * @param $theme
- *  当前主题系统名
+ * 输出一个区块显示内容
+ * @Implement of hook_block_view()
+ * @param string $theme
+ *  主题系统名称
  * @param $config = array()
  *  配置数据，包含系统配置和自定义配置。
  *   如：array('system' => array(), 'custom' => array())
- * @param $value = array()
- *  设置表单提交值，用于自定义存储
+ * @return array
  */
 function block_block_view($theme, $config) {
-  if (strpos($config->delta, '_') !== false) {
+  if (substr($config->delta, 0, 6) == 'boxes_') {
     list($box, $bid) = explode('_', $config->delta);
-    
-    if ($o = db_query('SELECT * FROM {boxes} WHERE bid = ?', array($bid), array('return' => 'one'))) {
+    if ($o = _dd_get_theme_boxes($theme, $bid)) {
       $block['title'] = t('block', $config->title);
       if ($o->format) {
         $block['content'] = filter_view($o->body, $o->format, 'block', $o->bid);
       } else {
         $block['content'] = $o->body;
       }
+      return $block;
     }
-    
   }
-  return $block;
 }
 
-
-// 写入区块
+/**
+ *  写入区块
+ */
 function block_set_info($block = array()) {
   $args = array(
     'cache' => 1,
@@ -282,24 +277,101 @@ function block_update_info($bid, $block = array()) {
   return true;
 }
 
+// public block_get_cache_theme($theme, $region = NULL) {{{ 
+/**
+ * block_get_cache_theme
+ * 按主题、区域读取已缓存的已启用区块信息 
+ * @param string $theme 
+ *  主题系统名称
+ * @param string $region 
+ *  区域系统名称
+ * @access public
+ * @return array
+ */
 function block_get_cache_theme($theme, $region = NULL) {
-  if ($cache = var_get('theme_'.$theme.'_view')) {
+  if ($cache = var_get('theme_' . $theme . '_view')) {
     return !$region ? $cache : $cache[$region];
-  } else {
-    if ($fetch = db_query('SELECT * FROM {blocks} WHERE theme = ? AND visibility = 1 AND region != ? ORDER BY weight ASC, bid DESC', array($theme, '0'))) {
-      foreach ($fetch as $o) {
-        $o->settings = $o->settings ? unserialize($o->settings) : array();
-        if (!$o->settings['custom']) {
-        	$o->settings['custom'] = array();
-        }
-        $data[$o->region][$o->module][$o->delta] = $o;
+  } else if ($fetch = db_query('SELECT * FROM {blocks} WHERE theme = ? AND visibility = 1 AND region != ? 
+  ORDER BY weight ASC, bid DESC', array($theme, '0'))) {
+    foreach ($fetch as $o) {
+      $o->settings = $o->settings ? unserialize($o->settings) : array();
+      if (!$o->settings['custom']) {
+        $o->settings['custom'] = array();
       }
+      $data[$o->region][$o->module][$o->delta] = $o;
     }
-    var_set('theme_'.$theme.'_view', $data);
+    var_set('theme_' . $theme . '_view', $data);
     
     return !$region ? $data : $data[$region];
   }
 }
+// }}}
+
+// public block_get_cache_theme_boxes($theme) {{{ 
+/**
+ * block_get_cache_theme_boxes
+ * 按主题读取该主题下所有管理员自定义区块 id，即保存在 boxes 表中的区块
+ * @param string $theme 
+ * @access public
+ * @return string
+ */
+function block_get_cache_theme_boxes($theme) {
+
+  if (!$data = var_get('theme_' . $theme . '_boxes_view')) {
+    if ($blocks = block_get_cache_theme($theme)) {
+      $id = array();
+      foreach ($blocks as $o) {
+        foreach ($o as $module => $blocks) {
+          foreach ($blocks as $delta => $block) {
+            if (substr($delta, 0, 6) == 'boxes_') {
+              $id[] = end(explode('_', $delta, 2));
+            }
+          }
+        }
+      }
+      if (!empty($id)) {
+        $data = implode(',', $id);
+      } else {
+        $data = -1;
+      }
+      var_set('theme_' . $theme . '_boxes_view', $data);
+    }
+  }
+
+  return $data;
+}
+// }}}
+
+// protected _dd_get_theme_boxes($blocks) {{{ 
+/**
+ * _dd_get_theme_boxes
+ * 获取指定主题中的自定义的区块，即保存在 boxes 表中的区块
+ * @param string $theme
+ *  主题系统名称
+ * @param int $bid
+ *  区块在 boxes 表中的 id
+ * @access protected
+ * @return object|bool
+ */
+function _dd_get_theme_boxes($theme, $bid) {
+  static $data;
+
+  if (!isset($data)) {
+    $data = array();
+    if ($id = block_get_cache_theme_boxes($theme)) {
+      if ($id != -1) {
+        if ($fetch = db_query('SELECT * FROM {boxes} WHERE bid IN (' . $id . ')')) {
+          foreach ($fetch as $o) {
+            $data[$o->bid] = $o;
+          }
+        }
+      }
+    }
+  }
+
+  return !empty($data) ? $data[$bid] : false;
+}
+// }}}
 
 /**
  * 获取显示区块

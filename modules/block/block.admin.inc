@@ -73,7 +73,8 @@ function block_admin_form_validate($form, $v) {
       }
     }
     cache_del('cid', 'theme_'.arg(3).'_list', 'cache_block');
-    var_del('theme_'.arg(3).'_view');
+    var_del('theme_' . arg(3) . '_view');
+    var_del('theme_' . arg(3) . '_boxes_view');
     dd_set_message(t('block', '保存成功'));
   }
 }
@@ -91,7 +92,8 @@ function block_settings_form($theme, $block) {
       if (empty($config['region'])) $config['region'] = '';
 
       if (block_update_info($block->bid, $config)) {
-      	var_del('theme_'.$theme.'_view');
+      	var_del('theme_' . $theme . '_view');
+        var_del('theme_' . $theme . '_boxes_view');
       	dd_set_message(t('block', '已恢复默认值'));
         dd_goto('admin/blocks/settings/'.$theme);
       }
@@ -184,7 +186,8 @@ function block_settings_form_validate($form, $v) {
 			$v['settings']['display']['body'] = trim($v['settings']['display']['body']);
 		}
 	  db_exec('UPDATE {blocks} SET title = ?, settings = ? WHERE bid = ?', array(trim($v['title']), serialize($v['settings']), $v['bid']));
-	  var_del('theme_'.$theme.'_view');
+	  var_del('theme_' . $theme . '_view');
+    var_del('theme_' . $theme . '_boxes_view');
 	  dd_set_message(t('block', '设置成功'));
     dd_goto_redirect('admin/blocks/settings/'.$theme);
   }
@@ -221,7 +224,8 @@ function block_admin_cache_validate($form, $v) {
           block_cache_lists($theme);
         break;
         case 'view':
-          var_del('theme_'.$theme.'_view');
+          var_del('theme_' . $theme . '_view');
+          var_del('theme_' . $theme . '_boxes_view');
       }
     }
     dd_set_message(t('block', '清除成功'));
