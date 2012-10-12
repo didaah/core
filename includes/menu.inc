@@ -104,8 +104,10 @@ function menu_get_item($path = NULL) {
     
     /**
      * 如果当前路径是别名，则将 $_GET['q'] 重写为真实路径
-     * 即使用 $_GET['q'] 获取到的永远是系统路径，可能和浏览器中显示的地址不一样
+     * 即使用 $_GET['q'] 获取到的永远是系统路径，可能和实际浏览器中显示的地址不一样
+     * 将实际访问的 q 参数，赋值到 $_GET['__q'];
      */
+    $_GET['__q'] = $_GET['q'];
     $_GET['q'] = $item['systemUrl'];   
 
     $page_args = $title_args = array();
