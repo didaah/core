@@ -9,3 +9,36 @@
 .field_form_selects_view span{
   margin: 5px;
 }
+
+/*fields view*/
+.fields-node-view {
+  margin: 5px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.fields-node-view-name {
+  display:-moz-inline-box;
+  display:inline-block;
+  width: 80px;
+}
+
+.fields-node-view-list-textarea .fields-node-view-content,
+.fields-node-view-list-file .fields-node-view-content {
+  display: block;
+}
+
+.fields-node-view-list-file .fields-node-view-content img {
+  padding: 2px;
+  border: 1px solid #ccc;
+}
+
+.fields-node-view-list-file .fields-node-view-content a:hover img {
+  border: 1px solid #09c;
+}
+
+.fields-node-view a {
+  padding-right: 8px;
+}
+
+

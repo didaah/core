@@ -2653,7 +2653,7 @@ function _field_get_node_data($nid, $type = 'term', $clear = NULL) {
   if ($clear) {
     $data[$nid] = NULL;
   }
-  
+
   if (!isset($data[$nid])) $data[$nid] = array();
   if (!isset($data[$nid][$type])) {
     switch ($type) {
@@ -2702,8 +2702,8 @@ function field_file_delete($file) {
 function field_get_node_load($module, $type, & $node, $ac = NULL, $clear = NULL) {
   global $conf;
   
-  if (!$conf['field_count'][$module.$type]) return;
-
+  if (!$conf['field_count'][$module . $type]) return;
+  
   if (!$clear && $cache = cache_get($module . $type . $node->nid, 'cache_field')) {
     if (!empty($node->fields) && is_array($node->fields) && is_array($cache->data)) {
       $node->fields += $cache->data;
@@ -2765,7 +2765,7 @@ function field_get_node_load($module, $type, & $node, $ac = NULL, $clear = NULL)
          * 其它模块定义的类型，回调 模块名_字段类型_call_load 函数，传递字段配置对象，引用传递节点对象
          * 回调函数应该加载字段数据到 $node->fields
          */
-        $function = $data->field_module.'_'.$data->field_type.'_field_node_load';
+        $function = $data->field_module . '_' . $data->field_type . '_field_node_load';
         if (function_exists($function)) $function($data, $node);
       }
     } else {
@@ -2783,8 +2783,8 @@ function field_get_node_load($module, $type, & $node, $ac = NULL, $clear = NULL)
       $function('load', $data, $node);
     }
   }
-  
-  cache_set($module.$type.$node->nid, $node->fields, 'cache_field');
+
+  cache_set($module . $type . $node->nid, $node->fields, 'cache_field');
 }
 
 /**
@@ -3462,23 +3462,47 @@ function field_get_node_validate($module, $type, $value, $node = NULL, &$form = 
   return $t;
 }
 
+// public field_get_node_html($module, $type, &$node) {{{ 
+/**
+ * field_get_node_html
+ * 获取字段组内所有字段并解析为 html，必须先调用 field_get_node_view()  生成数据
+ * @param string $module 
+ *  定义字段组的模块名称
+ * @param string $type 
+ *  字段组名，若节点下有多个字段组，且合并输出，不要传递此值
+ * @param object $node 
+ *  节点对象
+ * @access public
+ * @return string
+ */
+function field_get_node_html($module, $node, $type = NULL) {
+  if (empty($node->field_view)) return false;
+  
+  dd_add_css(dd_get_path('module', 'field') . '/field.css'); 
+  
+  return theme('fields', $module, $node, $type);
+}
+// }}}
+
 /**
  * 节点回调显示
- * @param (string) $module
+ * @param string $module
  *  模块名称
- * @param (string) $type
+ * @param string $type
  *  字段组名
- * @param (object) $node
+ * @param object $node
  *  节点对象
  * @param (int) $type
  *  显示方式：
  *    0：按类型分组，如 $node->field_view['tags'][$data->field_key]
  *    1、按 field_key 分组，如 $node->field_view[$data->field_key]，注意：若节点下有两个字段组，可能存在相同 field_key
+ *    2、按 field_id 分组，可避免节点下有两个字段组 key 重复产生的冲突
  */
 function field_get_node_view($module, $type, &$node, $view_type = 0) {
   if (!$datas = field_get_cache_field_group($module, $type)) return;
   
   global $conf;
+
   foreach ($datas as $data) {
     
     if (!isset($node->fields[$data->field_key])) continue;
@@ -3486,36 +3510,17 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
     if (!$data->field_func) {
       // 没有自定义处理函数的字段
       if ($data->field_module == 'field') {
+        $view_field_type = $data->field_type;
         switch ($data->field_type) {
           case 'select':  case 'radio':
             $content = l($node->fields[$data->field_key]->name, 'category/'.$node->fields[$data->field_key]->tid);
-            if ($view_type) {
-              $node->field_view[$data->field_key] = array(
-                '#content' => $content,
-                '#name' => $data->name
-              );
-            } else {
-              $node->field_view['category'][$data->field_key] = array(
-                '#content' => $content,
-                '#name' => $data->name
-              );
-            }
+            $view_field_type = 'category';
           break;
           case 'checkbox': case 'selects':
+            $view_field_type = 'category';
             $term = $content = NULL;
             foreach ($node->fields[$data->field_key] as $term) {
               $content .= l($term->name, 'category/'.$term->tid);
-            }
-            if ($view_type) {
-              $node->field_view[$data->field_key] = array(
-                '#content' => $content,
-                '#name' => $data->name
-              );
-            } else {
-              $node->field_view['category'][$data->field_key] = array(
-                '#content' => $content,
-                '#name' => $data->name
-              );
             }
           break;
           case 'tags':
@@ -3523,49 +3528,17 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
             foreach ($node->fields[$data->field_key] as $term) {
               $content .= l($term->name, 'category/'.$term->tid);
             }
-            if ($view_type) {
-              $node->field_view[$data->field_key] = array(
-                '#content' => $content,
-                '#name' => $data->name
-              );
-            } else {
-              $node->field_view['tags'][$data->field_key] = array(
-                '#content' => $content,
-                '#name' => $data->name
-              );
-            }
           break;
           case 'textfield':
-           $textfield = check_plain($node->fields[$data->field_key]->text);
-           if ($data->data['validate']['type']) {
+           $content = check_plain($node->fields[$data->field_key]->text);
+           if (!empty($data->data['validate']['type'])) {
               if ($textfield_value = module_invoke_all('field_type_textfield', 'node_view', $data->data['validate']['type'], $data, $node->fields[$data->field_key]->text)) {
-                $textfield = $textfield_value[0];
+                $content = $textfield_value[0];
               }
-            }
-            if ($view_type) {
-              $node->field_view[$data->field_key] = array(
-                '#content' => $textfield,
-                '#name' => $data->name
-              );
-            } else {
-              $node->field_view['textfield'][$data->field_key] = array(
-                '#content' => $textfield,
-                '#name' => $data->name
-              );
             }
           break;
           case 'textarea':
-            if ($view_type) {
-              $node->field_view[$data->field_key] = array(
-                '#content' => filter_view($node->fields[$data->field_key]->text, $data->data['format']),
-                '#name' => $data->name
-              );
-            } else {
-              $node->field_view['textarea'][$data->field_key] = array(
-                '#content' => filter_view($node->fields[$data->field_key]->text, $data->data['format']),
-                '#name' => $data->name
-              );
-            }
+            $content = filter_view($node->fields[$data->field_key]->text, $data->data['format']);
           break;
           case 'file':
             $content = NULL;
@@ -3578,21 +3551,38 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
                 array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
               }
             }
-            if ($view_type) {
-              $node->field_view[$data->field_key] = array(
-                '#content' => $content, '#name' => $data->name
-              );
-            } else {
-              $node->field_view['file'][$data->field_key] = array(
-                '#content' => $content, '#name' => $data->name
-              );
-            }
         }
+        
+        if (empty($content)) continue;
+
+        if (empty($view_type)) {
+          $node->field_view[$view_field_type][$data->field_key] = array(
+            '#content' => $content,
+            '#name' => $data->name,
+            '#field_type' => $data->field_type,
+            '#field_key' => $data->field_key
+          );
+        } else if ($vite_type == 1) {
+          $node->field_view[$data->field_key] = array(
+            '#content' => $content,
+            '#name' => $data->name,
+            '#field_type' => $data->field_type,
+            '#field_key' => $data->field_key
+          );
+        } else {
+          $node->field_view[$data->field_id] = array(
+            '#content' => $content,
+            '#name' => $data->name,
+            '#field_type' => $data->field_type,
+            '#field_key' => $data->field_key
+          );
+        }
+        
       } else {
         /**
          * 其它模块定义的类型，模块名_字段类型_call_view 函数
          */
-        $function = $data->field_module.'_'.$data->field_type.'_field_node_view';
+        $function = $data->field_module . '_' . $data->field_type . '_field_node_view';
         if (function_exists($function)) $t = $function($data, $node, $view_type);
       }
     } else {
@@ -3970,4 +3960,36 @@ function field_token_list() {
 	);
 }
 
+/**
+ * @Implement of hook_theme()
+ */
+function field_theme() {
+  return array(
+    'fields' => array(
+      'tpl' => 'fields.tpl.php',
+      'description' => '节点字段组输出模板',
+      /**
+       * 当节点有多个字段组时，可能合并输出，该种情况下， $type 为空
+       */
+      'args' => array('module', 'node', 'type'),
+    ),
+  );
+}
 
+/**
+ * @Implement of hook_template_preprocess_x()
+ * 
+ * 节点字段组输出模板：
+ * fields_{$module}_{$type}.tpl.php
+ * fields_{$module}.tpl.php
+ * fields.tpl.php
+ * 
+ */
+function field_template_preprocess_fields(&$var, $hook) {
+  if (!empty($var['module'])) {
+    if (!empty($var['type'])) {
+      $var['theme_config']->tpl[] = 'fields_' . $var['module'] . '_' . $var['type'] . '.tpl.php';
+    }
+    $var['theme_config']->tpl[] = 'fields_' . $var['module'] . '.tpl.php';
+  } 
+}

@@ -56,10 +56,19 @@ if (cache_memcache_connect()) {
    */
   function cache_get($cid, $table = 'cache') {
     global $mem, $mem_prefix;
-    if ($data = $mem->get($mem_prefix . $table . '_' . $cid)) {
-      $cache->data = $data;
+
+    $cid = $mem_prefix . $table . '_' . $cid;
+
+    if ($data = $mem->get(array($cid))) {
+      $cache->data = $data[$cid];
       return $cache;
     }
+
+    // @TODO 若存入的是 0 false 等数据，将导致系统认为该条缓存不存在
+    //if ($data = $mem->get($cid)) {
+    //  $cache->data = $data;
+    //  return $cache;
+    //}
   }
 
   /**
