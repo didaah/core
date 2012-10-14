@@ -1,6 +1,6 @@
 // $Id$
 
-以域名为基础的多站点设置，当通过 demo.example.com 访问站点时，将读取本目录下配置文件。
+自定义配置默认站点，请参见 sites/default.config.php 中的说明
 
 目录说明：
 cache：站点缓存目录，必须可读写

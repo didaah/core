@@ -1,12 +1,12 @@
 // $Id$
 
-./sites/modules：非核心模块
-./sites/themes：自定义主题
-./sites/cache：缓存目录，必须可读写
-./sites/files：默认文件目录，必须可读写
-./sites/logs：程序运行生成的各种日志
-./sites/setting.php：配置文件，安装时必须可读写
+./sites/modules：非必须。第三方模块目录，该目录中的所有模块供全部站点共用
+./sites/themes：非必须。第三方主题目录，该目录中的所有主题供全部站点共用
+./sites/cache：默认安装模式时必须。默认缓存目录，必须可读写
+./sites/files：默认安装模式时必须。默认文件目录，必须可读写
+./sites/logs：必须目录。程序运行生成的各种日志，必须可读写
+./sites/setting.php：默认配置文件，若以默认方式安装，安装时必须可读写
 
-如何使用同一程序，创建多个站点？
-以当前访问域名自动匹配，请看 ./sites/demo.example.com 下说明文件，但不建议使用这个方式
-推荐使用自定义配置，请看本目录下 default.config.php 文件
+自定义安装或使用同一程序，创建多个站点：
+1、以当前访问域名自动匹配，请参见 ./sites/demo.example.com 下说明文件，但不建议使用这个方式
+2、推荐使用自定义配置，请参见 ./sites/default.config.php 文件中的说明

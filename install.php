@@ -137,23 +137,20 @@ function dida_is_setup() {
 
   // 检查缓存目录读写权限，生成系统变量缓存文件 conf.php
   if (!is_dir($conf_dir . '/cache') && !mkdir($conf_dir . '/cache', 0777)) {
-    $error[] = '无法创建目录 '.$conf_dir.'/cache，请手动创建，并将权限设置为可读写';
+    $error[] = '无法创建目录 ' . $conf_dir . '/cache，请手动创建，并将权限设置为可读写';
   } else if (!is_writable($conf_dir . '/cache')) {
-    $error[] = $conf_dir . '/cache必须有读写权限';
+    $error[] = $conf_dir . '/cache 必须有读写权限';
   } else if (is_file($conf_file)) {
     if (!is_writable($conf_file)) {
       $error[] = $conf_file . '必须有读写权限';
     }
-  } else if (is_file('sites/cache/default.conf.php')) {
-    if (file_put_contents($conf_file, file_get_contents('sites/cache/default.conf.php'))) {
-      @chmod($conf_file, 0777);
-    } else {
-      $error[] = $conf_file . '文件必须有读写权限';
+  } else if (file_put_contents($conf_file, '<?php')) {
+    if (!chmod($conf_file, 0777) && !is_writable($conf_file)) {
+      $error[] = $conf_file . ' 文件权限无法更改，请将其修改为可读写';
     }
   } else {
-    $error[] = '请不要删除 sites/cache/default.conf.php';
+    $error[] = $conf_file . ' 文件无法创建，请手动创建并设置权限为可读写';
   }
- 
 
   // 检查默认文件目录读写权限，该路径可在管理中修改
   if (!is_dir($conf_dir . '/files') && !mkdir($conf_dir . '/files', 0777)) {
