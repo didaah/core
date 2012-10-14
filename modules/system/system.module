@@ -2289,6 +2289,11 @@ function system_site_menu(&$menu) {
         $menu['system_' . $field->field_key]['#childrens'] = array();
         foreach ($term[$field->field_id] as $o) {
           $d = unserialize($o->description);
+          if (!empty($d['description'])) {
+            $att = array('attributes' => array('title' => $d['description']));
+          } else {
+            $att = array();
+          }
           $menu['system_' . $field->field_key]['#childrens'][] = array(
             '#data' => l($o->name,  dd_get_token($d['path'], NULL, array('user', 'system')), $att),
             '#weight' => $o->weight
