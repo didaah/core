@@ -167,9 +167,15 @@ function dida_is_setup() {
     @chmod($setting_file, 0777);
     fclose($handle);
   } else {
-    $error[] = $setting_file.'不存在且无法自动创建，请复制 sites/default.setting.php 并重命名为 setting.php';
+    $error[] = $setting_file . '不存在且无法自动创建，请复制 sites/default.setting.php 并重命名为 setting.php';
   }
   
+  if (!empty($error)) {
+    $error[] = '如果你愿意试试更自由的安装方式，请复制 sites/default.config.php 并重命名为 config.php';
+    $error[] = '在 config.php 中可以自定义站点模块、主题、文件、缓存等数据的存放位置，建议先阅读 sites/default.config.php 中的说明';
+    $error[] = '虽然看上去比较麻烦，但如果你长期使用 dida，你会发现这多花的几分钟是值得的';
+  }
+
   return $error;
 }
 
