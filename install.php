@@ -144,7 +144,7 @@ function dida_is_setup() {
     if (!is_writable($conf_file)) {
       $error[] = $conf_file . '必须有读写权限';
     }
-  } else if (file_put_contents($conf_file, '<?php')) {
+  } else if (file_put_contents($conf_file, "<?php\n\n")) {
     if (!chmod($conf_file, 0777) && !is_writable($conf_file)) {
       $error[] = $conf_file . ' 文件权限无法更改，请将其修改为可读写';
     }
@@ -172,7 +172,8 @@ function dida_is_setup() {
   
   if (!empty($error)) {
     $error[] = '如果你愿意试试更自由的安装方式，请复制 sites/default.config.php 并重命名为 config.php';
-    $error[] = '在 config.php 中可以自定义站点模块、主题、文件、缓存等数据的存放位置，建议先阅读 sites/default.config.php 中的说明';
+    $error[] = '在 config.php 中可以自定义站点模块、主题、文件、缓存等数据的存放位置';
+    $error[] = '建议先阅读 sites/default.config.php 中的说明';
     $error[] = '虽然看上去比较麻烦，但如果你长期使用 dida，你会发现这多花的几分钟是值得的';
   }
 
