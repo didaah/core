@@ -2550,7 +2550,7 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
 
   if ($menus) {
     static $i;
-    
+
     if (!empty($fisrt)) {
       dd_add_js('$(\'.site_menu\').menuLevel();', 'inline');
       $custom_data = var_get('site_menu_system', array());
@@ -2585,7 +2585,7 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
             $data .= dd_get_menu($lists['#childrens'], 0);
           }
           $items[] = array(
-            '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_'.$key),
+            '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_' . $key),
             '#weight' => ($lists['#weight'] ? $lists['#weight'] : $weight)
           );
         } else if (!$lists['#childrens']) {
@@ -2598,13 +2598,13 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
                   $data .= dd_get_menu($child['#childrens'], 0);
                 }
                 $items[] = array(
-                  '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_'.$k),
+                  '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_' . $k),
                   '#weight' => ($child['#weight'] ? $child['#weight'] : $weight)
                 );
               }
             } else {
               $items[] = array(
-                '#data' => array('data' => $child, 'class' => 'site_menu_list site_menu_list_'.$k),
+                '#data' => array('data' => $child, 'class' => 'site_menu_list site_menu_list_' . $k),
                 '#weight' => $i
               );
             }
@@ -2613,16 +2613,24 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
         }
       } else {
         $items[] = array(
-          '#data' => array('data' => $lists, 'class' => 'site_menu_list site_menu_list_'.$key),
+          '#data' => array('data' => $lists, 'class' => 'site_menu_list site_menu_list_' . $key),
           '#weight' => $i,
         );
       }
       ++$i;
     }
+
     if ($items) {
       uasort($items, 'dd_form_cmp');
+      $j = 1;
       foreach ($items as $d) {
+        if (!empty($fisrt)) {
+          $d['#data']['class'] .= ' site_menu_list_index_' . $j;
+        } else {
+          $d['#data']['class'] .= ' site_menu_list_index_sub_' . $j;
+        }
         $item[] = $d['#data'];
+        $j++;
       }
       $output = theme('item_list', $item, NULL, 'ul', array('class' => $class), 0);
     }
