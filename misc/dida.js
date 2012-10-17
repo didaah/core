@@ -137,7 +137,7 @@ Dida.messageShow = function(text, opt) {
     o = {timeOut: 5000, status: 'status'};
   }
   
-  $('body').append('<div style="position:absolute;top:0;right:0;z-index: 1000;" class="js_messageShow '+o.status+'">'+text+'</div>');
+  $('body').append('<div class="js_messageShow '+o.status+'">'+text+'</div>');
   window.setTimeout(function() {$('.js_messageShow').remove();}, o.timeOut);
 };
 
@@ -353,10 +353,8 @@ Dida.ajaxSuccess = function(obj, data, type) {
     var fun = obj.attr('fun');
     
     if (fun) {
-      
       // 调用函数，依次传递：返回值、当前元素、类型
       Dida.callFunc(fun, data, obj, type);
-      
     } else {
     
       switch (data) {
@@ -392,13 +390,11 @@ Dida.ajaxSuccess = function(obj, data, type) {
         break;
         default:
           if (data == 1) {
-            
             var text = obj.attr('replace') ? obj.attr('replace') : Dida.t('system', '成功');
             if (text) {
               obj.after('<span class="red msgjs">' + text + '</span>');
               obj.remove();
             }
-            
           } else if (type == 'a') {
             alert(data ? data : Dida.t('system', '操作失败'));
           } else {
@@ -474,7 +470,8 @@ $(function() {
   
   $('.homepage_button').click(function() {
     if ($.browser.msie) {
-      this.style.behavior='url(#default#homepage)';this.setHomePage($(this).attr('href'));
+      this.style.behavior = 'url(#default#homepage)';
+      this.setHomePage($(this).attr('href'));
     } else {
       alert(Dida.t('system', '你的浏览器安全设置过高，不支持此操作。'));
     }
@@ -529,15 +526,35 @@ $(function() {
     }
     return false;
   });
+ 
+  $('.clickajax').live('click', function() {
+    $(this).addClass('ja_loading');
+    var $$ = $(this);
+    var url = $$.attr('href');
+    if ($$.attr('method') != 'POST') {
+      $.get(url, {'timestamp': Dida.gettime()}, function(data) {
+        Dida.ajaxSuccess($$, data, 'a');
+      });
+    } else {
+      $.post(url, {'timestamp': Dida.gettime()}, function(data) {
+        Dida.ajaxSuccess($$, data, 'a');
+      });
+    }
+    return false;
+  });
 
-  $('.dida_search_form_field_keyword').each(function(){
+  $('.dida_search_form_field_keyword, .dida_form_field_placeholder_keyword').each(function(){
     if (!$(this).val()) {
-      $(this).val(($(this).attr('title') || $(this).attr('alt'))).addClass('dida_search_form_field_keyword_default');
+      if ($.browser.msie) {
+        $(this).val(($(this).attr('title') || $(this).attr('alt'))).addClass('dida_search_form_field_keyword_default');
+      } else {
+        $(this).attr('placeholder', ($(this).attr('title') || $(this).attr('alt'))).addClass('dida_search_form_field_keyword_default');
+      }
     }
   });
   
-  $('.dida_search_form_field_keyword').focusout(function(){
-    if (!$(this).val()) {
+  $('.dida_search_form_field_keyword, .dida_form_field_placeholder_keyword').focusout(function(){
+    if (!$(this).val() && $.browser.msie) {
       $(this).val(($(this).attr('title') || $(this).attr('alt'))).addClass('dida_search_form_field_keyword_default');
     }
   }).focusin(function(){
@@ -547,7 +564,7 @@ $(function() {
     }
   }).parents('form').submit(function() {
     var t = $(this).attr('title') || $(this).attr('alt');
-    $(this).find('.dida_search_form_field_keyword').each(function() {
+    $(this).find('.dida_search_form_field_keyword,.dida_form_field_placeholder_keyword').each(function() {
       if ($(this).val() == t) {
         $(this).val("");
       }

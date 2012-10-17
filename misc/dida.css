@@ -776,9 +776,14 @@ span.ja_loading {
 }
 
 .js_messageShow {
-  padding: 20px;
+  position: fixed;
+  top: 0;
+  right: 45%;
+  _position: absolute;
+  padding: 30px 100px;
   border: 1px solid #ccc;
   background: #fff;
+  z-index: 100;
 }
 
 #dd_database_debug {

@@ -1363,21 +1363,22 @@ function user_login_form($url = NULL) {
     );
   }
   
-  module_alter_all('user_login_form', $form);
-  
   $form['fields']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('user', '登录'),
-    '#weight' => 100,
+    '#weight' => 1000,
     '#prefix' => '<div id="user_login_form_submit" class="form_item form_item_submit">',
   );
   
   $form['fields']['his'] = array(
     '#type' => 'checkbox',
-    '#weight' => 101,
+    '#weight' => 1001,
     '#options' => array(1 => t('user', '记住我')),
     '#suffix' => '</div>'
   );
+
+  module_alter_all('user_login_form', $form);
+
   return $form;
 }
 

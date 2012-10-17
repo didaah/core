@@ -2535,11 +2535,11 @@ function dd_get_breadcrumb() {
  * 获取下拉导航，触发 hook_site_menu()
  * @param array $menus
  *  导航菜单，若无，则执行 hook_site_menu
- * @param bool $fisrt
+ * @param bool $first
  *  第一次调用，添加 js 代码，以实现下拉效果
  * @return (string)
  */
-function dd_get_menu($menus = NULL, $fisrt = true) {
+function dd_get_menu($menus = NULL, $first = true) {
   if (!isset($menus)) {
     $menus = array();
     module_alter_all('site_menu', $menus);
@@ -2551,13 +2551,13 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
   if ($menus) {
     static $i;
 
-    if (!empty($fisrt)) {
+    if (!empty($first)) {
       dd_add_js('$(\'.site_menu\').menuLevel();', 'inline');
       $custom_data = var_get('site_menu_system', array());
     }
 
     foreach ($menus as $key => $lists) {
-      if (!empty($fisrt)) {
+      if (!empty($first)) {
         // 已禁用的导航
         if (!empty($custom_data['disabled']) && isset($custom_data['disabled'][$key])) continue;
         
@@ -2624,7 +2624,7 @@ function dd_get_menu($menus = NULL, $fisrt = true) {
       uasort($items, 'dd_form_cmp');
       $j = 1;
       foreach ($items as $d) {
-        if (!empty($fisrt)) {
+        if (!empty($first)) {
           $d['#data']['class'] .= ' site_menu_list_index_' . $j;
         } else {
           $d['#data']['class'] .= ' site_menu_list_index_sub_' . $j;
