@@ -23,6 +23,12 @@ function system_menu() {
     'page_callback' => 'captcha_page',
     'file' => 'system.captcha.inc'
   );
+
+  $items['robots.txt'] = array(
+    'access_callback' => true,
+    'page_callback' => 'system_page_robots',
+    'file' => 'system.page.inc'
+  );
   
   $items['ajax'] = array(
     'access_callback' => true,
@@ -228,6 +234,14 @@ function system_menu() {
     'file' => 'system.admin.inc'
   );
 
+  $items['admin/settings/robots'] = array(
+    'title' => 'robots 设置',
+    'access_arguments' => array('system admin settings robots'),
+    'page_callback' => 'dd_get_form',
+    'page_arguments' => array('system_admin_robots'),
+    'file' => 'system.admin.inc',
+  );
+
   $items['admin/settings/files'] = array(
     'title' => '文件设置',
     'access_arguments' => array('system admin settings files'),
@@ -252,6 +266,7 @@ function system_perm() {
     'system admin front' => t('system', '首页设置'),
     'system admin settings' => t('system', '站点设置'),
     'system admin alias' => t('system', '别名管理'),
+    'system admin settings robots' => t('system', 'robots 设置'),
     'system admin settings global' => t('system', '站点信息'),
     'system admin settings error' => t('system', '错误设置'),
     'system admin logs' => t('system', '系统日志'),
@@ -557,6 +572,7 @@ function system_system_admin_menus() {
     array(t('system', '站点信息'), 'admin/settings/global'),
     //array(t('system', '计划任务'), 'admin/settings/cron'),
     array(t('system', '错误设置'), 'admin/settings/error'),
+    array(t('system', 'robots 设置'), 'admin/settings/robots'),
     array(t('system', '模块管理'), 'admin/modules'),
     array(t('system', '主题管理'), 'admin/themes'),
     array(t('system', '缓存管理'), 'admin/cache'),

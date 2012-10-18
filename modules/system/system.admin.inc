@@ -229,6 +229,74 @@ function system_system_admin_default() {
 }
 
 /**
+ * robots.txt 设置
+ * 当一套代码多个站点时，使用物理文件 robots.txt，将导致不能自定义
+ * 所以提供管理后台添加，动态生成 robots.txt 的功能
+ */
+function system_admin_robots() {
+  dd_set_breadcrumb(array(l(t('system', '系统管理'), 'admin'), t('system', 'robots.txt 设置')));
+
+  $form = array('fields' => array(), 'settings' => array('#validate' => array('system_admin_robots_validate')));
+  
+$data = <<<EOT
+User-agent: *
+Crawl-delay: 10
+
+Disallow: /includes/
+Disallow: /misc/
+Disallow: /modules/
+Disallow: /sites/all/
+Disallow: /sites/cache/
+Disallow: /sites/themes/
+Disallow: /sites/modules/
+Disallow: /themes/
+Disallow: /install/
+Disallow: /tools/
+
+Disallow: /rpc.php
+Disallow: /cron.php
+Disallow: /custom.php
+Disallow: /install.php
+
+Disallow: /admin
+Disallow: /ajax
+Disallow: /captcha
+Disallow: /g
+Disallow: /search
+Disallow: /images/error
+Disallow: /user/logout
+Disallow: /user/register
+Disallow: /user/pass
+Disallow: /user/login
+
+# 若不启用简洁链接，删除下一行
+Disallow: /?q
+EOT;
+
+  if ($cache = custom_get('system_robots')) {
+    $data = $cache;
+  }
+
+  $form['fields']['data'] = array(
+    '#title' => t('system', 'robots.txt'),
+    '#default_value' => $data,
+    '#type' => 'textarea',
+    '#description' => t('system', '自定义 robots.txt 文件内容')
+  );
+
+  $form['fields']['button'] = array(
+    '#type' => 'submit'
+  );
+
+  return $form;
+}
+
+function system_admin_robots_validate(&$form, &$v) {
+  custom_set('system_robots', $v['data']);
+  dd_set_message(t('system', '操作成功'));
+}
+
+/**
  * phpinfo
  */
 function system_status_php() {

@@ -1,7 +1,11 @@
-#
-# robots.txt
-#
+<?php
+// $Id$
 
+/**
+ * 输出 robots.txt 内容
+ */
+function system_page_robots() {  
+$data = <<<EOT
 User-agent: *
 Crawl-delay: 10
 
@@ -31,5 +35,16 @@ Disallow: /user/logout
 Disallow: /user/register
 Disallow: /user/pass
 Disallow: /user/login
+EOT;
 
-Disallow: /?q
+  if ($cache = custom_get('system_robots')) {
+    $data = $cache;
+  }
+
+  header('Content-Type:text/plain; charset=utf-8');
+
+  echo $data;
+
+  exit;
+}
+
