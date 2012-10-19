@@ -479,9 +479,8 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
     }
   }
   
-  // 重命名浏览器可执行的文件
-  
-  if (preg_match('/\.(php|pl|py|cgi|asp|js|html)$/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+  // 重命名可执行的文件
+  if (preg_match('/\.(php|pl|py|cgi|asp|js|html)$/i', $file->filename)) {
     $file->filemime = 'text/plain';
     $file->filepath .= '.txt';
     $file->filename .= '.txt';

@@ -138,7 +138,6 @@ function theme() {
    * 在模块文件夹，以 tpl 命名文件夹，在tpl 下可分多级目录。在主题文件夹覆写，以模块名称命名文件夹
    */
   if ($theme['tpl']) {
-    
     $var = array();
     if (is_array($theme['args'])) {
       foreach ($theme['args'] as $key => $val) {
@@ -207,15 +206,12 @@ function theme() {
        * 在当前主题中覆盖。将 tpl 文件复制到主题文件夹下，必须以模块名为目录名，即：themename/modulename/
        */
       if (is_file($temp['path'] . '/' . $theme['module'] . '/' . $tpl)) {
-        
         return theme_render_tpl($temp['path'] . '/' . $theme['module'] . '/' . $tpl, $var, $hook);
-        
       } else if (is_file($module_path . '/tpl/' . $tpl)) {
         /**
          * 调用模块目录中的 tpl
          */
         return theme_render_tpl($module_path . '/tpl/' . $tpl, $var, $hook);
-        
       }
     }
     
@@ -244,7 +240,12 @@ function theme() {
  */
 function _template_preprocess_language(&$var, $hook) {
   if (is_array($var['theme_config']->tpl)) {
-    $var['theme_config']->tpl[] =  $GLOBALS['language_code'] . '_' . $var['theme_config']->tpl[0];
+    $tpls = array();
+    foreach ($var['theme_config']->tpl as $id => $tpl) {
+      $tpls[] = $tpl;
+      $tpls[] =  $GLOBALS['language_code'] . '_' . $tpl;
+    }
+    $var['theme_config']->tpl =  $tpls;
   }
 }
 

@@ -3543,37 +3543,43 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
           case 'file':
             $content = NULL;
             foreach ($node->fields[$data->field_key] as $file) {
-              if ($data->data['thumbs']['medium']) {
-                $content .= l(img(image_get_thumb($file->fid, $file->filepath, $data->data['thumbs']['medium'])), f($file->filepath),
-                array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+              if (strpos($file->filemime, 'image/') !== false) {
+                $view_field_type = 'file_image'; // 文件中的图片类型
+                if (!empty($data->data['thumbs']['medium'])) {
+                  $content .= l(img(image_get_thumb($file->fid, $file->filepath, $data->data['thumbs']['medium'])), f($file->filepath),
+                  array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+                } else {
+                  $content .= l(img($file->filepath), f($file->filepath),
+                  array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+                }
               } else {
-                $content .= l(img($file->filepath), f($file->filepath),
-                array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+                $content .= l(($file->filename ? $file->filename : dirname($file->filepath)), f($file->filepath),
+                array('attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
               }
             }
         }
         
         if (empty($content)) continue;
-
+        
         if (empty($view_type)) {
           $node->field_view[$view_field_type][$data->field_key] = array(
             '#content' => $content,
             '#name' => $data->name,
-            '#field_type' => $data->field_type,
+            '#field_type' => $view_field_type,
             '#field_key' => $data->field_key
           );
         } else if ($vite_type == 1) {
           $node->field_view[$data->field_key] = array(
             '#content' => $content,
             '#name' => $data->name,
-            '#field_type' => $data->field_type,
+            '#field_type' => $view_field_type,
             '#field_key' => $data->field_key
           );
         } else {
           $node->field_view[$data->field_id] = array(
             '#content' => $content,
             '#name' => $data->name,
-            '#field_type' => $data->field_type,
+            '#field_type' => $view_field_type,
             '#field_key' => $data->field_key
           );
         }

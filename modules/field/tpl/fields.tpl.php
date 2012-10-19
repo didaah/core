@@ -10,7 +10,6 @@
  *  $node->fields 字段原始数据
  *  $node->field_view 已经过组织的字段数据
  */
-
 ?>
 <div class="fields-node-view fields-node-<?php echo $module;?>-view fields-node-<?php echo $module;?>-<?php echo $node->nid;?>-view" id="fields-node-<?php echo $module?>-<?php echo $type?>-<?php echo $node->nid?>-view"><ul>
   <?php
@@ -20,7 +19,7 @@
         if (!empty($data['#content'])) {
           // view_type 为 2 时
           echo '<li class="fields-node-view-list fields-node-view-list-' . $data['#field_type'] . ' fields-node-view-list-' . $data['#field_type'] . '-' . $data['#field_key'] . '">';
-          echo '<strong class="fields-node-view-name">' . $data['#name'] . ': </strong>';
+          echo '<strong class="fields-node-view-name">' . $data['#name'] . '：</strong>';
           echo '<span class="fields-node-view-content">' . $data['#content'] . '</span>';
           echo '</li>';
         } else {
@@ -29,7 +28,7 @@
             if (!is_array($d)) continue;
             if (!empty($d['#content'])) {
               echo '<li class="fields-node-view-list fields-node-view-list-' . $d['#field_type'] . ' fields-node-view-list-' . $d['#field_type'] . '-' . $d['#field_key'] . '">';
-              echo '<strong class="fields-node-view-name">' . $d['#name'] . ': </strong>';
+              echo '<strong class="fields-node-view-name">' . $d['#name'] . '</strong>：';
               echo '<span class="fields-node-view-content">' . $d['#content'] . '</span>';
               echo '</li>';
             }
