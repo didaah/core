@@ -1,6 +1,33 @@
 <?php
 // $Id$
 
+/**
+ * @param object $ac
+ *  用户对象
+ * @return string
+ */
+function user_page_view($ac) {
+  $type = arg(3);
+
+  if (empty($type)) return dd_get_access();
+
+  $info = module_invoke_all('user_page_info', $ac);
+
+  if (empty($info[$type])) return dd_get_access();
+
+  // 默认约定输出值
+  $ac->content = '';
+
+  module_alter_all('user_page_view', $ac, $type);
+
+  dd_set_title(array($info[$type]['title']));
+
+  return theme('user_page', $ac, $type);
+}
+
+/**
+ * 跳转页
+ */
 function user_default() {
   global $user;
   if (!$user->uid) {

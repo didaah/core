@@ -104,6 +104,39 @@ function user_menu() {
     'page_callback' => 'user_view',
     'page_arguments' => array(1),
   );
+
+  /**
+   * 模块可通过 hook_user_page_info() 定义页面
+   * function test_user_page_info() {
+   *  return array(
+   *    'images' => array( // 则该页面的访问路径为 user/$uid/page/images
+   *      'title' => t('user', '我的图片'),
+   *    ),
+   *    'file' => array( // 则该页面的访问路径为 user/$uid/page/file
+   *      'title' => t('user', '我的文件')
+   *    ),
+   *  );
+   * }
+   *
+   * 可通过 hook_user_page_view() 输出内容
+   * function test_user_page_view(&$ac, $type) {
+   *  if ($type == 'images') {
+   *    $ac->content = $ac->name . '的图片';
+   *  } else if ($type == 'file') {
+   *    $ac->content = $ac->name . '的文件';
+   *  }
+   * }
+   * 
+   */ 
+  $items['user/%/page'] = array(
+    'description' => '用户个人页面扩展',
+    'load_functions' => array(1 => array('user_load')),
+    'access_callback' => 'user_is_user_view',
+    'access_arguments' => array(1),
+    'file' => 'user.page.inc',
+    'page_callback' => 'user_page_view',
+    'page_arguments' => array(1),
+  );
   
   $items['admin/users'] = array(
     'title' => '用户列表',
@@ -1948,7 +1981,7 @@ function user_block_list($theme) {
 function user_block_view($theme, $config = object) {
   if ($config->delta == 'login' && $GLOBALS['user']->uid == 0 && arg(1) != 'login') {
     return array(
-      'title' => t('user', '会员登录'),
+      'title' => $config->title,
       'content' => dd_get_form('user_login_form', $_GET['q'])
     );
   }
@@ -2099,6 +2132,10 @@ function user_theme() {
       'tpl' => 'user.tpl.php',
       'args' => array('account'),
     ),
+    'user_page' => array(
+      'tpl' => 'user_page.tpl.php',
+      'args' => array('account', 'type'),
+    ),
     'user_center' => array(
 			'tpl' => 'user_center.tpl.php',
 			'args' => array('center'),
@@ -2121,6 +2158,20 @@ function user_template_preprocess_user_center(&$var, $hook) {
   }
 }
 
+/**
+ * 
+ * @Implement of hook_template_preprocess_x()
+ * 
+ * 个人主页扩展页面模板文件加载顺序：
+ * user_page_{$type}.tpl.php
+ * user_page.tpl.php
+ * 
+ */
+function user_template_preprocess_user_page(&$var, $hook) {
+  if (isset($var['account']) && $var['type']) {
+    $var['theme_config']->tpl[] = 'user_page_' . $var['type'] . '.tpl.php';
+  }
+}
 
 /**
  * @Implement of hook_cron()

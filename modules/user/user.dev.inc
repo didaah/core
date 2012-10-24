@@ -42,6 +42,40 @@ function user_hook_info() {
       ),
     ),
   );
+     
+  $hook['user_page_info'] = array(
+    'name' => '用户扩展页面定义',
+    'description' => '',
+    'arguments' => array(
+      'account' => array(
+        'type' => 'object',
+        'name' => '用户对象',
+        'description' => '当前用户对象'
+      ),
+    ), 
+    'return' => array(
+      'type' => 'array',
+      'description' => '返回一个定义页面类型的数组，一个模块可以定义多个页面'
+    )
+  );
+     
+  $hook['user_page_view'] = array(
+    'name' => '用户扩展页面显示',
+    'description' => '',
+    'arguments' => array( // 传递的参数
+      'account' => array(
+        'type' => 'object',
+        'name' => '用户对象',
+        'description' => '当前用户对象，可为对象 $account->content 赋值，约定输出该内容'
+      ),
+      'type' => array(
+        'type' => 'string',
+        'name' => '页面类型',
+        'description' => '模块可根据该类型判断是否需要输出或改写 $account 对象'
+      ),
+    ),
+    'return' => array(), // 无返回，使用引用传递，直接修改 $account 对象
+  );
     
   return $hook;
 }

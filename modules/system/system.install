@@ -59,7 +59,7 @@ function system_update_7(){
 function system_update_6(){
   $ret = array();
   
-  if($cache_filter = module_get_table('system', 'cache')){
+  if ($cache_filter = module_get_table('system', 'cache')) {
     $ret = db_create_table('cache_filter', $cache_filter);
   }
   

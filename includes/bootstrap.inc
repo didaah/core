@@ -1402,12 +1402,12 @@ function format_date($timestamp, $type = 'default', $format = '') {
 }
 
 /**
- * 时间格式化，距离当前多少时间
- * @param (int) $timestamp
- *  时间戳
- * @param (int) $granularity
+ * 计算给定的秒数距离当前时间多久
+ * @param int $timestamp
+ *  秒数，通常是当前时间减去另一个时间
+ * @param int $granularity
  *  显示层级，默认为 年 周 天 小时 分钟 秒
- * @return (string)
+ * @return string
  */
 function format_interval($timestamp, $granularity = 5) {
   $units = array(
@@ -3064,8 +3064,8 @@ function dd_get_js($scope = 'header', $js = NULL) {
       continue;
     }
 
-    if (strpos($path, 'http://') === false && strpos($path, 'https://') === false) {
-      $path = $base_path .$path;
+    if (strpos($path, 'http://') === false && strpos($path, 'https://') === false && substr($path, 0, 1) != '/') {
+      $path = $base_path . $path;
     }
 
     if (strpos($path, '?') === false) {
