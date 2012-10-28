@@ -462,9 +462,14 @@ function url($path = NULL, $options = array()) {
 
   global $conf, $base_url, $base_path;
 
+  /**
+   * $options['query'] = array('id' => 123, 'title' => 'test');
+   * $options['query'] = 'id=123&title=test';
+   * $options['query'] = '123';
+   */
   if (is_array($options['query'])) {
     $options['query'] = dd_query_string_encode($options['query']);
-  } else if (strpos($options['query'], '=') === false) {
+  } else if (empty($options['query'])) {
     $options['query'] = '';
   }
 

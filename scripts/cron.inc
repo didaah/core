@@ -4,23 +4,39 @@
 /**
  * 计划任务统一管理脚本，请将此脚本加入到系统计划任务中，间隔时间自行控制，建议为 1-3 分钟。
  *  如：* * * * * php $path/scripts/cron.inc --host www.didaah.org
- * 
+ *
  * 可使用本脚本手动执行任务，必须指定模块名称及任务机器名，手动执行时，不检查条件限制
- *  如：php $path/scripts/cron.inc --host www.didaah.org --module system --name test
+ *  如：php $path/scripts/cron.inc --host www.didaah.org --cron_module system --cron_name test
  *  执行 system 模块的 test 任务
+ *
+ * @param 可用的参数
+ *  --cron_module 指定模块名称，将只执行该模块设定的任务，注：旧名称为 --module，为避免和任务本身的参数冲突，添加 cron 前缀
+ *  --cron_type 指定任务名称，将只执行该模块中指定名称的任务，注：旧名称为 --type，为避免和任务本身的参数冲突，添加 cron 前缀
  */
 
 $is_cron = true;
 
 require_once 'common.inc';
 
-if (!empty($_args['module']) && !empty($_args['name'])) {
-  module_include_file('cronjobs.inc', $_args['module']);
-  $cronjobs = module_invoke($_args['module'], 'cronjobs');
+if (!empty($_args['cron_module'])) {
+  $__cron_module = $_args['cron_module'];
+} else if (!empty($_args['module'])) {
+  $__cron_module = $_args['module'];
+}
 
-  if ($cronjobs[$_args['name']]) {
-    $cron = $cronjobs[$_args['name']];
-    $module = !empty($cron['module']) ? $cron['module'] : $_args['module'];
+if (!empty($_args['cron_name'])) {
+  $__cron_name = $_args['cron_name'];
+} else if (!empty($_args['name'])) {
+  $__cron_name = $_args['name'];
+}
+
+if (!empty($__cron_module) && !empty($__cron_name)) {
+  module_include_file('cronjobs.inc', $__cron_module);
+  $cronjobs = module_invoke($__cron_module, 'cronjobs');
+
+  if ($cronjobs[$__cron_name]) {
+    $cron = $cronjobs[$__cron_name];
+    $module = !empty($cron['module']) ? $cron['module'] : $__cron_module;
     $file = DIDA_ROOT . '/' . dd_get_path('module', $module) . '/scripts/' . $cron['script'];
     if (is_file($file)) {
       if (!empty($cron['param']) && is_array($cron['param'])) {
@@ -32,7 +48,7 @@ if (!empty($_args['module']) && !empty($_args['name'])) {
       message(t('system', '脚本 !file 不存在', array('!module' => $file)));
     }
   } else {
-    message(t('system', '!module 模块没有任务 !name', array('!module' => $_args['module'], '!name' => $_args['name'])));
+    message(t('system', '!module 模块没有任务 !name', array('!module' => $__cron_module, '!name' => $__cron_name)));
   }
   exit;
 }

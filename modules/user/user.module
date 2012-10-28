@@ -1333,23 +1333,34 @@ function user_roles_opt() {
   return $opt;
 }
 
+// public user_login_form($url = NULL) {{{ 
 /**
- * 登录表单
+ * user_login_form
+ * 登录表单，主要用于区块。 
+ * @param string $redirect 
+ *  登录成功后跳转地址
+ * @access public
+ * @return array
  */
-function user_login_form($url = NULL) {
+function user_login_form($redirect = NULL) {
   global $conf;
-  if (!$url) {
-    if ($q = dd_query_string_encode($_GET, array_merge(array('q', 'ajax'), array_keys($_COOKIE)))) {
-      $q = '&' . $q;
+  
+  if (empty($redirect)) {
+    $query = '';
+
+    if ($query = dd_query_string_encode($_GET, array_merge(array('q', 'ajax'), array_keys($_COOKIE)))) {
+      $query = '&' . $query;
     }
-    if (strpos($_GET['q'], 'user/login') !== false) {
-      $path = $_GET['q'];
-    } else {
-      $path = 'user/login/ajax';
-      $q .= '&redirect='.urlencode($_SERVER['REQUEST_URI']);
+
+    if (strpos($_GET['q'], 'user/login') === false) {
+      $query .= '&redirect=' . urlencode($_SERVER['REQUEST_URI'] . '&1');
     }
-    $url = url($path, array('query' => 'ajax=submit' .$q));
+
+    $url = url('user/login/ajax', array('query' => 'ajax=submit' . $query));
+  } else {
+    $url = url('user/login/ajax', array('query' => 'ajax=submit&redirect=' . urlencode(url($redirect))));
   }
+  
   $form['settings'] = array(
     '#validate' => array('user_login_validate'),
     '#ajax_validate' => true,
@@ -1414,6 +1425,7 @@ function user_login_form($url = NULL) {
 
   return $form;
 }
+// }}}
 
 /**
  * 登录验证
@@ -1982,7 +1994,7 @@ function user_block_view($theme, $config = object) {
   if ($config->delta == 'login' && $GLOBALS['user']->uid == 0 && arg(1) != 'login') {
     return array(
       'title' => $config->title,
-      'content' => dd_get_form('user_login_form', $_GET['q'])
+      'content' => dd_get_form('user_login_form')
     );
   }
 }
