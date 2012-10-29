@@ -98,10 +98,10 @@ Dida.markitup.html = function(obj) {
     }, obj.AutoSaveTime || 60000);
 	}
 	
-	if (!$.isEmptyObject(settings.markitupHtmlSets)) {
+	if (!$.isEmptyObject(Dida.settings.markitupHtmlSets)) {
 		// 添加全局按钮
-		for (var attr in settings.markitupHtmlSets) {
-			sets[attr] = settings.markitupHtmlSets[attr];
+		for (var attr in Dida.settings.markitupHtmlSets) {
+			sets[attr] = Dida.settings.markitupHtmlSets[attr];
 		}
 	}
 	
