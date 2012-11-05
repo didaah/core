@@ -1626,9 +1626,9 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     return $result;
   }
 
-  $options['headers'] += array(
-    'User-Agent' => 'Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTBDFff GTB7.0',
-  );
+  if (empty($options['headers']['User-Agent'])) {
+    $options['headers']['User-Agent'] = 'Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTBDFff GTB7.0';
+  }
   
   if (is_array($data) || is_object($data)) {
     $options['data'] = '';

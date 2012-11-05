@@ -364,6 +364,7 @@ function system_admin_logs(){
   }
   
   dd_set_breadcrumb($breadcrumb);
+
   return $output;
 }
 
