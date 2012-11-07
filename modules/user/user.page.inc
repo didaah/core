@@ -582,8 +582,10 @@ function user_page_register() {
       dd_js_print('$(\'#ajax_description\').html("'. addslashes(implode('<br>', dd_array2_to('value', $error))).'").show(300);');
     }
   }
-  $v = dd_get_form('user_register_form');
-  return $v;
+
+  $output = dd_get_form('user_register_form');
+
+  return $output;
 }
 
 /**

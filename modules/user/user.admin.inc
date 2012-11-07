@@ -523,6 +523,7 @@ function user_admin_fields() {
 	$tabs = array(
 		l(t('user', '字段管理'), 'admin/users/fields'),
 		l(t('user', '添加字段'), 'admin/users/fields/add'),
+		l(t('user', '分组管理'), 'admin/users/fields/groups'),
 		l(t('user', '导出字段'), 'admin/users/fields/export')
 	);
 	global $user;
@@ -545,6 +546,9 @@ function user_admin_fields() {
   	case 'export':
   	  $output = field_export(0, 'user', 'field');
   	break;
+    case 'groups':
+      $output = dd_get_form('field_groups', 'user', 'field');
+    break;
   	case 'test':
   	  _user_field_test();
   	break;

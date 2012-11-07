@@ -2,6 +2,19 @@
 // $Id$
 
 /**
+  $form = array();
+  
+  // 表单配置，设置验证函数等参数
+  $form['settings'] = array(
+    '#validate' => array('module_test_form_validate'),
+  );
+
+  // 设置字段分组 fieldset 信息 
+  $form['groups'] = array('test' => array('#fieldset' => true, '#fieldset_sort' => 'desc'));
+
+  // 表单字段
+  $form['fields'] = array();
+
   $form['fields']['account'] = array(
     '#type' => 'textfield',
     '#title' => '用户名',
@@ -11,6 +24,7 @@
     '#suffix' => '包裹后缀',
     '#field_prefix' => '字段前缀',
     '#field_suffix' => '字段后缀',
+    '#groups' => 'test', // 字段分组，同组字段输出到页面时，将显示在一起。并可包裹在 fieldset 中，根据  $form['settings']['#groups'] 中的设置而定
     '#attributes' => array(
       'id' => 'user_login',
       'size' => 50,
@@ -188,12 +202,13 @@ function dd_get_form($form_id) {
 
   $fields = dd_form_sort(dd_form_field($form, $form_values, $error));
   
-  $output .= '<form '.dd_attributes($form['#args']).'>';
+  $output .= '<form ' . dd_attributes($form['#args']) . '>';
 
-  if ($form['settings']['#title']) {
+  if (!empty($form['settings']['#title'])) {
     $output .= '<h3>'.$form['settings']['#title'].'</h3>';
   }
-  if ($form['settings']['#description']) {
+
+  if (!empty($form['settings']['#description'])) {
     $output .= '<div class="description form_description form_setting_description">'.$form['settings']['#description'].'</div>';
   }
   
@@ -540,22 +555,29 @@ function _dd_form_required($form, $field, $value) {
  * 表单字段转换为 html
  */
 function dd_form_html($form, $fields) {
-  if (!$form['settings']['#theme']) {
+  if (empty($form['settings']['#theme'])) {
+    $_fields = array();
     foreach ($fields as $key => $field) {
-      if ((strpos($key, '#') === false)) {
-        if ($field['#html']) {
-          if (!$field['#theme']) {
-            $output .= $field['#html'];
-          } else {
-            $output .= call_user_func($field['#theme'], $field);
-          }
+      if (is_array($field) && !empty($field['#groups'])) {
+        // 分组名称，附加前缀，避免和字段冲突
+        $_key = '__dida_form_groups_' . $field['#groups'];
+        if (empty($_fields[$_key])) {
+          $_fields[$_key] = !empty($form['groups']) ? $form['groups'][$field['#groups']] : array();
+        }
+        unset($field['#groups']);
+        $_fields[$_key][$key] = $field;
+      } else {
+        $_fields[$key] =$field;
+      }
+    }
+    
+    foreach ($_fields as $key => $field) {
+      if (strpos($key, '#') === false) {
+        if (!empty($field['#html'])) {
+          $output .= empty($field['#theme']) ? $field['#html'] : call_user_func($field['#theme'], $field);
         } else if (is_array($field)) {
           $output .= _dd_form_fieldset($field, 'prefix');
-          if (!$field['#theme']) {
-            $output .= dd_form_html($form, $field);
-          } else {
-            $output .= call_user_func($field['#theme'], $field);
-          }
+          $output .= empty($field['#html']) ? dd_form_html($form, $field) : call_user_func($field['#theme'], $field);
           $output .= _dd_form_fieldset($field, 'suffix');
         }
       }

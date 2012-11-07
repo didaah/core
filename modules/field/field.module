@@ -11,6 +11,7 @@
  */
 function field_menu() {
   $items = array();
+
   $items['fields/%'] = array(
     'load_functions' => array(1 => array('field_load')),
     'access_callback' => 'field_access',
@@ -19,6 +20,7 @@ function field_menu() {
     'page_arguments' => array(1),
     'file' => 'field.page.inc'
   );
+
   $items['category/%'] = array(
     'load_functions' => array(1 => array('field_term_load')),
     'access_callback' => 'field_term_access',
@@ -27,6 +29,7 @@ function field_menu() {
     'page_arguments' => array(1),
     'file' => 'field.page.inc'
   );
+
   $items['category/%/feed'] = array(
     'load_functions' => array(1 => array('field_term_load')),
     'access_callback' => 'field_term_access',
@@ -35,13 +38,8 @@ function field_menu() {
     'page_arguments' => array(1),
     'file' => 'field.page.inc'
   );
-  return $items;
-}
 
-/**
- * @Implement of hook_perm
- */
-function field_perm() {
+  return $items;
 }
 
 /**
@@ -1141,6 +1139,14 @@ function field_form($field) {
     '#title' => t('field', '排序'),
     '#type' => 'weight'
   );
+ 
+  $form['fields']['groups'] = array(
+    '#type' => 'textfield',
+    '#title' => t('field', '组名'),
+    '#weight' => -99,
+    '#default_value' => $field->groups,
+    '#description' => t('field', '分组便于在输出表单时组织字段'),
+  );
   
   $form['fields']['_field_type'] = array(
     '#title' => t('field', '类型'),
@@ -1315,19 +1321,21 @@ function field_save(&$field) {
       $error['type']['#error'][] = t('field', '字段标识不能为空');
     } else if (!$field->field_key) {
       $error['field_key']['#error'][] = t('field', '索引不能为空');
+    } else if (mb_strlen($field->groups, 'utf-8') > 32) {
+      $error['groups']['#error'][] = t('field', '字段分组长度不超过 %strlen 个字符', array('%strlen' => 32));
     } else if (mb_strlen($field->type, 'utf-8') > 32) {
       $error['type']['#error'][] = t('field', '字段标识长度不超过 %strlen 个字符', array('%strlen' => 32));
     } else if (mb_strlen($field->field_func, 'utf-8') > 64) {
       $error['field_func']['#error'][] = t('field', '回调函数长度不超过 %strlen 个字符', array('%strlen' => 64));
     } else if ($field->name && mb_strlen($field->name, 'utf-8') > 64) {
       $error['name']['#error'][] = t('field', '字符名称长度不超过 %strlen 个字符', array('%strlen' => 64));
-    } else if (preg_match('/[^0-9|a-z|_]/i', $field->type)) {
+    } else if (preg_match('/[^0-9|a-z|_|-]/i', $field->type)) {
       $error['type']['#error'][] = t('field', '字段标识只能是数字、字母与下划线');
-    } else if ($field->field_func && preg_match('/[^0-9|a-z|_]/i', $field->field_func)) {
+    } else if ($field->field_func && preg_match('/[^0-9|a-z|_|-]/i', $field->field_func)) {
       $error['field_func']['#error'][] = t('field', '回调函数只能是数字、字母与下划线');
     } else if (is_numeric($field->field_key)) {
       $error['field_key']['#error'][] = t('field', '索引不能全部是数字');
-    } else if (preg_match('/[^0-9|a-z|_]/i', $field->field_key)) {
+    } else if (preg_match('/[^0-9|a-z|_|-]/i', $field->field_key)) {
       $error['field_key']['#error'][] = t('field', '索引名称只能是数字、字母与下划线');
     } else if (($field->field_id && db_query('SELECT COUNT(*) FROM {fields} WHERE field_key = ? AND module = ?
       AND type = ? AND field_id != ?', array($field->field_key, $field->module, $field->type, $field->field_id),
@@ -1351,31 +1359,26 @@ function field_save(&$field) {
         
         if ($field->field_id) {
           // 更新
-          if (db_exec('UPDATE {fields} SET field_key = ?, field_type = ?, field_func = ?, type = ?, module = ?, name = ?, weight = ?, required = ?, access = ?, deleted = ?, locked = ?, data = ? WHERE field_id = ?',
-            array($field->field_key, $field->field_type, $field->field_func, $field->type, $field->module, $field->name, $field->weight, $field->required, serialize($field->access), $field->deleted, $field->locked, serialize($field->data), $field->field_id), array('return' => 'return'))) {
-            dd_set_message(t('field', '更新成功'));
-          } else {
-            dd_set_message(t('field', '更新失败'), 'error');
-            return false;
-          }
+          $args = array('field_id');
         } else {
+          $args = NULL;
           // 添加
           if ($info['sum']) {
-            $count = db_query('SELECT COUNT(*) FROM {fields} WHERE module = ? AND type = ?', array($field->module, $field->type), array('return' => 'column'));
+            $count = db_query('SELECT COUNT(*) FROM {fields} WHERE module = ? AND type = ?',
+            array($field->module, $field->type), array('return' => 'column'));
             if ($count + 1 > $info['sum']) {
               dd_set_message(t('field', '该组最多添加 %length 个字段', array('%length' => $info['sum'])), 'error');
               $error['type']['#error'][] = t('field', '该组最多添加 %length 个字段', array('%length' => $info['sum']));
               return $error;
             }
           }
-          
-          if (db_exec('INSERT INTO {fields} (field_key, field_type, field_func, type, module, name, weight, required, access, deleted, locked, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            array($field->field_key, $field->field_type, $field->field_func, $field->type, $field->module, $field->name, $field->weight, $field->required, serialize($field->access), $field->deleted, $field->locked, serialize($field->data)))) {
-            $field->field_id = db_last_insert_id();
-          } else {
-            dd_set_message(t('field', '写入失败'), 'error');
-            return false;
-          }
+        }
+
+        if (db_write_record('fields', $field, $args)) {
+          dd_set_message(t('field', '保存成功'));
+        } else {
+          dd_set_message(t('field', '保存失败'), 'error');
+          return false;
         }
         
         /**
@@ -1405,6 +1408,82 @@ function field_load($field_id, $clear = NULL) {
     $fields[$field_id] = field_get_cache_field($field_id, $clear);
   }
   return $fields[$field_id];
+}
+
+// public field_groups($module, $type) {{{ 
+/**
+ * field_groups
+ * 字段输出分组管理
+ * 
+ * @param string $module 
+ * @param string $type 
+ * @access public
+ * @return array
+ */
+function field_groups($module, $type) {
+  if ($fetch = db_query('SELECT field_id, groups FROM {fields} WHERE module = ? AND type = ?',
+  array($module, $type))) {
+    
+    dd_set_help(t('field', '管理字段分组在表单中显示时的 fieldset 信息'));
+
+    $datas = custom_get('field_groups_' . $module . $type);
+
+    $form = array(
+      'fields' => array('groups' => array()),
+      'settings' => array(
+        '#validate' => array('field_groups_validate'),
+      ),
+      'values' => array('module' => $module, 'type' => $type),
+    );
+
+    foreach ($fetch as $o) {
+      if (empty($o->groups)) continue;
+
+      if (empty($datas[$o->groups])) {
+        $data = array('legend' => '', 'prefix' => '');
+      } else {
+        $data = $datas[$o->groups];
+      }
+
+      $form['fields']['groups'][$o->groups] = array(
+        '#fieldset_prefix' => 'asc',
+        '#fieldset_legend' => $o->groups,
+        '#fieldset_suffix' => 1,
+        '#fieldset' => true       
+      );
+
+      $form['fields']['groups'][$o->groups]['legend'] = array(
+        '#title' => t('field', '分组名称'),
+        '#type' => 'textfield',
+        '#default_value' => $data['legend'],
+        '#description' => t('field', 'fieldset legend 值，留空则为不启用 fieldset'),
+      );
+ 
+      $form['fields']['groups'][$o->groups]['prefix'] = array(
+        '#title' => t('field', '默认样式'),
+        '#type' => 'radio',
+        '#default_value' => $data['prefix'],
+        '#options' => array('asc' => t('field', '展开'), 'desc' => '闭合'),
+        '#description' => t('field', '若启用 fieldset，请选择默认样式'),
+      );
+    }
+
+    $form['fields']['button'] = array(
+      '#type' => 'submit'
+    );
+
+    return $form;
+  } else {
+    dd_set_help(system_no_content(t('field', '还没有分组')));
+    return false;
+  }
+}
+// }}}
+
+function field_groups_validate(&$form, &$v) {
+  $key = 'field_groups_' . $form['values']['module'] . $form['values']['type'];
+  custom_set($key, $v['groups']);
+  dd_set_message(t('field', '保存成功'));
 }
 
 /**
@@ -1476,7 +1555,7 @@ function field_delete($field) {
  *  设置需要输出的 table 表头，如：array('name', 'weight'), 若为空，则输出全部
  */
 function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
-  if ($_POST['field_field_id']) {
+  if (!empty($_POST['field_field_id'])) {
     if (isset($_POST['field_change_weight']) && is_numeric($_POST['field_change_weight'])) {
       if (db_exec('UPDATE {fields} SET weight = ? WHERE field_id = ?', array($_POST['field_change_weight'], $_POST['field_field_id']))) {
         field_get_cache_field(NULL, 1);
@@ -1495,7 +1574,7 @@ function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
     }
   }
   
-  if ($_GET['field_field_id']) {
+  if (!empty($_GET['field_field_id'])) {
     if ($field = field_load($_GET['field_field_id'])) {
       switch ($_GET['field_op']) {
         case 'custom':
@@ -1520,7 +1599,7 @@ function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
             dd_set_message(t('field', '这个字段不允许编辑'), 'error');
           }
         break;
-        case 'export':
+        case 'export': // 导出
           return field_export($field->field_id);
         break;
         case 'delete':
@@ -1536,27 +1615,36 @@ function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
       return;
     }
   }
-  
-  if ($module && $type) {
-    $fetch = pager_query('SELECT * FROM {fields} WHERE module = ? AND type = ? ORDER BY weight ASC, field_id ASC', 20, 0, NULL, array($module, $type));
-  } else if ($module) {
-    $fetch = pager_query('SELECT * FROM {fields} WHERE module = ? ORDER BY weight ASC, field_id ASC', 20, 0, NULL, array($module));
-  } else {
-    $fetch = pager_query('SELECT * FROM {fields} ORDER BY weight ASC, field_id ASC', 20);
-  }
-  
-  if (!$fetch) return system_no_content();
-  
+   
   $types = field_get_call_lists();
   
   $header = array(
-    'name' => t('field', '名称'),
-    'type' => t('field', '类型'),
-    'required' => t('field', '必需'),
-    'weight' => t('field', '权重'),
+    'name' => array('data' => t('field', '名称'), 'field' => 'name'),
+    'type' => array('data' => t('field', '类型'), 'field' => 'field_type'),
+    'groups' => array('data' => t('field', '分组'), 'field' => 'groups'),
+    'required' => array('data' => t('field', '必需'), 'field' => 'required'),
+    'weight' => array('data' => t('field', '权重'), 'field' => 'weight'),
     'links' => t('field', '操作')
   );
+
+  $args = array(); 
+
+  $query = 'SELECT * FROM {fields}';
+
+  if ($module && $type) {
+    $query .= ' WHERE module = ? AND type = ?';
+    $args = array($module, $type);
+  } else if ($module) {
+    $args = array($module);
+    $query = ' WHERE module = ?';
+  }
+
+  $query .= table_sql($header);
   
+  if (!$fetch = pager_query($query, 20, 0, NULL, $args)) {
+    return system_no_content();
+  }
+ 
   if (!empty($filter_header)) $header = array_intersect_key($header, array_flip($filter_header));
 
   if ($get = dd_query_string_encode($_GET, array_merge(array('q', 'field_field_id'), array_keys($_COOKIE)))) {
@@ -1584,6 +1672,10 @@ function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
     
     if (!empty($header['type'])) {
       $rows[] = $types[$field->field_type]['title'];
+    }
+     
+    if (!empty($header['groups'])) {
+      $rows[] = $field->groups ? $field->groups : t('field', '默认');
     }
     
     if (!empty($header['required'])) {
@@ -2879,7 +2971,23 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
   } else {
     $form['fields']['fields']['#weight'] = -3;
   }
+
+  if (empty($form['groups'])) {
+    $form['groups'] = array();
+  }
   
+  if ($groups = custom_get('field_groups_' . $module . $type)) {
+    foreach ($groups as $key => $info) {
+      if (empty($info['legend'])) continue;
+      $form['groups'][$key] = array(
+        '#fieldset' => 1,
+        '#fieldset_legend' => $info['legend'],
+        '#fieldset_prefix' => !empty($info['prefix']) ? $info['prefix'] : 'asc',
+        '#fieldset_suffix' => 1
+      );
+    }
+  }
+
   dd_add_js('modules/field/field.js');
   dd_add_css('modules/field/field.css');
   
@@ -2903,6 +3011,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               '#type' => $data->field_type,
               '#default_value' => $node->fields[$data->field_key] ? $node->fields[$data->field_key]->tid : '',
               '#required' => $required,
+              '#groups' => $data->groups,
               '#options' => field_get_term_options($options[$field_id], $required),
               '#description' => t(NULL, $data->data['input_description'])
             );
@@ -2917,6 +3026,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
               '#default_value' => $field_value,
+              '#groups' => $data->groups,
               '#required' => $required,
               '#options' => field_get_term_options($options[$field_id], 1),
               '#description' => t(NULL, $data->data['input_description'])
@@ -2933,6 +3043,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
                 '#title' => t(NULL, $data->name),
                 '#type' => 'select',
                 '#required' => $required,
+                '#groups' => $data->groups,
                 '#attributes' => array(
                   'class' => 'field_option_children field_option_children_'.$data->field_key,
                   'alt' => $data->field_key
@@ -2957,6 +3068,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
                   ++$ajaxId;
                   $form['fields']['fields']['_field_root_'.$data->field_key.$ajaxId] = array(
                     '#type' => 'select',
+                    '#groups' => $data->groups,
                     '#attributes' => array(
                       'class' => 'field_option_children',
                       'alt' => $data->field_key
@@ -2972,6 +3084,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               $form['fields']['fields'][$data->field_key] = array(
                 '#type' => 'hidden',
                 '#default_value' => $default_value,
+                '#groups' => $data->groups,
                 '#required' => $required,
                 '#attributes' => array(
                   'class' => 'field_select_value field_select_value_'.$data->field_key,
@@ -2982,6 +3095,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               $form['fields']['fields'][$data->field_key] = array(
                 '#title' => t(NULL, $data->name),
                 '#type' => 'select',
+                '#groups' => $data->groups,
                 '#default_value' => $node->fields[$data->field_key] ? $node->fields[$data->field_key]->tid : '',
                 '#required' => $required,
                 '#options' => field_get_term_options($options[$field_id], $required),
@@ -2999,6 +3113,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               $form['fields']['fields']['field_root_'.$data->field_key] = array(
                 '#title' => t(NULL, $data->name),
                 '#type' => 'select',
+                '#groups' => $data->groups,
                 '#required' => $node->fields[$data->field_key] ? false : $required,
                 '#attributes' => array(
                   'class' => 'field_option_children field_option_children_'.$data->field_key,
@@ -3056,6 +3171,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
               $form['fields']['fields'][$data->field_key] = array(
                 '#title' => t(NULL, $data->name),
                 '#type' => 'selects',
+                '#groups' => $data->groups,
                 '#default_value' => $defaults,
                 '#required' => $required,
                 '#options' => field_get_term_options($options[$field_id], 1),
@@ -3073,6 +3189,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             $form['fields']['fields'][$data->field_key] = array(
               '#title' => t(NULL, $data->name),
               '#type' => 'textfield',
+              '#groups' => $data->groups,
               '#default_value' => $field_value ? rtrim($field_value, ',') : '',
               '#required' => $required,
               '#attributes' => array('size' => 50),
@@ -3100,6 +3217,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             $form['fields']['fields'][$data->field_key] = array(
               '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
+              '#groups' => $data->groups,
               '#default_value' => $node->fields[$data->field_key]->text,
               '#required' => $required,
               '#attributes' => array('size' => 50),
@@ -3116,6 +3234,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             $form['fields']['fields'][$data->field_key] = array(
               '#title' => t(NULL, $data->name),
               '#type' => $data->field_type,
+              '#groups' => $data->groups,
               '#default_value' => $node->fields[$data->field_key]->text,
               '#required' => $required,
               '#description' => t(NULL, $data->data['input_description'])
@@ -3137,6 +3256,7 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             $form['fields']['fields'][$data->field_key] = array(
               '#title' => t(NULL, $data->name),
               '#type' => 'file',
+              '#groups' => $data->groups,
               '#multi' => $multi,
               '#disabled' => $disabled,
               '#required' => $node->fields[$data->field_key] ? false : $required,

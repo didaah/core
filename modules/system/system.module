@@ -2160,9 +2160,9 @@ function system_get_lang_change_link($html = true) {
  */
 function system_logs_info() {
   return array(
-    'cron' => t('cron', '计划任务'),
-    'cron_info' => t('cron', '计划任务详情'),
-    'cron_timeout' => t('cron', '任务超时提醒'),
+    'cron' => t('system', '计划任务'),
+    'cron_info' => t('system', '计划任务详情'),
+    'cron_timeout' => t('system', '任务超时提醒'),
   );
 }
 
