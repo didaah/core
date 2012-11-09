@@ -47,18 +47,33 @@ function _lang_export($lang_code, $module) {
      * 读取该语言所有已翻译的字符串，做为默认翻译
      */
     $cache_lang_file = DIDA_ROOT . '/' . $conf_dir . '/cache/languages/';
-    $cache_lang_value = array();
+    $cache_lang_value = $cache_lang_js = array();
 
     if (is_file($cache_lang_file . $lang_code . '.php')) {
       // 已合并的缓存翻译文件
       include $cache_lang_file . $lang_code . '.php';
       $cache_lang_value = $l;
+      $cache_lang_js = $j;
       // 加载自定义翻译文件
       if (is_file($cache_lang_file . 'custom_' . $lang_code . '.php')) {
-        $l = array();
+        $l = $j = array();
         include $cache_lang_file . 'custom_' . $lang_code . '.php';
         $cache_lang_value = array_merge($cache_lang_value, $l);
+        if (!empty($j)) {
+          $cache_lang_js = array_merge($cache_lang_js, $j);
+        }
       }
+
+      if (!empty($cache_lang_js)) {
+        foreach ($cache_lang_value as $key => $value) {
+          if ($key == $value && !empty($cache_lang_js[$key]) && $cache_lang_js[$key] != $key) {
+            $cache_lang_value[$key] = $cache_lang_js[$key];
+          } else if ($key != $value && !empty($cache_lang_js[$key]) && $cache_lang_js[$key] == $key) {
+            $cache_lang_js[$key] = $value;
+          }
+        }
+      }
+
     }
   }
 

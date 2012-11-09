@@ -3116,17 +3116,13 @@ function dd_to_js($var) {
       return $var;
     case 'resource':
     case 'string':
-      $str = '"'. str_replace(array("\r", "\n", "<", ">", "&"),
-      array('\r', '\n', '\x3c', '\x3e', '\x26'),
-      addslashes($var)) .'"';
       if (strpos($var, ':::code:::') === false) {
         return '"'. str_replace(array("\r", "\n", "<", ">", "&"),
         array('\r', '\n', '\x3c', '\x3e', '\x26'),
         addslashes($var)) .'"';
       } else {
         return str_replace(array("\r", "\n", "<", ">", "&", ':::code:::'),
-        array('\r', '\n', '\x3c', '\x3e', '\x26', ''),
-        addslashes($var));
+        array('\r', '\n', '\x3c', '\x3e', '\x26', ''), $var);
       }
     case 'array':
       if (empty ($var) || array_keys($var) === range(0, sizeof($var) - 1)) {
