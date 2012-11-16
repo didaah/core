@@ -421,6 +421,10 @@ span.option_label, span.form_radio_text{
   color: #ccc;
 }
 
+.dida_search_form_field_keyword_focus {
+  color: #000;
+}
+
 /* icon */
 .ext_sort_order {
   padding: 0 5px;

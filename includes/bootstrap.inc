@@ -2836,7 +2836,7 @@ function dd_js_print($js) {
  * @return (string)
  */
 function _dd_js_print($js) {
-  return '<script type="text/javascript">'.$js.'</script>';
+  return '<script type="text/javascript">' . $js . '</script>';
 }
 
 /**

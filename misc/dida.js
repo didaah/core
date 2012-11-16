@@ -557,7 +557,12 @@ $(function() {
     if (!$(this).val() && $.browser.msie) {
       $(this).val(($(this).attr('title') || $(this).attr('alt'))).addClass('dida_search_form_field_keyword_default');
     }
+    var t = $(this).attr('title') || $(this).attr('alt');
+    if (!$(this).val() || $(this).val() == t) {
+      $(this).removeClass('dida_search_form_field_keyword_focus');
+    }
   }).focusin(function(){
+    $(this).addClass('dida_search_form_field_keyword_focus');
     var t = $(this).attr('title') || $(this).attr('alt');
     if (t && $(this).val() == t) {
       $(this).val("").removeClass('dida_search_form_field_keyword_default');
