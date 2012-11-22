@@ -14,33 +14,36 @@
  */
 function image_get_thumb($fid, $filepath, $size, $style = 'scale') {
   static $files;
-  if (!isset($files[$fid][$size][$style])) {
+  if (!isset($files[$fid]) || !isset($files[$fid][$size][$style])) {
+    if (empty($files[$fid])) $files[$fid] = array($size => array());
     if (is_file($filepath)) {
       $files[$fid][$size][$style] = $filepath;
-      
-      $filename = end(explode('/', $filepath));
-      $ext = end(explode('.', basename($filepath)));
-      $thumb = $size. '_'.$style;
-      $thumb_filepath = file_mkdir(str_replace($filename, $fid, $filepath)) .'/'.$thumb .'.'. $ext;
+      $filename = basename($filepath);
+      $thumb_filepath = file_mkdir(str_replace($filename, $fid, $filepath)) . '/';
+      $thumb_filepath .= $size . '_' . $style;
+
+      if (strpos($filename, '.') !== false) {
+        $thumb_filepath .= '.' . end(explode('.', $filename));
+      }
+
       if (is_file($thumb_filepath)) {
         $files[$fid][$size][$style] = $thumb_filepath;
       } else {
+        $info = image_get_info($filepath);
         $t = explode('x', $size);
-        if (is_file(file_directory_path(). '/org/'.$fid)) {
-          $filepath = file_directory_path(). '/org/'.$fid;
-        }
-        $function = 'image_' . $style;
-        if (function_exists($function)) {
-          $true = $function($filepath, $thumb_filepath, $t[0], $t[1]);
-        } else {
-          $true = image_scale_resize($filepath, $thumb_filepath, $t[0], $t[1]);
-        }
-        if ($true) {
-          $files[$fid][$size][$style] = $thumb_filepath;
+        // 原图长或宽大于缩略尺寸才需要生成
+        if ($info['width'] > $t[0] || $info['height'] > $t[1]) {
+          $function = 'image_' . $style;
+          if (function_exists($function)) {
+            $true = $function($filepath, $thumb_filepath, $t[0], $t[1]);
+          } else {
+            $true = image_scale_resize($filepath, $thumb_filepath, $t[0], $t[1]);
+          }
+          if ($true) $files[$fid][$size][$style] = $thumb_filepath;
         }
       }
     } else {
-      $files[$fid][$size][$style] = 'custom.php?module=system&op=image_error&size='.$size;
+      $files[$fid][$size][$style] = 'custom.php?module=system&op=image_error&size=' . $size;
     }
   }
   return $files[$fid][$size][$style];
