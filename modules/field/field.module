@@ -867,50 +867,68 @@ function field_field_call_form($field, &$form) {
       '#type' => 'select',
       '#title' => t('field', '数量'),
       '#default_value' => $field->data['multi'] ? $field->data['multi'] : 0,
-      '#options' => array(1 => 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+      '#options' => array(1 => 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 100 => 100, 1000 => 1000),
       '#description' => t('field', '可同时上传多个文件，默认为  1 个')
     );
+
+    $form['fields']['data']['swfupload'] = array(
+      '#type' => 'checkbox',
+      '#title' => '工具',
+      '#default_value' => $field->data['swfupload'] ? $field->data['swfupload'] : 0,
+      '#description' => t('field', '使用 swfupload 可以让批量上传更便捷，需要先启用 editor 模块'),
+      '#disabled' => !module_exists('editor')
+    );
+    if (function_exists('editor')) {
+      
+    }
+
     $form['fields']['data']['filetype'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '类型'),
       '#default_value' => $field->data['filetype'] ? implode('|', $field->data['filetype']) : '',
       '#description' => t('field', '允许的文件类型，留空为不限。以|分隔，如：jpg|gif')
     );
+
     $form['fields']['data']['filesize'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '大小'),
       '#default_value' => $field->data['filesize'],
       '#description' => t('field', '允许的文件大小，单位KB，留空为不限')
     );
+
     $form['fields']['data']['filename'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '名称'),
       '#default_value' => $field->data['filename'],
       '#description' => t('field', '指定文件名称，可使用<a href="!url">通配符</a>，建议留空', array('!url' => url('admin/token')))
     );
+
     $form['fields']['data']['extension'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '扩展'),
       '#default_value' => $field->data['extension'],
       '#description' => t('field', '指定文件扩展名，建议留空')
     );
+
     $form['fields']['data']['thumbs']['thumb'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '小图'),
       '#default_value' => $field->data['thumbs']['thumb'] ? $field->data['thumbs']['thumb'] : '85x85',
       '#description' => t('field', '缩略图尺寸，如：85x85')
     );
+
     $form['fields']['data']['thumbs']['medium'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '中图'),
       '#default_value' => $field->data['thumbs']['medium'] ? $field->data['thumbs']['medium'] : '200x200',
       '#description' => t('field', '适中图尺寸，如：200x200')
     );
+
     $form['fields']['data']['savepath'] = array(
       '#type' => 'textfield',
       '#title' => t('field', '路径'),
       '#default_value' => $field->data['savepath'],
-      '#description' => t('field', '文件保存路径，留可使用<a href="!url">通配符</a>，空则使用用户默认文件路径', array('!url' => url('admin/token')))
+      '#description' => t('field', '文件保存路径，可使用<a href="!url">通配符</a>，空则使用用户默认文件路径', array('!url' => url('admin/token')))
     );
   } else if ($field->field_type == 'tags') {
     $form['fields']['data']['validate'] = array(
@@ -3241,27 +3259,68 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
             );
           break;
           case 'file': // 文件
-            if ($data->data['multi'] > 1) {
-              if ($node->fields[$data->field_key]) {
-                $multi = $data->data['multi'] - count($node->fields[$data->field_key]);
-                if ($multi < 1) {
-                  $disabled = true;
+            // 借助 swfupload 批量上传
+            if (!empty($data->data['swfupload']) && module_exists('editor')) {
+              $validate = _field_get_file_validate($data, $node);
+
+              $form_field_type = '_' . $module . $type . $data->field_key;
+
+              if (empty($node->nid)) {
+                if (empty($_POST['fields'][$form_field_type])) {
+                  $validate['ext_type'] = md5($module . $type . $data->field_key . $GLOBALS['user']->uid . uniqid(mt_rand(), true));
+                } else {
+                  $validate['ext_type'] = $_POST['fields'][$form_field_type];
+                }
+
+                $form['fields']['fields'][$form_field_type] = array(
+                  '#default_value' => $validate['ext_type'],
+                  '#type' => 'hidden',
+                  '#constant' => 1,
+                  '#required' => 1,
+                );
+              }
+
+              $validate['status'] = 0;
+
+              $form['fields']['fields'][$data->field_key] = array(
+                '#title' => t(NULL, $data->name),
+                '#groups' => $data->groups,
+                '#value' => editor_get_swfupload(array(
+                  'swfupload' => array(
+                    'file_types' => !empty($validate['filetype']) ? '*.' . implode(';*.', $validate['filetype']) : $validate['filetype'] = '*.*',
+                    'file_upload_limit' => empty($node->fields[$data->field_key]) ? $data->data['multi'] : $data->data['multi']-count($node->fields[$data->field_key])
+                  ),
+                  'validate' => $validate
+                ))
+              );
+              
+            } else {
+              if ($data->data['multi'] > 1) {
+                if ($node->fields[$data->field_key]) {
+                  $multi = $data->data['multi'] - count($node->fields[$data->field_key]);
+                  if ($multi < 1) {
+                    $disabled = true;
+                  }
+                } else {
+                  $multi = $data->data['multi'];
                 }
               } else {
-                $multi = $data->data['multi'];
+                $multi = 0;
               }
-            } else {
-              $multi = 0;
+
+              $form['fields']['fields'][$data->field_key] = array(
+                '#title' => t(NULL, $data->name),
+                '#type' => 'file',
+                '#groups' => $data->groups,
+                '#multi' => $multi,
+                '#disabled' => $disabled,
+                '#required' => $node->fields[$data->field_key] ? false : $required,
+              );
+
             }
-            $form['fields']['fields'][$data->field_key] = array(
-              '#title' => t(NULL, $data->name),
-              '#type' => 'file',
-              '#groups' => $data->groups,
-              '#multi' => $multi,
-              '#disabled' => $disabled,
-              '#required' => $node->fields[$data->field_key] ? false : $required,
-            );
+
             $description = '';
+
             if ($node->fields[$data->field_key]) {
               if ($data->data['multi'] > 1) {
                 $description = '<span class="field_file_view field_file_view_multi">';
@@ -3816,43 +3875,30 @@ function field_get_node_save($module, $type, $value, $node = NULL, $form = NULL,
             }
           break;
           case 'file':
-            if ($_FILES['fields'] && $_FILES['fields']['name'][$data->field_key]) {
+            if (!empty($data->data['swfupload']) && module_exists('editor')) {
+              // 将通过 swfupload 上传的文件关联到节点字段
+              if (!empty($value->fields['_' . $module . $type . $data->field_key])) {
+                db_exec('UPDATE {files} SET ext_id = ?, ext_id2 = ?, ext_type = ?, status = 1 WHERE ext_type = ?',
+                array($data->field_id, $value->nid, 'field_file', $value->fields['_' . $module . $type . $data->field_key]));
+              }
 
-              $validate = array(
-                'filetype' => $data->data['filetype'],
-                'savepath' => !empty($data->data['savepath']) ? dd_get_token($data->data['savepath'], $value) : '',
-                'filesize' => !empty($data->data['filesize']) ? $data->data['filesize'] : 999999
-              );
-
+            } else if ($_FILES['fields'] && $_FILES['fields']['name'][$data->field_key]) {
+              $validate = _field_get_file_validate($data, $value);
               if (is_array($_FILES['fields']['name'][$data->field_key])) {
                 $files = 0;
                 foreach ($_FILES['fields']['name'][$data->field_key] as $i => $name) {
                   if ($i > $data->data['multi']) break;
                   if (!$message = file_validate_error($_FILES['fields']['error'][$data->field_key][$i])) {
-                    if ($data->data['filename']) {
-                      $validate['filename'] = dd_get_token($data->data['filename'], $value);
-                    } else {
-                      $validate['filename'] = NULL;
-                    }
-                    if ($data->data['extension']) {
-                      $validate['extension'] = $data->data['extension'];
-                    } else {
-                      $validate['extension'] = NULL;
-                    }
                     $file = array(
                       'name' => $name,
                       'type' => $_FILES['fields']['type'][$data->field_key][$i],
                       'size' => $_FILES['fields']['size'][$data->field_key][$i],
                       'tmp_name' => $_FILES['fields']['tmp_name'][$data->field_key][$i],
-                      'ext_id' => $data->field_id, // 字段id
-                      'ext_id2' => $value->nid, // 节点id
-                      'ext_type' => 'field_file', // 扩展标记
                     );
                     if ($newfile = file_save_upload($file, $validate)) {
-                      if ($newfile->imagetotype) {
-                        image_to_type_data($newfile->filepath, $newfile->imagetotype[0], $newfile->imagetotype[1], $newfile->filepath);
-                      }
                       ++$files;
+                    } else {
+                      dd_set_message(t('field', '!name 上传失败', array('!name' => $file['name'])), 'error');
                     }
                   } else if ($message !== 4) {
                     dd_set_message($message, 'error');
@@ -3874,33 +3920,16 @@ function field_get_node_save($module, $type, $value, $node = NULL, $form = NULL,
                     file_delete($file->fid, 1, $file->filepath);
                   }
                 }
-                
-                if ($data->data['filename']) {
-                  $validate['filename'] = dd_get_token($data->data['filename'], $value);
-                } else {
-                  $validate['filename'] = NULL;
-                }
-                
-                if ($data->data['extension']) {
-                  $validate['extension'] = $data->data['extension'];
-                } else {
-                  $validate['extension'] = NULL;
-                }
-                
+               
                 if (!$message = file_validate_error($_FILES['fields']['error'][$data->field_key])) {
                   $file = array(
                     'name' => $_FILES['fields']['name'][$data->field_key],
                     'type' => $_FILES['fields']['type'][$data->field_key],
                     'size' => $_FILES['fields']['size'][$data->field_key],
                     'tmp_name' => $_FILES['fields']['tmp_name'][$data->field_key],
-                    'ext_id' => $data->field_id,
-                    'ext_id2' => $value->nid,
-                    'ext_type' => 'field_file'
                   );
-                  if ($newfile = file_save_upload($file, $validate)) {
-                    if ($newfile->imagetotype) {
-                      image_to_type_data($newfile->filepath, $newfile->imagetotype[0], $newfile->imagetotype[1], $newfile->filepath);
-                    }
+                  if (!$newfile = file_save_upload($file, $validate)) {
+                    dd_set_message(t('field', '!name 上传失败', array('!name' => $file['name'])), 'error');
                   }
                 } else if ($message !== 4) {
                   dd_set_message($message, 'error');
@@ -3938,6 +3967,31 @@ function field_get_node_save($module, $type, $value, $node = NULL, $form = NULL,
 	}
 	
 	cache_del('cid', $module.$type.$value->nid, 'cache_field');
+}
+
+/**
+ * 根据字段设置，获取文件上传验证参数
+ */
+function _field_get_file_validate($data, $value) {
+
+  $validate = array(
+    'ext_id' => $data->field_id, // 字段 id
+    'ext_id2' => $value->nid, // 节点 id
+    'ext_type' => 'field_file', // 扩展类型
+    'filetype' => $data->data['filetype'],
+    'savepath' => !empty($data->data['savepath']) ? dd_get_token($data->data['savepath'], $value) : '',
+    'filesize' => !empty($data->data['filesize']) ? $data->data['filesize'] : 999999,
+  );
+
+  if (!empty($data->data['filename'])) {
+    $validate['filename'] = dd_get_token($data->data['filename'], $value);
+  }
+
+  if (!empty($data->data['extension'])) {
+    $validate['extension'] = $data->data['extension'];
+  }
+
+  return $validate;
 }
 
 /**

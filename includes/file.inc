@@ -25,7 +25,7 @@
       'filetype' => array('jpg', 'zip'),// 允许的文件类型
       'filesize' => '300',// 允许的最大文件
       'usersize' => true, // 验证用户上传文件总大小
-      'call_function' => '',// 验证完成，并保存后，回调函数，传递表单字段名及文件对象
+      'call_function' => '',// 验证完成，并保存后，回调函数，call_function($form_id, $field_name, $file, $form_token)
     ),
   );
 */
@@ -164,8 +164,11 @@ function _file_form_validate($files, $field, $save = true) {
   }
   
   if ($save) {
-    if ($field['#call_function']) {
-      $error = call_user_func($field['#call_function'],  $field['#form_id'],  $field['#name'], $file);
+    global $form_tokens; 
+    // 用户通过表单上传，form_token 才有值，而直接调用函数上传，可能为空
+    $token = !empty($form_tokens[$field['#form_id']]) ? $form_tokens[$field['#form_id']] : '';
+    if (!empty($field['#call_function'])) {
+      $error = call_user_func($field['#call_function'],  $field['#form_id'],  $field['#name'], $file, $token);
     } else if ($field['#filesave']) {
       $error = file_form_save($field, $file);
     }
@@ -283,10 +286,14 @@ function file_form_save($form, $files) {
   if (is_array($files)) {
     foreach ($files as $item) {
       if ($file = file_save_upload($item, $form['#validate'])) {
-        if (!$form['#validate']['call_function']) {
+        global $form_tokens; 
+        // 用户通过表单上传，form_token 才有值，而直接调用函数上传，可能为空
+        $token = !empty($form_tokens[$form['#form_id']]) ? $form_tokens[$form['#form_id']] : '';
+
+        if (empty($form['#validate']['call_function'])) {
           dd_set_message(t('system', '%string 上传成功', array('%string' => $file->filename)));
         } else {
-          call_user_func($form['#validate']['call_function'], $form['#form_id'], $form['#name'], $file);
+          call_user_func($form['#validate']['call_function'], $form['#form_id'], $form['#name'], $file, $token);
         }
       }
     }
@@ -311,7 +318,14 @@ function file_save_upload($file, $validate = NULL, $rename = 1) {
   $file->filename = $file->name;
   
   if (file_create_name($file, $validate, $rename) && move_uploaded_file($file->tmp_name, $file->filepath) && file_save_validate($file, $validate)) {
-    if (!$validate['no_insert']) {
+    /**
+     * 上传图片文件时，验证中参数中指定了文件类型，但所上传的类型不匹配时，直接将图片格式转换
+     */
+    if (!empty($file->imagetotype) && count($file->imagetotype) == 2) {
+      image_to_type_data($file->filepath, $file->imagetotype[0], $file->imagetotype[1], $file->filepath);
+    }
+
+    if (empty($validate['no_insert'])) {
       return file_save($file); // 文件信息写入数据库
     } else {
       return $file; // 不写入
@@ -429,22 +443,11 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
   }
   
   if ($validate['filename']) {
-    // 指定扩展名
-    if ($validate['extension']) {
-      $file->extension = strtolower($validate['extension']);
-      if (in_array($file->extension, array('jpg', 'jpeg', 'png', 'gif'))) {
-        $extension = strtolower(end(explode('.', $file->filename)));
-        if ($extension && $file->extension != $extension) {
-          $file->imagetotype = array($extension, $file->extension);
-        }
-      }
-      
-      $file->filename = $validate['filename'] .'.'. $file->extension;
-    } else if (strpos($validate['filename'], '.') !== false) {
+    if (strpos($validate['filename'], '.') !== false) {
       $file->filename = $validate['filename'];
     } else {
       $file->extension = strtolower(end(explode('.', $file->filename)));
-      $file->filename = $validate['filename'].'.'.$file->extension;
+      $file->filename = $validate['filename'] . '.' . $file->extension;
     }
   }
   
@@ -458,15 +461,25 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
     return false;
   }
   
-  if (!$file->uid) {
+  if (empty($file->uid)) {
     $file->uid = $GLOBALS['user']->uid;
   }
   
-  if (!$file->extension) {
+  if (empty($file->extension)) {
     $file->extension = strtolower(end(explode('.', $file->filename)));
   }
-  
-  if ($validate['filetype'] && !file_validate_mime($file, $validate['filetype'])) {
+
+  // 指定扩展名，若与上传类型不符，则转换，因此，只有图片才能指定扩展名
+  if (!empty($validate['extension'])) {
+    $validate['extension'] = strtolower($validate['extension']);
+    if ($file->extension != $validate['extension'] && in_array($validate['extension'], array('jpg', 'jpeg', 'png', 'gif'))) {
+      $file->imagetotype = array($file->extension, $validate['extension']);
+      $file->extension = $validate['extension'];
+      $file->filename .= '.' . $file->extension;
+    }
+  }
+ 
+  if (!empty($validate['filetype']) && !file_validate_mime($file, $validate['filetype'])) {
     dd_set_message(t('system', '只允许 %string 类型的文件', array('%string' => implode(' ', $validate['filetype']))), 'error');
     return false;
   }
@@ -716,7 +729,7 @@ function file_validate_image(&$file, $val) {
         case 'size':
           $w = explode('x', $item);
           if (($data['width'] > $w[0]) || ($data['height'] > $w[1])) {
-            $function = 'image_'. ($val['style'] ? $val['style'] : 'scale_resize');
+            $function = 'image_'. ($val['style'] ? $val['style'] : 'scale');
             if ($function($file->filepath, $file->filepath, $w[0], $w[1], false)) {
               dd_set_message(t('system', '图片长宽超限，已被缩减至 %string', array('%string' => $w[0] .'x'. $w[1])));
             }

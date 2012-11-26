@@ -91,14 +91,28 @@ function bootstrap($op, $inc = NULL) {
       //载入主题
       theme_init();
 
-      if ($_POST['__SETPHPSESSID'] && $_POST['__SETUID']) {
-        if (!$user->uid && db_query('SELECT name FROM {users} WHERE session = ? AND uid = ? AND host = ?', array($_POST['__SETPHPSESSID'], $_POST['__SETUID'], ip_address()))) {
-          if (!$user = user_login(user_load($_POST['__SETUID']))) {
-            $user->__SETVALIDATE = NULL;
+      /**
+       * 非其它渠道验证请求
+       * 比如通过 flash 上传，浏览器和 flash cookie 不一致，可能导致 session 错误
+       * 当请求中包含特定 POST 参数，视作验证请求，通过验证后，将根据参数加载相应用户记录
+       * 该请求视作非正常请求，不记录活动状态
+       */
+      $user->__SETVALIDATE = NULL;
+
+      if (!empty($_POST['__SETPHPSESSID']) && !empty($_POST['__SETUID'])) {
+        if (!empty($user->uid)) {
+          if ($_POST['__SETUID'] != $user->uid) {
+            dd_get_access();
+            exit;
+          } else {
+            $user->__SETVALIDATE = time();
+          }
+        } else if (db_query('SELECT name FROM {users} WHERE session = ? AND uid = ? AND host = ?',
+        array($_POST['__SETPHPSESSID'], $_POST['__SETUID'], ip_address()))) {
+          if ($user = user_login(user_load($_POST['__SETUID']))) {
+            $user->__SETVALIDATE = time();
           }
         }
-      } else {
-        $user->__SETVALIDATE = NULL;
       }
 
       switch ($conf['status']) {
@@ -116,7 +130,7 @@ function bootstrap($op, $inc = NULL) {
         dd_get_referer($_SERVER['HTTP_REFERER']), dd_get_referer($_SERVER['REQUEST_URI'])));
       }
 
-      break;
+    break;
     case 'data':
       /**
        * 仅载入数据库连接
@@ -127,7 +141,7 @@ function bootstrap($op, $inc = NULL) {
       //初始化默认数据库连接
       db_connect('default');
 
-      break;
+    break;
     case 'custom':
       /**
        * 跳过所有模块，默认仅加载数据库及缓存接口文件
@@ -1045,7 +1059,7 @@ function dd_user_validate() {
         }
       }
 
-      if (!empty($user->__SETVALIDATE)) {
+      if (empty($user->__SETVALIDATE)) {
         // 每 600 秒验证一次 session。如上次活动时间为 0，则强行验证一次 session
         if (empty($active) || $active > ($user->active + 600)) {
           if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',

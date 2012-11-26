@@ -1699,10 +1699,12 @@ function user_session_reg(&$ac) {
   $_SESSION['user'] = $ac;
   session_regenerate_id();
   
-  if (!$_POST['__SETPHPSESSID'] && !$_POST['__SETUID']) {
-    db_exec('UPDATE {users} SET login = ?, count = count + 1, session = ?, host = ?, active = ? WHERE uid = ?', array($_SERVER['REQUEST_TIME'], session_id(), $ac->host, $_SERVER['REQUEST_TIME'], $ac->uid));
+  if (empty($_POST['__SETPHPSESSID']) && empty($_POST['__SETUID'])) {
+    db_exec('UPDATE {users} SET login = ?, count = count + 1, session = ?, host = ?, active = ? WHERE uid = ?',
+    array($_SERVER['REQUEST_TIME'], session_id(), $ac->host, $_SERVER['REQUEST_TIME'], $ac->uid));
+    $_SESSION['user']->__SETVALIDATE = NULL;
   } else {
-    $_SESSION['user']->__SETVALIDATE = $_SERVER['REQUEST_TIME'];
+    $_SESSION['user']->__SETVALIDATE = time();
   }
   
   $ac->session = session_id();

@@ -54,7 +54,7 @@ function dd_get_form($form_id) {
   if ($_POST['form_id'] == $form_id) {
   	$form_token = $_POST['form_token'];
   } else {
-  	$form_token = md5(uniqid(mt_rand(), true));
+  	$form_token = md5($user->uid . uniqid(mt_rand(), true));
   }
   
   $form_tokens[$form_id] = $form_token;

@@ -1081,7 +1081,7 @@ function dd_get_highlighter() {
   
   dd_add_css('misc/syntaxhighlighter/styles/sh.css');
   dd_add_js('misc/syntaxhighlighter/scripts/sh.js');
-  dd_add_js(array('Syntax' => array('clipboardSwf' => $GLOBALS['base_path'].'misc/syntaxhighlighter/scripts/clipboard.swf')), 'setting');
+  dd_add_js(array('Syntax' => array('clipboardSwf' => $GLOBALS['base_path'] . 'misc/syntaxhighlighter/scripts/clipboard.swf')), 'setting');
   $i = 1;
 }
 
@@ -1093,6 +1093,12 @@ function dd_get_highlighter() {
  *  编辑器配置
  */
 function dd_get_editor($dom, $v = array()) {
+  if (!function_exists('editor_get_editor')) {
+    //dd_set_message(t('system', 'dd_get_editor() 即将废弃，请下载 editor 模块，使用 editor_get_editor() 接口代替'));
+  }
+
+  return;
+
 	static $i;
 	
 	if (!$i) {

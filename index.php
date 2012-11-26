@@ -20,6 +20,9 @@ bootstrap('full');
 // 获取当前路径($_GET['q'])输出
 $return = menu_get_item();
 
+// 针对当前路径，所有模块输出完成，触发 hook_exit()
+module_invoke_all('exit', 'full');
+
 if (is_int($return)) {
   switch ($return) {
     case MENU_ACCESS_DENIED:
@@ -33,5 +36,5 @@ if (is_int($return)) {
   exit;
 }
 
-// 打印数据
+// 调用 page 模板输出内容
 print theme('page', $return);
