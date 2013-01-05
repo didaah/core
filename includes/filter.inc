@@ -60,24 +60,23 @@ function filter_view($text, $format = NULL, $type = NULL, $id = NULL) {
  * PHP 解析
  */
 function filter_tags_php($text) {
+  // 判断全局是否启用 php code
   if ($GLOBALS['_filter_is_php_code'] == true) {
-    // 全局启用 php code
     if (strpos($text, '<?php') !== false) {
       return preg_replace_callback('/<\?php(.*?)\?>$/ms', '_filter_tags_php', $text);
     }
-  } else {
-    return $text;
   }
+  return $text;
 }
 
 function _filter_tags_php($matches) {
-  if ($matches[1]) {
+  if (!empty($matches[1])) {
     ob_start();
     eval($matches[1]);
     $text = ob_get_contents();
     ob_end_clean();
+    return $text;
   }
-  return $text;
 }
 
 /**
