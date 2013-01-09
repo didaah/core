@@ -39,34 +39,7 @@ jQuery.fn.extend({
       $(this).children('ul').eq(0).hide();
     }); 
   },
-  
-  countdown: function(o) {
-    var count = 0;
-    var interId = null;
-    var $$ = this;
-    $$.html('请稍候，正在同步时间');
-    function show() {
-      if (count > 0) {
-        count -= 1;
-        var second = Math.floor(count % 60);
-        var minite = Math.floor((count / 60) % 60);
-        var hour = Math.floor((count / 3600) % 24);
-        var day = Math.floor((count / 3600) / 24);
-        $$.html('<span class="day"><em>'+day + '</em>天</span><span class="hour"><em>' + hour + '</em>小时</span><span class="minite"><em>' + minite + '</em>分</span><span class="second"><em>' + second + '</em>秒</span>');
-      } else {
-        $(o.button).attr('disabled', false);
-        window.clearInterval(interId);
-      }
-    }
-    $.post(o.path, o, function(t) {
-      if (t < 0) {
-        Dida.loca();
-      }
-      count = t;
-      interId = window.setInterval(show, 1000);
-    });
-  },
-  
+ 
   didaTabs: function(o){
     var opt = {
       event: 'click',
@@ -177,16 +150,19 @@ jQuery.fn.extend({
         });
     }
   },
+
   didaShow: function(o) {
     var opt = {
       fadeOutTime: o.fadeOutTime || 500,
       fadeInTime: o.fadeInTime || 500,
       dom: o.dom,
       isTab: o.isTab || true,
-      varyTime: o.varyTime || 3000
+      varyTime: o.varyTime || 4000
     }
     
     var _data, _self, _dataBtn;
+
+    opt.veryTime += opt.fadeOutTime+opt.fadeInTime;
 
     if (opt.dom) {
       _data = $(opt.dom + ' .focus_change_list li');
@@ -230,25 +206,25 @@ jQuery.fn.extend({
 
         is_show = 0;
 
-        if (opt.isTab) {
-          _dataBtn.eq(currentId).removeClass('current');
-        }
+        if (opt.isTab) _dataBtn.eq(currentId).removeClass('current');
 
         currentId += 1;
+
         if (currentId >= imgCount) currentId = 0;
 
         _data.each(function(i) {
           if (i != currentId) {
             if ($(this).is(':visible')) {
-              $(this).animate({width: 'toggle', height: '100%'}, opt.fadeOutTime);
+              $(this).animate({width: 'toggle', height: '100%'}, opt.fadeOutTime, function() {
+                _data.eq(currentId).animate({width: 'toggle', height: '100%'}, opt.fadeInTime, function() {
+                  is_show = 1;
+                  if (opt.isTab) _dataBtn.eq(currentId).addClass('current');
+                });
+              });
             }
           }
         });
 
-        _data.eq(currentId).animate({width: 'toggle', height: '100%'}, opt.fadeInTime, function() { is_show = 1; });
-        if (opt.isTab) {
-          _dataBtn.eq(currentId).addClass('current');
-        }
       }
       
       showTimer = window.setInterval(show, opt.varyTime);
@@ -285,6 +261,7 @@ jQuery.fn.extend({
       }
     }
   },
+
   didaScroll: function(o) {
     var opt = {
       varyTime: o.varyTime || 3000

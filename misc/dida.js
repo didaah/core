@@ -152,8 +152,8 @@ Dida.callFunc = function(cb) {
 };
 
 Dida.isImage = function(p) {
-  var regu = /.*(jpg|gif|png)$/i;
-  return p && regu.test(p);
+  var re = /.*(jpg|gif|png|jpeg)$/i;
+  return p && re.test(p);
 };
 
 Dida.dialog = function(opt) {
@@ -321,10 +321,13 @@ Dida.dialog = function(opt) {
   return false;
 };
 
-Dida.dialog_colse = function() {
+/**
+ * 关闭 dialog，可选择是否刷新页面
+ */
+Dida.dialog_close = function(reload) {
   $('#dialog_wrapper').dialog('destroy');
   $('#dialog_wrapper').remove();
-  location.reload();
+  if (reload) location.reload();
 };
 
 Dida.php = {

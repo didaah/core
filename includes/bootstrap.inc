@@ -1047,6 +1047,20 @@ function dd_user_validate() {
     dd_set_cookie('time', $time);
 
     if ($_SESSION['user']->session == $_COOKIE[session_name()]) {
+ 
+      if (empty($user->__SETVALIDATE)) {
+        // 每 600 秒验证一次 session。如上次活动时间为 0，则强行验证一次 session
+        if (empty($active) || ($active > ($user->active + 600))) {
+          if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',
+          array($user->uid, $_COOKIE[session_name()]), array('return' => 'column'))) {
+            user_logout();  // 游客
+            dd_set_message(t('system', '登录超时，请重新登录'), 'error');
+          } else {
+            $user->active = $time;
+          }
+        }
+      }
+     
       if ($active > ($time - 1800)) {
         // 两次活动时间间隔 30 分钟内
         if (($active > ($user->active + 300)) && ($active < ($user->active + 600))) {
@@ -1056,19 +1070,6 @@ function dd_user_validate() {
           $user->active = $time;
           $user->exp += $exp;
           $user->online += $online;
-        }
-      }
-
-      if (empty($user->__SETVALIDATE)) {
-        // 每 600 秒验证一次 session。如上次活动时间为 0，则强行验证一次 session
-        if (empty($active) || $active > ($user->active + 600)) {
-          if (!db_query('SELECT uid FROM {users} WHERE uid = ? AND session = ?',
-          array($user->uid, $_COOKIE[session_name()]), array('return' => 'column'))) {
-            user_logout();  // 游客
-            dd_set_message(t('system', '登录超时，请重新登录'), 'error');
-          } else {
-            $user->active = $time;
-          }
         }
       }
     }
@@ -2258,7 +2259,7 @@ function dd_jqedit($v = array()) {
 
   dd_add_js(array('edit' => array($v)), 'setting');
 
-  dd_add_js('misc/jquery.jeditable.mini.js');
+  dd_add_js('misc/jquery.jeditable.js');
 
   switch ($v['opt']['type']) {
     case 'charcounter':
@@ -3048,17 +3049,22 @@ function dd_get_js($scope = 'header', $js = NULL) {
 
   $js_path = array();
   $output = $inline = '';
-
+  
   if (!empty($js['setting'])) {
     /**
      * 将 js 中的 Dida 对象，在这儿初始化，输出在页面顶端。
      * @TODO 为避免和其它 js 库内部变量造成冲突，将之前的全局配置变量 settings，修改为 Dida.settings
      *       为兼容之前的代码，暂不取消 settings 变量，做为过渡
+     *       js 全局变量 settings 已取消
      */
-    $output = "<script type=\"text/javascript\">\n<!--//--><![CDATA[//><!--\n" 
-      . 'var Dida = {cache: {}}, settings = {};'
-      . 'Dida.settings = settings = ' . dd_to_js(call_user_func_array('array_merge_recursive', $js['setting']))
-      . "\n//--><!]]>\n</script>\n";
+    $output = "<script type=\"text/javascript\">\n<!--//--><![CDATA[//><!--\n";
+    $output .= 'var Dida = {cache: {}, module: {';
+    foreach ($conf['modules'] as $key => $module) {
+      $output .= $key . ': {},';
+    }
+    $output = rtrim($output, ',') . '},';
+    $output .= 'settings: ' . dd_to_js(call_user_func_array('array_merge_recursive', $js['setting']));
+    $output .= "}\n//--><!]]>\n</script>\n";
   }
 
   if ($js['__inline']) {

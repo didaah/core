@@ -871,31 +871,6 @@ function file_mkdir($path, $mode = 0775, $recursive = 1) {
 }
 
 /**
- * 文件删除、更新、浏览操作
- */
-function file_operate($file, $op) {
-  switch ($op) {
-    case 'delete':
-      if (strpos($file->filemime, 'image') !== false) {
-        $thumb = 1;
-      }
-      if (file_delete($file->fid, $thumb, $file->filepath)) {
-        module_invoke_all('file_delete', $file);
-        echo 1;
-        exit;
-      }
-    break;
-  }
-}
-
-/**
- * 文件权限验证
- */
-function file_is_access($file, $op = 'view') {
-  return user_access('file all '.$op) || (user_access('file one '.$op) && $file->uid == $GLOBALS['user']->uid);
-}
-
-/**
  * 加载文件
  * @param (int) $fid
  *  文件 Id
@@ -1729,6 +1704,7 @@ function file_get_mimetype($key, $value = 0) {
       'uls' => 290,
       'mml' => 291,
       'txt' => 292,
+      'conf' => 292,
       'pot' => 292,
       'text' => 292,
       'asc' => 292,

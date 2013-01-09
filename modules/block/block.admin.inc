@@ -136,7 +136,7 @@ function block_settings_form($theme, $block) {
       t('block', '正则模式：必须以斜杠(/)开始和结束。如：/user\/.*?\/edit/ 将匹配 user/*/edit'),
     );
 
-    if ($GLOBALS['_filter_is_php_code'] == true) {
+    if ($GLOBALS['_filter_is_php_code'] == true && user_access('filter use php')) {
       $form['fields']['settings']['display']['type']['#options'][3] = t('block', '当 PHP 代码返回 TRUE 时显示');
       $description[] = t('block', 'PHP模式：如：if ($GLOBALS[\'user\']->uid == 1) return true;不能包含 PHP 标签。必须用 return 而不是 echo');
     }

@@ -532,8 +532,8 @@
         event      : 'click.editable',
         onblur     : 'cancel',
         loadtype   : 'GET',
-        loadtext   : '请稍候...',
-        placeholder: '点此编辑',
+        loadtext   : Dida.t('system', '请稍候...'),
+        placeholder: Dida.t('system', '点此编辑'),
         loaddata   : {},
         submitdata : {},
         ajaxoptions: {}

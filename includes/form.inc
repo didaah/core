@@ -39,7 +39,7 @@
 /**
  * 调用一个表单
  * @param string $form_id 
- *  定义表单的函数
+ *  表单 id，即函数名称，系统通过此 id 回调表单定义函数，并且将表单缓存与此 id 关联。
  * @access public
  * @return string
  */
@@ -139,10 +139,7 @@ function dd_get_form($form_id) {
   if ($_POST['form_id'] == $form_id) {
     $form_values = &$_POST;
 
-    // 不再需要在表单指定创建一个 object
-    //if ($form['settings']['#values_object']) {
-      $form_values['_dida_values'] = (object) $_POST;
-    //}
+    $form_values['_dida_values'] = (object) $_POST;
     
   	// 基本验证：必填字段，选项字段数据是否被修改
     if ((!$error = dd_form_required($form, $form_values)) && (!$error = file_form_validate($form, false))) {
@@ -209,7 +206,7 @@ function dd_get_form($form_id) {
   }
 
   if (!empty($form['settings']['#description'])) {
-    $output .= '<div class="description form_description form_setting_description">'.$form['settings']['#description'].'</div>';
+    $output .= '<div class="description form_description form_setting_description">' . $form['settings']['#description'] . '</div>';
   }
   
   $tpl = DIDA_ROOT . '/' . $conf['themes'][$base_theme_name]['path'] . '/form/' . $form['#form_id'] . '.tpl.php';
@@ -232,6 +229,7 @@ function dd_get_form($form_id) {
   $output .= dd_form_hidden(array('#name' => 'form_id', '#value' => $form_id));
   $output .= dd_form_hidden(array('#name' => 'form_token', '#value' => $form_token));
   $output .= '</form>';
+  
   return $form['settings']['#prefix'] . $output . $form['settings']['#suffix'];
 }
 
@@ -382,9 +380,7 @@ function dd_ajax_validate($uid, $form_id, $form_token, $clear = 1) {
 		$form['#form_id'] = $form_id;
     $form['#form_token'] = $form_token;
     
-	  if ($cache['settings']['#values_object']) {
-      $form_values['_dida_values'] = (object) $form_values;
-    }
+    $form_values['_dida_values'] = (object) $form_values;
     
     $_POST = &$form_values;
     
@@ -608,7 +604,10 @@ function _dd_form_html($fields) {
   return $result;
 }
 
-//字段排序
+/**
+ * 字段排序
+ * @param array $fields
+ */
 function dd_form_sort($fields) {
   foreach ($fields as $key => $child) {
     //if (isset($child['#children'])) {
@@ -624,7 +623,10 @@ function dd_form_sort($fields) {
   return $fields;
 }
 
-//子字段排序
+/**
+ * 子字段排序
+ * @param array $fields
+ */
 function dd_form_sort_child($fields) {
   foreach ($fields as $key => $child) {
     if (strpos($key, '#') === false && is_array($child)) {
@@ -658,10 +660,11 @@ function dd_form_cmp($a, $b) {
 function dd_form_field(&$form, $value, $error = array()) {
   
   foreach ($form['fields'] as $key => $field) {
+    if (!is_array($field)) continue;
     if ($field['#type'] || isset($field['#value'])) {
       $field['#name'] = array($key);
       $fields[$key] = _dd_form_element($form, $field, $value, $error);
-    } else if (is_array($field)) {
+    } else {
       $parents = $sub_field = array();
       foreach ($field as $child_key => $child) {
         if (strpos($child_key, '#') === false) {
@@ -678,8 +681,6 @@ function dd_form_field(&$form, $value, $error = array()) {
       }
       
 			$fields[$key]['#weight'] = _dd_form_weight($form['#form_id'], $field['#weight']);
-			
-			//echo $fields[$key]['#weight'] . $key;
     }
   }
   return $fields;
@@ -690,10 +691,11 @@ function dd_form_field(&$form, $value, $error = array()) {
  */
 function dd_form_subfield(&$form, $field, $value, $error) {
   foreach ($field as $sub_key => $sub_field) {
+    if (!is_array($sub_field)) continue;
     $sub_field['#name'] = array_merge($sub_field['#name'], array($sub_key));
     if ($sub_field['#type'] || isset($sub_field['#value'])) {
       $fields[$sub_key] = _dd_form_element($form, $sub_field, $value, $error);
-    } else if (is_array($sub_field)) {
+    } else {
       $parents = $child_field = array();
       foreach ($sub_field as $child_key => $child) {
         if (strpos($child_key, '#') === false) {
@@ -714,6 +716,9 @@ function dd_form_subfield(&$form, $field, $value, $error) {
   return $fields;
 }
 
+/**
+ * 获取字段值
+ */
 function dd_get_value($value, $name) {
   $count = count($name);
   for ($i = 0; $i < $count; ++$i) {
@@ -732,6 +737,18 @@ function dd_get_value($value, $name) {
   return false;
 }
 
+// public dd_get_error($value, $name) {{{ 
+/**
+ * dd_get_error
+ * 获取指定字段错误信息
+ * 
+ * @param array $value 
+ *  表单验证未通过时返回的错误信息
+ * @param string $name 
+ *  需获取错误信息的字段名称
+ * @access public
+ * @return array|bool
+ */
 function dd_get_error($value, $name) {
   $count = count($name);
   for ($i = 0; $i < $count; ++$i) {
@@ -745,6 +762,7 @@ function dd_get_error($value, $name) {
   }
   return false;
 }
+// }}}
 
 function _dd_form_weight($form_id, $weight = 0) {
 	static $i = array();
@@ -781,8 +799,21 @@ function _dd_form_fieldset($field, $type) {
   return $output;
 }
 
+// protected _dd_form_element(&$form, $field, $value, $error) {{{ 
 /**
- * 解析字段
+ * _dd_form_element
+ * 解析一个表单字段，将字段定义参数转换为 html 
+ * 
+ * @param array $form 
+ *  表单对象
+ * @param array $field 
+ *  一个表单字段
+ * @param array $value 
+ *  表单提交值 
+ * @param array $error 
+ *  表单验证错误值
+ * @access protected
+ * @return string
  */
 function _dd_form_element(&$form, $field, $value, $error) {
   $types = form_get_type_info();
@@ -790,50 +821,53 @@ function _dd_form_element(&$form, $field, $value, $error) {
   $field['#weight'] = _dd_form_weight($form['#form_id'], $field['#weight']);
   $field['#parents'] = $field['#name'];
   $name = array_shift($field['#name']);
+
   if (count($field['#name'])) {
     $name .= '['. implode('][', $field['#name']) .']';
   }
+
   $field['#name'] = $name;
   
   if ($value['form_id'] == $form['#form_id']) {
     $val = dd_get_value($value, $field['#parents']);
-    if ($val !== false) {
-      $field['#value'] = $val;
-    }
+    if ($val !== false) $field['#value'] = $val;
     $field['#error'] = dd_get_error($error, $field['#parents']);
   } else if (!isset($field['#value'])) {
     $field['#value'] = isset($field['#default_value']) ? $field['#default_value'] : '';
   }
   
-  if ($field['#attributes']['class']) {
+  if (empty($field['#attributes'])) $field['#attributes'] = array();
+
+  $field['__name'] = str_replace(array('[', ']'), array('_'), $field['#name']);
+
+  $class = array();
+
+  if (!empty($field['#attributes']['class'])) {
     $class[] = $field['#attributes']['class'];
   }
   
-  if ($field['#required']) {
-    $class[] = 'required';
-  }
+  if (!empty($field['#required'])) $class[] = 'required';
   
   if (in_array($field['#type'], array('textfield', 'password', 'captcha'))) {
     $class[] = 'form_text';
   }
   
-  if (!isset($field['#type'])) {
-    $field['#type'] = 'value';
-  }
+  if (!isset($field['#type'])) $field['#type'] = 'value';
   
+  $class[] = $field['#type'];
+  $class[] = ' form_' . $field['#type'] . '_name_' . $field['__name'];
+
   if ($class) $field['#attributes']['class'] = implode(' ', $class);
+
   $field['#form_id'] = $form['#form_id'];
   
-  $field['__name'] = str_replace(array('[', ']'), array('_'), $field['#name']);
+  if (!empty($field['#disabled'])) $field['#attributes']['disabled'] = 'disabled';
   
-  if ($field['#disabled']) {
-    $field['#attributes']['disabled'] = 'disabled';
-  }
-  
-  if ($field['#fieldset_prefix']) {
+  if (!empty($field['#fieldset_prefix'])) {
     $field['#fieldset_prefix_html'] = _dd_form_fieldset($field, 'prefix');
   }
-  if ($field['#fieldset_suffix']) {
+
+  if (!empty($field['#fieldset_suffix'])) {
     $field['#fieldset_suffix_html'] = '</div></fieldset>';
   }
   
@@ -857,102 +891,170 @@ function _dd_form_element(&$form, $field, $value, $error) {
     $form['#type'] = 'value';
     $element = dd_form_label($field) . $field['#value'] . $field['#field_suffix'];
   }
+
   if ($field['#description']) {
-    $element .= '<span class="description form_description">'.$field['#description'].'</span>';
+    $element .= '<span class="description form_description">' . $field['#description'] . '</span>';
   }
+
   if (isset($field['#prefix']) || isset($field['#suffix'])) {
     $element =  $field['#fieldset_prefix_html'] . $field['#prefix'] .$element. $field['#suffix'] . $field['#fieldset_suffix_html'];
   } else if (!$form['settings']['#theme'] && $field['#type'] != 'hidden') {
-    $element = $field['#fieldset_prefix_html'] . '<div id="'.$field['#form_id'].'_'.$field['__name'].'" class="form_item form_item_'.$field['#type'].'">'."\n" .$element. "\n</div>\n"  . $field['#fieldset_suffix_html'];
+    $element = $field['#fieldset_prefix_html'] . '<div id="' . $field['#form_id'] . '_' . $field['__name'] . '" class="form_item form_item_' . $field['#type'] . '">' . $element . '</div>'  . $field['#fieldset_suffix_html'];
   }
+
   $field['#html'] = $element;
+
   form_set_ahah($field);
+
   return $field;
 }
+// }}}
 
-//字段错误信息
+// public dd_form_error($field) {{{ 
+/**
+ * dd_form_error
+ * 字段错误信息输出
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_error($field) {
   if (is_array($field['#error']) && !empty($field['#error'][0])) {
-    return '<span class="form_error">'.implode('<br>', $field['#error'])."</span>\n";
+    return '<span class="form_error">' . implode('<br>', $field['#error']) . '</span>';
   }
 }
+// }}}
 
-//单行文本字段
+// public dd_form_textfield($field) {{{ 
+/**
+ * dd_form_textfield
+ * 单行文本字段
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_textfield($field) {
-  if ($field['#autocomplete']) {
-    form_set_auto($field);
-  }
+  if (!empty($field['#autocomplete'])) form_set_auto($field);
   
-  if (strpos($field['#attributes']['class'], 'form_text') === false) {
-    $field['#attributes']['class'] = 'form_text';
-  }
-  
-  if ($field['#required']) {
-    $field['#attributes']['class'] .= ' required';
-  }
+  $field['#attributes']['name'] = $field['#name'];
+  $field['#attributes']['value'] = check_plain($field['#value']);
+  $field['#attributes']['type'] = 'text';
 
-  $field['#attributes']['class'] .= ' form_textfield_name_' . $field['__name'];
-
-  return dd_form_label($field) . '<input type="text" name="'.$field['#name'].'" value="'.check_plain($field['#value']).'"'.dd_attributes($field['#attributes']).'/>' . dd_form_error($field);
+  return dd_form_label($field) . '<input' . dd_attributes($field['#attributes']) . '/>' . dd_form_error($field);
 }
+// }}}
 
-//隐藏字段
+// public dd_form_hidden($field) {{{ 
+/**
+ * dd_form_hidden
+ * 隐藏字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_hidden($field) {
-  return '<input type="hidden" name="'.$field['#name'].'" value="'.$field['#value'].'"'.dd_attributes($field['#attributes']).'/>';
+  return '<input type="hidden" name="' . $field['#name'] . '" value="' . $field['#value'] . '"' . dd_attributes($field['#attributes']) . '/>';
 }
+// }}}
 
+// public dd_form_weight($field) {{{ 
+/**
+ * dd_form_weight
+ * 权重字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_weight($field) {
-  $start = $field['#start'] ? $field['#start'] : 0;
-  $end = $field['#end'] ? $field['#end'] : 20;
-  foreach (range($start, $end) as $v) {
-    $opt[$v] = $v;
+
+  if (empty($field['#options'])) {
+    $start = !empty($field['#start']) && is_numeric($field['#start']) ? $field['#start'] : 0;
+    $end = !empty($field['#end']) && is_numeric($field['#end']) ? $field['#end'] : 20;
+    $options = array();
+
+    foreach (range($start, $end) as $value) {
+      $options[$value] = $value;
+    }
+    
+    $field['#options'] = $options;
   }
   
-  if (!$field['#value'])	$field['#value'] = 0;
-  
-  $field['#options'] = $opt;
-  
-  if ($field['#attributes']['class']) {
-    $field['#attributes']['class'] .= ' weight dd_form_ajax_field';
-  } else {
-    $field['#attributes']['class'] = 'weight';
-  }
-  
+  if (empty($field['#value']))	$field['#value'] = 0;
+   
   return dd_form_select($field);
 }
+// }}}
 
-//密码字段
+// public dd_form_password($field) {{{ 
+/**
+ * dd_form_password
+ * 密码字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_password($field) {
-  return dd_form_label($field) . '<input type="password" name="'.$field['#name'].'" value="'.$field['#value'].'"'.dd_attributes($field['#attributes']).'/>' . dd_form_error($field);
+  $output .= dd_form_label($field);
+  $output .= '<input type="password" name="' . $field['#name'] . '" value="' . $field['#value'] . '"';
+  $output .= dd_attributes($field['#attributes']) . '/>' . dd_form_error($field);
+  return $output;
 }
+// }}}
 
-//多行文本框字段
+// public dd_form_textarea($field) {{{ 
+/**
+ * dd_form_textarea
+ * 多行文本字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_textarea($field) {
-  if (!$field['#attributes']['rows']) {
-    $field['#attributes']['rows'] = 10;
-  }
-  if (!$field['#attributes']['cols']) {
-    $field['#attributes']['cols'] = 60;
-  }
-  return dd_form_label($field) . '<div class="form_textarea"><textarea name="'.$field['#name'].'"'.dd_attributes($field['#attributes']).'>'.$field['#value'].'</textarea></div>' . dd_form_error($field);
+  if (empty($field['#attributes']['rows'])) $field['#attributes']['rows'] = 10;
+  if (empty($field['#attributes']['cols'])) $field['#attributes']['cols'] = 60;
+  $output = dd_form_label($field) . '<div class="form_textarea"><textarea name="' . $field['#name'] . '"';
+  $output .= dd_attributes($field['#attributes']).'>' . $field['#value'] . '</textarea></div>' . dd_form_error($field);
+  return $output;
 }
+// }}}
 
-//验证码字段
+// public dd_form_captcha($field, $form = NULL) {{{ 
+/**
+ * dd_form_captcha
+ * 验证码字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @param array $form 
+ *  表单对象
+ * @access public
+ * @return string
+ */
 function dd_form_captcha($field, $form = NULL) {
   
-  if (!system_is_captcha_ttf()) {
-    unset($field['#captcha']['image']);
-  }
+  // 检查是否有字体文件
+  if (!system_is_captcha_ttf()) unset($field['#captcha']['image']);
 
   $key = $form['#form_token'] . $field['#name'] . $form['#form_id'];
 
   $values = array(
     'name' => $field['#name'],
-    'type' => $field['#captcha']['type'] ? $field['#captcha']['type'] : 0,
+    'type' => !empty($field['#captcha']['type']) ? $field['#captcha']['type'] : 0,
     'form_id' => $form['#form_id'],
     'tag' => $form['#form_token'],
     'mosaic' => $field['#captcha']['mosaic'],
-    'image' => $field['#captcha']['image'] ? $field['#captcha']['image']: 0
+    'image' => !empty($field['#captcha']['image']) ? $field['#captcha']['image']: 0
   );
 
   dd_add_js(array('captcha' => array($key => array(
@@ -960,19 +1062,15 @@ function dd_form_captcha($field, $form = NULL) {
     'image' => $values['image'],
   ))), 'setting');
 
-  if ($field['#attributes']['class']) {
-    if (strpos($field['#attributes']['class'], 'form_field_input_captcha') === false) {
-      $field['#attributes']['class'] .= ' form_field_input_captcha';
-    }
-  } else {
-    $field['#attributes']['class'] = 'form_field_input_captcha';
+  if (strpos($field['#attributes']['class'], 'form_field_input_captcha') === false) {
+    $field['#attributes']['class'] .= ' form_field_input_captcha';
   }
 
   $html =  dd_form_label($field) . '<input type="text" name="' . $field['#name'] . '" value="';
   $html .= $field['#value'] . '"' . dd_attributes($field['#attributes']).'/>';
   $html .= '<span class="form_captcha" alt="' . $key . '" title="' . t('system', '点击换一个验证码') . '">';
 
-  if ($field['#captcha']['show']) {
+  if (!empty($field['#captcha']['show'])) {
     // 默认显示验证码
     require_once DIDA_ROOT . '/modules/system/system.captcha.inc';
     $html .= captcha_get($values); 
@@ -985,145 +1083,136 @@ function dd_form_captcha($field, $form = NULL) {
 
   return $html;
 }
+// }}}
 
+// public dd_form_checkbox($field) {{{ 
 /**
+ * dd_form_checkbox
  * 复选框字段
+ * 
+ * @param array $field 
+ * @access public
+ * @return string
  */
 function dd_form_checkbox($field) {
   $output = dd_form_label($field);
   
-  if ($field['#options']) {
+  if (!empty($field['#options'])) {
     $id = $field['#attributes']['id'];
-    if ($field['#attributes']['class']) {
-      $field['#attributes']['class'] .= ' '.$id;
-    } else {
-      $field['#attributes']['class'] = $id;
-    }
-    foreach ($field['#options'] as $key => $op) {
-      $field['#attributes']['id'] = $id .'_'. $key;
+    $field['#attributes']['class'] .= ' '.$id;
+
+    foreach ($field['#options'] as $key => $data) {
       $output .= '<span class="form_checkbox_option" alt="'.$id.'"><input';
+
       if (is_array($field['#value']) && in_array($key, $field['#value'])) {
         $output .= ' checked="checked"';
       }
-      $output .= ' value="'.$key.'" name="'.$field['#name'].'['.$key.']" type="checkbox"'.dd_attributes($field['#attributes']).'/><span class="option_label">'.$op ."</span></span>\n";
+
+      $field['#attributes']['id'] = $id .'_'. $key;
+
+      if (is_array($data)) {
+        foreach ($data as $_key => $value) {
+          if ($_key == 'data' || $_key == 'name') {
+            $text = $value;
+          } else {
+            $field['#attributes'][$_key] = $value;
+          }
+        }
+      } else {
+        $text = $data;
+      }
+
+      $output .= ' value="' . $key . '" name="' . $field['#name'] . '[' . $key . ']" type="checkbox"';
+
+      $output .= dd_attributes($field['#attributes']) . '/><span class="option_label">' . $text . '</span></span>';
     }
   } else {
     $output .= '<input';
     if ($field['#value']) $output .= ' checked="checked"';
-    $output .= ' value="1" name="'.$field['#name'].'" type="checkbox"'.dd_attributes($field['#attributes'])."/>\n";
+    $output .= ' value="1" name="' . $field['#name'] . '" type="checkbox"' . dd_attributes($field['#attributes']) . '/>';
   }
+
   return $output . dd_form_error($field);
 }
+// }}}
 
-function dd_form_ajax_form($url, $title = '', $att = NULL) {
- if (empty($title)) $title = t('system', '确认提交');
-
- $att['alt'] = $url;
- $att['class'] = 'dd_form_ajax_form_button';
-
- dd_add_js('misc/jquery.form.js');
-	return dd_form_button(array(
-		'#name' => 'dd_form_ajax_form_button[]',
-		'#value' => $title,
-		'#attributes' => $att
-	));
-}
-
+// public dd_form_select($field) {{{ 
 /**
- * 全选
- * @param (array) $att
- * @param (string) $value
- */
-function form_util_all_check($att = NULL, $value = NULL) {
-  $output = '<input type="checkbox" name="form_field_check_all[]" ';
-  
-  if (!isset($att['class'])) {
-    $att['class'] = 'form_field_all_check';
-  }
-  if (!isset($att['alt'])) {
-    $att['alt'] = 'form_field_check_dom';
-  }
-  
-  $output .= dd_attributes($att);
-  $output .= ' />';
-  
-  $output .= !isset($value) ? t('system', '全选') : $value;
-  return $output;
-}
-
-/**
- * 配合全选按钮，class 对应全选按钮 alt 属性
- * @param array $att
- */
-function form_util_all_check_dom($att = NULL) {
-  $output = '<input type="checkbox" ';
-  
-  if (empty($att['name'])) {
-    $output .= 'name="form_field_all_list_check[]" ';
-  }
-
-  if (!isset($att['class'])) {
-    $att['class'] = 'form_field_check_dom';
-  }
-  
-  $output .= dd_attributes($att);
-  $output .= ' />';
-  
-  return $output;
-}
-
-/**
- * 配合全选，通过 ajax 执行批量操作，rel 对应被选中对象的 class 属性
- * @param array $att
- */
-function form_util_all_check_button($att = NULL) {
-  $output = '<input name="form_field_all_button[]" type="button" ';
-  if (!isset($att['value'])) {
-    $att['value'] = t('system', '确认删除');
-  }
-  
-  if (!isset($att['rel'])) {
-    $att['rel'] = 'form_field_check_dom';
-  }
-  
-  $att['class'] = 'form_field_all_button';
-  
-  $output .= dd_attributes($att);
-  $output .= ' />';
-  return $output;
-}
-
-/**
+ * dd_form_select
  * 下拉框字段
- * @param (array) $field
+ * @param array $field 
+ * @access public
+ * @return string
  */
 function dd_form_select($field) {
-  $output = dd_form_label($field) . '<select name="'.$field['#name'].'"'.dd_attributes($field['#attributes']).'>';
-  foreach ($field['#options'] as $key => $op) {
-    $output .= '<option';
-    if (isset($field['#value']) && (string)$field['#value'] == (string)$key) $output .= ' selected="selected"';
-    $output .= ' value="'.$key.'">'.$op."</option>\n";
-  }
-  $output .= "</select>\n";
-  return $output . dd_form_error($field);
-}
+  $output = dd_form_label($field) . '<select name="' . $field['#name'] . '"' . dd_attributes($field['#attributes']) . '>';
 
-//下拉复选框字段
-function dd_form_selects($field) {
-  $output = dd_form_label($field) . '<select name="'.$field['#name'].'[]"'.dd_attributes($field['#attributes']).' multiple="multiple">';
-  
-  foreach ($field['#options'] as $key => $op) {
+  foreach ($field['#options'] as $key => $data) {
     $output .= '<option';
-    if ($field['#value'] && in_array($key, $field['#value'])) $output .= ' selected="selected"';
-    $output .= ' value="'.$key.'">'.$op."</option>\n";
+
+    if (isset($field['#value']) && (string) $field['#value'] == (string) $key) $output .= ' selected="selected"';
+
+    if (is_array($data)) {
+      $text = !empty($data['name']) ? $data['name'] : $data['data'];
+      unset($data['name'], $data['data']);
+      if (!empty($data)) $output .= dd_attributes($data);
+    } else {
+      $text = $data;
+    }
+   
+    $output .= ' value="' . $key . '">' . $text . '</option>';
   }
-  $output .= "</select>\n";
+
+  $output .= '</select>';
+
   return $output . dd_form_error($field);
 }
+// }}}
+
+// public dd_form_selects($field) {{{ 
+/**
+ * dd_form_selects
+ * 下拉复选框字段
+ * 
+ * @param array $field 
+ * @access public
+ * @return string
+ */
+function dd_form_selects($field) {
+  $output = dd_form_label($field) . '<select name="'.$field['#name'].'[]"' . dd_attributes($field['#attributes']) . ' multiple="multiple">';
+  
+  foreach ($field['#options'] as $key => $data) {
+    $output .= '<option';
+
+    if ($field['#value'] && in_array($key, $field['#value'])) $output .= ' selected="selected"';
+ 
+    if (is_array($data)) {
+      $text = !empty($data['name']) ? $data['name'] : $data['data'];
+      unset($data['name'], $data['data']);
+      if (!empty($data)) $output .= dd_attributes($data);
+    } else {
+      $text = $data;
+    }
+   
+    $output .= ' value="' . $key . '">' . $text . '</option>';   
+  }
+
+  $output .= '</select>';
+
+  return $output . dd_form_error($field);
+}
+// }}}
 
 /**
+ */
+// public dd_form_radio($field) {{{ 
+/**
+ * dd_form_radio
+ * 
  * 单选框字段
- * @param (array) $field
+ * @param array $field
+ * @access public
+ * @return string
  */
 function dd_form_radio($field) {
   $output = dd_form_label($field);
@@ -1140,72 +1229,125 @@ function dd_form_radio($field) {
     foreach ($field['#options'] as $key => $data) {
       if (is_array($data)) {
         foreach ($data as $_key => $value) {
-          if ($_key == 'data') {
-            $desc = $value;
+          if ($_key == 'data' || $_key == 'name') {
+            $text = $value;
           } else {
             $field['#attributes'][$_key] = $value;
           }
         }
       } else {
-        $desc = $data;
+        $text = $data;
       }
 
       $field['#attributes']['id'] = $id . '_' . $key;
       
       $output .= '<span class="form_radio_field"><input';
       
-      if ($field['#value'] == (string) $key) $output .= ' checked="checked"';
+      if ((string)$field['#value'] == (string) $key) $output .= ' checked="checked"';
 
       $output .= ' value="' . $key . '" name="' . $field['#name'] . '" type="radio"';
       $output .= dd_attributes($field['#attributes']) . '/>';
-      $output .= '<span class="form_radio_text">' . $desc . '</span></span>';
+      $output .= '<span class="form_radio_text">' . $text . '</span></span>';
 
     }
   } else {
-    
     $output .= '<span class="form_radio_field"><input';
     if ($field['#value']) $output .= ' checked="checked"';
-
     $output .= ' value="1" name="'.$field['#name'] . '" type="radio"' . dd_attributes($field['#attributes']);
     $output .= '/></span>';
-
   }
+
   return $output . dd_form_error($field);
 }
+// }}}
 
-//上传字段
+// public dd_form_file($field) {{{ 
+/**
+ * dd_form_file
+ * 上传字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_file($field) {
   return file_get_form($field);
 }
+// }}}
 
-//按钮字段
+/**
+ * @return string
+ */
+// public dd_form_button($field) {{{ 
+/**
+ * dd_form_button
+ * 
+ * 按钮字段
+ * @param array $field
+ * @access public
+ * @return string
+ */
 function dd_form_button($field) {
-  return dd_form_label($field). '<input type="button" name="'.$field['#name'].'" value="'.($field['#value'] ? $field['#value'] : 'Button').'"'.dd_attributes($field['#attributes']).'/>';
+  return dd_form_label($field) . '<input type="button" name="' . $field['#name'] . '" value="' . ($field['#value'] ? $field['#value'] : 'Button').'"' . dd_attributes($field['#attributes']) . '/>';
 }
+// }}}
 
-//提交按钮字段
+// public dd_form_submit($field) {{{ 
+/**
+ * dd_form_submit
+ * 提交按钮字段
+ * 
+ * @param array $field 
+ *  一个表单字段
+ * @access public
+ * @return string
+ */
 function dd_form_submit($field) {
-  return dd_form_label($field) .'<input type="submit" name="'.$field['#name'].'" value="'.($field['#value'] ? $field['#value'] : t('system', '确认提交')).'"'.dd_attributes($field['#attributes']).'/>';
+  return dd_form_label($field) . '<input type="submit" name="' . $field['#name'] . '" value="' . ($field['#value'] ? $field['#value'] : t('system', '确认提交')) . '"' . dd_attributes($field['#attributes']) . '/>';
 }
+// }}}
 
-//图片按钮字段
+// public dd_form_image($field) {{{ 
+/**
+ * dd_form_image
+ * 图片按钮字段
+ * 
+ * @param array $field 
+ * @access public
+ * @return string
+ */
 function dd_form_image($field) {
-  return dd_form_label($field). '<input type="image" name="'.$field['#name'].'" src="'.$field['#src'].'"'.dd_attributes($field['#attributes']).'/>';
+  return dd_form_label($field) . '<input type="image" name="' . $field['#name'] . '" src="' . $field['#src'] . '"' . dd_attributes($field['#attributes']) . '/>';
 }
+// }}}
 
+// public dd_form_label($field) {{{ 
+/**
+ * dd_form_label
+ * 表单字段 label
+ * 
+ * @param array $field 
+ * @access public
+ * @return string
+ */
 function dd_form_label($field) {
+  $output = '';
+
   if ($field['#title'] || $field['#required']) {
-    $t = '<label class="dd_label" for="'.$field['#name'].'">';
-    if ($field['#title']) $t .= $field['#title'].'：';
-    if ($field['#required']) $t .= '<span class="form_required" title="' . t('system', '此项不能为空。') . '">*</span>';
-    $t .= "</label>\n";
+    $output = '<label class="dd_label" for="' . $field['#name'] . '">';
+    if (!empty($field['#title'])) $output .= $field['#title'] . '：';
+    if (!empty($field['#required'])) $output .= '<span class="form_required" title="' . t('system', '此项不能为空。') . '">*</span>';
+    $output .= "</label>\n";
   }
   
   if (!empty($field['#field_prefix'])) {
-    $t .= $field['#field_prefix'];
+    $output .= $field['#field_prefix'];
   }
-  return $t;
+
+  return $output;
 }
+// }}}
 
 function form_set_auto($field = NULL) {
   if ($field['#autocomplete']) {
@@ -1280,7 +1422,7 @@ function form_vali_mobile($mobile) {
 }
 
 function dd_form_inline($form) {
-  return '<div class="dd_form_inline">'.$form.'</div>';
+  return '<div class="dd_form_inline">' . $form . '</div>';
 }
 
 function dd_label($v, $class = NULL) {
@@ -1424,13 +1566,13 @@ function form_date_start_or_end($title, $type = 'get', $return = 'string', $star
       '#type' => 'textfield',
       '#default_value' => $start,
       '#value' => $start,
-      '#attributes' => array('class' => 'form_text ui_data_click {dateISO: true}')
+      '#attributes' => array('class' => 'form_text ui_date_click {dateISO: true}')
      ),
      'date_end' => array(
       '#type' => 'textfield',
       '#default_value' => $end,
       '#value' => $end,
-      '#attributes' => array('class' => 'form_text ui_data_click {dateISO: true}')
+      '#attributes' => array('class' => 'form_text ui_date_click {dateISO: true}')
     ),
   );
 
@@ -1459,4 +1601,96 @@ function form_date_start_or_end($title, $type = 'get', $return = 'string', $star
   }
 }
 
+// public dd_form_ajax_form($url, $title = '', $att = NULL) {{{ 
+/**
+ * dd_form_ajax_form
+ * 获得一个 ajax 提交按钮
+ * 
+ * @param string $url 
+ *  表单提交处理页面
+ * @param string $title
+ *  按钮名称
+ * @param array $att 
+ *  按钮属性
+ * @access public
+ * @return string
+ */
+function dd_form_ajax_form($url, $title = '', $att = NULL) {
+ if (empty($title)) $title = t('system', '确认提交');
 
+ $att['alt'] = $url;
+ $att['class'] = 'dd_form_ajax_form_button';
+
+ dd_add_js('misc/jquery.form.js');
+ 
+ return dd_form_button(array(
+		'#name' => 'dd_form_ajax_form_button[]',
+		'#value' => $title,
+		'#attributes' => $att
+	));
+}
+// }}}
+
+/**
+ * 全选
+ * @param array $att
+ * @param string $value
+ */
+function form_util_all_check($att = NULL, $value = NULL) {
+  $output = '<input type="checkbox" name="form_field_check_all[]" ';
+  
+  if (!isset($att['class'])) {
+    $att['class'] = 'form_field_all_check';
+  }
+  if (!isset($att['alt'])) {
+    $att['alt'] = 'form_field_check_dom';
+  }
+  
+  $output .= dd_attributes($att);
+  $output .= ' />';
+  
+  $output .= !isset($value) ? t('system', '全选') : $value;
+  return $output;
+}
+
+/**
+ * 配合全选按钮，class 对应全选按钮 alt 属性
+ * @param array $att
+ */
+function form_util_all_check_dom($att = NULL) {
+  $output = '<input type="checkbox" ';
+  
+  if (empty($att['name'])) {
+    $output .= 'name="form_field_all_list_check[]" ';
+  }
+
+  if (!isset($att['class'])) {
+    $att['class'] = 'form_field_check_dom';
+  }
+  
+  $output .= dd_attributes($att);
+  $output .= ' />';
+  
+  return $output;
+}
+
+/**
+ * 配合全选，通过 ajax 执行批量操作，rel 对应被选中对象的 class 属性
+ * @param array $att
+ */
+function form_util_all_check_button($att = NULL) {
+  $output = '<input name="form_field_all_button[]" type="button" ';
+  if (!isset($att['value'])) {
+    $att['value'] = t('system', '确认删除');
+  }
+  
+  if (!isset($att['rel'])) {
+    $att['rel'] = 'form_field_check_dom';
+  }
+  
+  $att['class'] = 'form_field_all_button';
+  
+  $output .= dd_attributes($att);
+  $output .= ' />';
+  return $output;
+}

@@ -70,6 +70,12 @@ function args($key = NULL, $argc = NULL, $argv = NULL) {
  * @return string
  */
 function message($text) {
+  if (is_object($text) || is_array($text)) {
+    ob_start();
+    var_dump($text);
+    $text = ob_get_contents();
+    ob_end_clean();
+  }
 
   if (empty($_SERVER['LANG']) || stripos($_SERVER['LANG'], 'utf') === false) {
     $text = iconv('UTF-8', 'GBK', $text);

@@ -204,13 +204,11 @@ h2.system_no_content {
   margin-left: 6px;
 }
 
-.pager .pager_form_go_input{
+.pager .pager_form_go_input {
   text-align: center;
-  width: 30px;
-}
-
-.pager_form_go_input{
+  min-width: 40px;
   width: 40px;
+  padding: 3px;
 }
 
 .pager-go-button{
@@ -327,19 +325,28 @@ input.error {
   display: inline;
 }
 
-.field_file_view_multi{
-  display: block;
+.field_file_view_multi {
+  overflow: auto;
+  max-height: 220px;
   margin: 5px 0;
-  overflow: hidden;
 }
 
-.field_file_view_multi .field_file_list{
-  float: left;
-  text-align: center;
-}
-
-.field_file_view_multi .field_file_list img{
+.field_file_view_multi .field_file_list img {
   display: block;
+}
+
+.field_file_edit_view_table_info {
+  width: 220px;
+  text-align: left;
+}
+
+.field_file_edit_view_table_content textarea {
+  height: 60px;
+}
+
+.field_file_edit_view_table_link {
+  text-align: center;
+  width: 60px;
 }
 
 .red, a.red, .form_error, .error, .form_required{
@@ -356,9 +363,9 @@ input.error {
   padding: 0;
 }
 
-.form_setting_description{
+.form_setting_description {
   font-weight: bold;
-  font-size: 1.4em;
+  font-size: 1.2em;
 }
 
 input[type="text"]{
@@ -831,6 +838,25 @@ span.ja_loading {
 
 .right_table, .right {
   text-align: right;
+}
+
+/*file view*/
+.file_view .filebody {
+  margin: 5px 0;
+  padding: 5px 0;
+}
+
+.file_view .fileinfo {
+  text-align: right;
+  padding: 5px 0;
+  margin: 5px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.file_view .fileview {
+  padding: 8px 0;
+  text-align: center;
 }
 
 /* grid */

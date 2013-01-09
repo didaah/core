@@ -1,6 +1,6 @@
 <?php 
 // $Id$
-// print_r($front);
+// @param $front
 ?>
 
 <?php if ($front->content) : ?>

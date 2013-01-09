@@ -274,6 +274,7 @@ function system_perm() {
     'system admin settings captcha' => t('system', '验证码设置'),
     'system admin settings files' => t('system', '文件设置'),
     'system admin filter' => t('system', '输入法管理'),
+    'filter use php' => t('system', '使用 PHP 过滤器(危险)'),
     'system admin lang' => t('system', '界面翻译'),
     'system lang change' => t('system', '选择语言'),
     'file upload' => t('system', '上传文件'),
@@ -608,33 +609,6 @@ function _system_filter_tags($fid, array $tags = array()) {
 }
 
 /**
- * 代码高亮
- * @param (array) $mat
- */
-function _system_filter_code_higth($mat) {
-  if ($mat[2]) {
-    $output = '<pre class="brush: '.$mat[1].';">';
-    $output .= str_replace(array('<br class="system_filter"/>', '<', '>'), array("\n", '&lt;', '&gt;'), $mat[2]);
-    $output .= '</pre>';
-  } else {
-    $output = $mat[0];
-  }
-  
-  return $output;
-}
-
-/**
- * <br class="system_filter"/> 转为 \n
- * @param (array) $mat
- */
-function _system_filter_code_pre_higth($mat) {
-  $output = '<pre class="brush'.$mat[1].'>';
-  $output .= str_replace(array('<br class="system_filter"/>', '<', '>'), array("\n", '&lt;', '&gt;'), $mat[2]);
-  $output .= '</pre>';
-  return $output;
-}
-
-/**
  * 换行符转换
  * @param (array) $mat
  */
@@ -689,13 +663,10 @@ function system_filter($op, $delta = NULL, $format = NULL, $value = NULL, $filte
     case 'view':
       switch ($delta) {
         case 'html':
-          
           $value = check_plain($value);
-          
         break;
 
         case 'br':
-          
           // 换行符前是 html 标签，则不替换
           $value = preg_replace_callback(
             "/(.*?)\n/",
@@ -711,30 +682,6 @@ function system_filter($op, $delta = NULL, $format = NULL, $value = NULL, $filte
           }
           // 执行 php 代码
           $value = filter_tags_php($value);
-        break;
-
-        case 'highlighter': // 代码高亮
-          
-          if (strpos($value, '[code=') === false) {
-            /**
-             * 直接通过 <pre> 标签添加的高亮代码
-             * 将换行符过滤器转换为 \n
-             */
-            if (strpos($value, '<pre class="brush') !== false) {
-              $value = preg_replace_callback('/<pre class="brush(.*?)>(.*?)<\/pre>/ims', '_system_filter_code_pre_higth', $value);
-              dd_get_highlighter();
-            }
-            
-            return $value;
-          }
-          
-          dd_get_highlighter();
-          $value = preg_replace_callback('/\[code=([^\/]*?)\](.*?)\[\/code\]/ims', '_system_filter_code_higth', $value);
-        break;
-
-        case 'smiley': // 表情转换
-          $dir = $GLOBALS['base_path'] . 'misc/markitup/sets/dida/face/';
-          $value = preg_replace('/\[smiley\](.*?)\[\/smiley\]/ims', "<img src='$dir\${1}' />", $value);
         break;
 
         default: // 其它手动添加的过滤器
@@ -795,16 +742,7 @@ function system_filter($op, $delta = NULL, $format = NULL, $value = NULL, $filte
         ),
         'php' => array(
           'title' => 'PHP 解析',
-          'description' => '将 <?php ?> 内的代码解析为 PHP',
-        ),
-        'highlighter' => array(
-          'title' => '代码高亮',
-          'weight' => 10,
-          'description' => '将 [code={type}][/code] 之间的代码做高亮处理，权重应低于换行符转换。若 HTML 过滤器同时启用，且设置为去除标签，代码高亮权重应高于 HTML 过滤器，同时过滤器中允许 pre 标签',
-        ),
-        'smiley' => array(
-          'title' => '表情解析',
-          'description' => '将 [smiley][/smiley] 转换为表情图片，与文本编辑器配合',
+          'description' => '将 <?php ?> 内的代码解析为 PHP。注意：危险！',
         ),
       );
 
@@ -1072,20 +1010,6 @@ function system_setting_form_submit($form, &$value) {
 }
 
 /**
- * 代码高亮
- */
-function dd_get_highlighter() {
-  static $i;
-  
-  if ($i) return;
-  
-  dd_add_css('misc/syntaxhighlighter/styles/sh.css');
-  dd_add_js('misc/syntaxhighlighter/scripts/sh.js');
-  dd_add_js(array('Syntax' => array('clipboardSwf' => $GLOBALS['base_path'] . 'misc/syntaxhighlighter/scripts/clipboard.swf')), 'setting');
-  $i = 1;
-}
-
-/**
  * 获取可视化编辑器
  * @param (string) $dom
  *  html dom
@@ -1093,141 +1017,7 @@ function dd_get_highlighter() {
  *  编辑器配置
  */
 function dd_get_editor($dom, $v = array()) {
-  if (!function_exists('editor_get_editor')) {
-    //dd_set_message(t('system', 'dd_get_editor() 即将废弃，请下载 editor 模块，使用 editor_get_editor() 接口代替'));
-  }
-
-  return;
-
-	static $i;
-	
-	if (!$i) {
-		dd_add_js('misc/ckeditor/ckeditor.js', 'module', 0);
-		dd_add_js('misc/farbtastic.js');
-    dd_add_js('misc/jquery.form.js');
-    
-		$toolbar['full'] = array(
-      array(
-        'Source','-','AutoSave','Maximize','Preview', 'Print', '-',
-        'Templates','Cut','Copy','Paste','PasteText', 'PasteFromWord','-',
-        'Undo','Redo','-',
-        'SelectAll','RemoveFormat','Form','Checkbox','Radio','TextField',
-        'Textarea','Select','Button','ImageButton','HiddenField'),
-      '/',
-      array(
-        'Bold','Italic','Underline','Strike','-',
-        'Subscript','Superscript','NumberedList','BulletedList','-',
-        'Outdent','Indent','Blockquote','JustifyLeft','JustifyCenter','JustifyRight',
-        'JustifyBlock','Link','Unlink','Anchor','Image','Flash','Table', 'HorizontalRule',
-        'Smiley','SpecialChar','PageBreak'),
-      '/',
-      array(
-        'Styles','Format','Font','FontSize','TextColor',
-        'BGColor','ShowBlocks','-', 'swfupload', 'Find','Replace', 'about'
-      )
-    );
-    
-		$toolbar['small'] = array(array(
-  		'Source', 'Maximize', '-', 'Strike', 'Underline', 'Bold',
-  		'Italic','TextColor','BGColor', '-', 'NumberedList', 'BulletedList', '-',
-  		'Link', 'Unlink', '-', 'insertcode', 'Smiley'
-		));
-		
-		$toolbar['medium'] = array(
-			array(
-  			'Source', 'Maximize', 'AutoSave', '-', 'Strike',
-        'Underline', 'Bold', 'Italic', 'TextColor','BGColor', '-',
-        'Cut', 'Copy', 'Paste', 'PasteText','PasteFromWord', 'Undo', 'Redo', '-',
-  			'NumberedList', 'BulletedList', 'BodyBreak'
-			),
-			'/',
-			array(
-  			'Format','Font','FontSize', '-', 'Link', 'Unlink',
-  			'Image','Table','HorizontalRule', '-', 'RemoveFormat', 'SelectAll', '-',
-  			'Blockquote', 'swfupload', 'insertcode', 'Smiley'
-			)
-		);
-		
-		dd_add_js('var toolbar = '.dd_to_js($toolbar).';function updateTextArea(dom){$("#"+dom).val(CKEDITOR.instances[dom].getData());};', 'inline_nojq', 0, 'footer');
-	}
-  if (!isset($v['extraPlugins'])) {
-    $v['extraPlugins'] = 'insertcode,smiley';
-    if ($v['swfupload']) {
-      $v['extraPlugins'] .= ',swfupload';
-    }
-    if ($v['autosave']) {
-      $v['extraPlugins'] .= ',autosave';
-    }
-    if ($v['bodybreak']) {
-      $v['extraPlugins'] .= ',bodybreak';
-    }
-  }
-
-  $query = '';
-
-  // 主要应用于上传文件保存时（写入 files 表）的扩展参数，如 ext_id，status 等
-  if (!empty($v['save_ext']) && is_array($v['save_ext'])) {
-    $query =  '&' . dd_query_string_encode($v['save_ext']);
-    unset($v['save_ext']);
-  }
-
-	if (strpos($v['extraPlugins'], 'swfupload') !== false) {
-		dd_add_js('misc/swfupload/swfupload.js');
-		dd_add_js('misc/swfupload/jquery.swfupload.js');
-		dd_add_css('misc/swfupload/css.css');
-    if (!$v['swf_Con']) {
-  		$v['swf_Con'] = array(
-  			'des' => t('system', '图片'),
-  			'types' => '*.gif;*.png;*.jpg',
-  			'url' => url('files/editor', array('query' => 'op=swfupload&name=Filedata&type=image' . $query)),
-  			'lists' => url('files/editor', array('query' => 'op=custombrowser&type=image')),
-  			'params' => array('__SETPHPSESSID' => $GLOBALS['user']->session, '__SETUID' => $GLOBALS['user']->uid),
-  		);
-    }
-	}
-  
-	if (!empty($_COOKIE['editorColor'])) $v['uiColor'] = $_COOKIE['editorColor'];
-	
-	if ($v['upload_image']) {
-	  if (empty($v['filebrowserImageUploadUrl'])) {
-		  $v['filebrowserImageUploadUrl'] = url('files/editor', array('query' => 'op=ckeditor&name=upload&type=image' . $query));
-	  }
-    if (empty($v['filebrowserBrowseUrl'])) {
-      $v['filebrowserBrowseUrl'] = url('files/editor', array('query' => 'op=ckeditorbrowser&type=image' . $query));
-    }
-    $v['filebrowserWindowHeight'] = '100%';
-    $v['filebrowserWindowWidth'] = '100%';
-	}
-  
-  $v['instanceName'] = $dom;
-  
-  if (empty($v['toolbar']))  $v['toolbar'] = 'medium';
-
-  switch ($v['toolbar']) {
-		case 'full':
-			$v['toolbar'] = ':::code:::toolbar.full';
-		break;
-		case 'small':
-			$v['toolbar'] = ':::code:::toolbar.small';
-		break;
-		case is_array($v['toolbar']):
-		break;
-		case 'custom':
-		  // 自定义
-		  $v['toolbar'] = $v['_toolbar'];
-		  unset($v['_toolbar']);
-		break;
-		case 'mini':
-		  $v['toolbar'] = array(array('Strike', 'Underline', 'Bold'));
-		break;
-		case 'medium': default:
-			$v['toolbar'] = ':::code:::toolbar.medium';
-	}
-  
-  $js = 'CKEDITOR.instances["'.$dom.'"].on("instanceReady", function(){this.document.on("keyup", function(){updateTextArea(\''.$dom.'\');});this.document.on("paste", function(){updateTextArea(\''.$dom.'\');});});';
-	
-	dd_add_js('CKEDITOR.replace(\''.$dom.'\', '.dd_to_js($v).');' . $js, 'inline_nojq', 0, 'footer');
-	$i = 1;
+  // @TODO 编辑器相关从核心中移出。编辑器模块：http://websvn.didaah.org/listing.php?repname=dida.modules.editor
 }
 
 /**
@@ -1246,26 +1036,6 @@ function dd_get_editor_text($dom, $type = 'html', $v = array()) {
     dd_add_js('misc/markitup/jquery.markitup.js');
     dd_add_js('misc/markitup/sets/dida/set.js');
     dd_add_css('misc/markitup/skins/dida/style.css');
-  }
-  
-  if ($v['upload_image']) {
-    if (empty($v['filebrowserImageUploadUrl'])) {
-      $v['filebrowserImageUploadUrl'] = url('files/editor', array('query' => 'op=markitup&name=upload&type=image'));
-    }
-    $v['filebrowserImageBrowseUrl'] = url('files/editor', array('query' => 'op=markitupbrowser&name=upload&type=image'));
-  }
-  
-  if ($v['upload']) {
-    if (empty($v['filebrowserUploadUrl'])) {
-      $v['filebrowserUploadUrl'] = url('files/editor', array('query' => 'op=markitup&name=upload'));
-    }
-    $v['filebrowserBrowseUrl'] = url('files/editor', array('query' => 'op=markitupbrowser&name=upload'));
-  }
-  
-  if ($v['filebrowserImageUploadUrl'] || $v['filebrowserUploadUrl']) {
-    // 文件上传
-    dd_add_js('misc/jquery.ajaxfileupload.js');
-    dd_jqui();
   }
   
   if ($v['AutoSaveUrl']) {
@@ -1289,48 +1059,6 @@ function dd_get_editor_text($dom, $type = 'html', $v = array()) {
 }
 
 /**
- * 文本编辑全部按钮
- */
-function dd_get_editor_text_toolbar() {
-  return array(
-    'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6', 
-    'p' => '段落', 'strong' => '粗体', 'u' => '下划线', 'em' => '斜体', 'del' => '删除线',
-    'ul' => '无序列表', 'ol' => '有序列表', 'img' => '图片', 'blockquote' => '引用', 'code' => '插入代码',
-    'a' => '超链接', 'clean' => '清除格式', 'preview' => '预览'
-  );
-}
-
-/**
- * 使用 swfobject 加载 flash 
- * @param (string) $flash
- *  flash 物理路径
- * @param (int) $width
- *  宽度
- * @param (int) $height
- *  高度
- * @param (string) $id
- *  div id
- * @param (object or array) $vars
- *  传递给 flash 的值
- * @param (object or array) $params
- *  传递给 flash 的值
- * @param (object or array) $attributes
- *  flash 其它设置参数
- */
-function dd_get_swfobject($flash, $width, $height, $id = 'myContent', $vars = NULL, $params = NULL, $attributes = NULL) {
-  dd_add_js('misc/swfobject/swfobject.js');
-  $install = f('misc/swfobject/expressInstall.swf');
-  
-  $vars = $vars ? json_encode($vars) : '{}';
-  $params = $params ? json_encode($params) : '{}';
-  $attributes = $attributes ? json_encode($attributes) : '{}';
-  
-  dd_add_js("swfobject.embedSWF('$flash', '$id', '$width', '$height', '9.0.0', '$install', $vars, $params, $attributes)", 'inline_nojq', false, 'footer'); 
-  
-  return '<div id="'.$id.'">flash</div>';
-}
-
-/**
  * @Implement of hook_alias_reservation()
  */
 function system_alias_reservation() {
@@ -1348,104 +1076,7 @@ function system_alias_reservation() {
  * @returu 若 $html 为真，返回 swfupload 所需的 html 代码
  */
 function dd_get_swfupload($dom = NULL, $v = array(), $html = 1) {
-  static $i = 0;
-  
-  if (!$dom) {
-    $dom = 'dida_swfupload_wrapper_'.$i;
-  }
-  
-	if (!$v['upload_url']) {
-	  $v['upload_url'] = url('files/editor', array('query' => 'op=swfupload&name=Filedata&type=image'));
-	}
-	
-  $html_text = array(
-    'list' => t('system', '文件队列'),
-    'stop' => t('system', '暂停上传'),
-    'start' => t('system', '开始上传'),
-    'des' => t('system', '图片'),
-  );
-  
-  if (isset($v['html_text'])) {
-    $html_text = array_merge($html_text, $v['html_text']);
-    unset($v['html_text']);
-  }
-	
-	$args = array(
-		'flash_url' => f('misc/swfupload/swfupload.swf'),
-		'post_params' => array(
-      '__SETPHPSESSID' => $GLOBALS['user']->session,
-      '__SETUID' => $GLOBALS['user']->uid
-    ),
-		'file_size_limit' => '8 MB',
-		'file_types' => '*.jpg;*.gif;*.png',
-		'file_types_description' => $html_text['des'],
-		'file_upload_limit' => 100,
-		'file_queue_limit' => '0',
-		'custom_settings' => array(
-			'wrapper' => '#'.$dom,
-			'fileLists' => '#su_files_'.$i
-		),
-    'minimum_flash_version' => '9.0.28',
-		'debug' => false,
-		'button_image_url' => f('misc/swfupload/button.png'),
-		'button_width' => 70,
-		'button_height' => 28,
-		'button_placeholder_id' => 'swf_select_button_'.$i,
-    'button_placeholder' => '$(\'#swf_select_button_'.$i.'\')[0]',
-    'swfupload_loaded_handler' => 'Su.swfLoaded',
-    'file_dialog_start_handler' => 'Su.dialogStart',
-		'file_queued_handler' => 'Su.fileQueued',
-		'file_queue_error_handler' => 'Su.fileQueueError',
-    'file_dialog_complete_handler' => 'Su.dialogComplete',
-		'upload_start_handler' => 'Su.uploadStart', 
-		'upload_progress_handler' => 'Su.uploadProgress',
-		'upload_error_handler' => 'Su.uploadError',
-		'upload_success_handler' => 'Su.uploadSuccess',
-    'upload_complete_handler' => 'Su.uploadComplete',
-	);
-	
-	if ($v['html_config']) {
-	  $config = $v['html_config'];
-	  unset($v['html_config']);
-	} else {
-	  $config = NULL;
-	}
-	
-	++$i;
-	
-	if ($v['custom_settings']) {
-    $args['custom_settings'] = array_merge($v['custom_settings'], $args['custom_settings']);
-    unset($v['custom_settings']);
-  }
-  
-  $v = array_merge($args, $v);
-  
-  dd_add_js('misc/swfupload/swfupload.js');
-  dd_add_js('misc/swfupload/jquery.swfupload.js');
-  
-  dd_add_js('$(\'#'.$dom.'\').swfupload('.dd_to_js($v).')', 'inline', false, 'footer');
-  
-  if ($html) {
-    $output = '<div id="'.$dom.'" class="dida_swfupload_content su_content">';
-    if (!$config['no_lists']) {
-      $output .= '<fieldset id="'.substr($v['custom_settings']['fileLists'], 1).'" class="collapsible dida_swfupload_fieldset">';
-      if (!$config['no_lists_text']) {
-        $output .= '<legend class="collapse-processed asc"><a href="#">'.$html_text['list'].'</a></legend>';
-      }
-    }
-    $output .= '</fieldset><div class="dida_swfupload_button">';
-    $output .= '<span id="'.$v['button_placeholder_id'].'"></span>';
-    
-    if (!$config['no_stop']) {
-      $output .= '<input type="button" class="su_stop_upload" value="'.$html_text['stop'].'" />';
-    }
-    if (!$config['no_start']) {
-      $output .= '<input type="button" class="su_start_upload" value="'.$html_text['start'].'" />';
-    }
-    
-    $output .= '</div></div>';
-    return $output;
-  }
+  // @TODO swfupload 相关将移出 system 模块，可在 editor 模块中找到相关方法
 }
 
 /**
@@ -2046,6 +1677,10 @@ function system_theme() {
 		  'tpl' => 'page.tpl.php',
 		  'args' => array('content'),
 		),
+		'file' => array(
+		  'tpl' => 'file.tpl.php',
+		  'args' => array('file'),
+		),
 		'item_list' => array(
 		  'fun' => 'theme_item_list',
       'args' => array('items', 'title', 'type', 'attributes'),
@@ -2325,3 +1960,54 @@ function system_site_menu(&$menu) {
     }
   }
 }
+
+/**
+ * 文件删除、更新、浏览操作
+ */
+function file_operate($file, $op) {
+  switch ($op) {
+    case 'view':
+      module_include_file('system.file.inc', 'system');
+    return _system_file_view($file);
+    case 'delete':
+      if (strpos($file->filemime, 'image') !== false) {
+        $thumb = 1;
+      }
+      if (file_delete($file->fid, $thumb, $file->filepath)) {
+        module_invoke_all('file_delete', $file);
+        echo 1;
+        exit;
+      }
+    break;
+  }
+}
+
+/**
+ * 文件权限验证
+ */
+function file_is_access($file, $op = 'view') {
+  global $user;
+
+  $type = 'is_' . $op;
+
+  $file->$type = false;
+
+  if ($op == 'view') {
+    if (!empty($file->status)) {
+      $file->$type= user_access('file all ' . $op) || (user_access('file one ' . $op) && $file->uid == $user->uid);
+    } else {
+      $file->$type = $file->uid == $user->uid;
+    }
+  } else {
+    $file->$type = user_access('file all ' . $op) || (user_access('file one ' . $op) && $file->uid == $user->uid);
+  }
+  
+  /**
+   * 触发 hook_file_access_is_$op()，若将 $file->$type 设置为 false，则不允许执行操作(view/update/delete)
+   */
+  module_invoke_all('file_access_is_' . $op, $file);
+
+  return $file->$type;
+}
+
+

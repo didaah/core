@@ -1364,7 +1364,6 @@ function user_login_form($redirect = NULL) {
   $form['settings'] = array(
     '#validate' => array('user_login_validate'),
     '#ajax_validate' => true,
-    '#values_object' => true,
     '#ajax_submit' => array(
       'des' => true,
       'options' => array(
@@ -1373,6 +1372,7 @@ function user_login_form($redirect = NULL) {
       ),
     ),
   );
+
   $form['fields']['mail'] = array(
     '#type' => 'textfield',
     '#title' => t('user', '邮箱'),

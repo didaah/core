@@ -2,7 +2,31 @@
 // $Id$
 
 /**
+ * 文件浏览页面
+ */
+function _system_file_view($file) {
+  global $user;
+
+  dd_set_title(array($file->filename));
+
+  $file->filebody = filter_view($file->filebody);
+  
+  if ($user->uid == $file->uid) {
+    $file->name = $user->name;
+  } else if (!empty($user->uid)) {
+    $file->name = db_query('SELECT name FROM {users} WHERE uid = ?', array($file->uid), array('return' => 'column'));
+  } else {
+    $file->name = var_get_key('user', 'anonymous', '游客');
+  }
+
+  module_invoke_all('file_view', $file);
+
+  return theme('file', $file);
+}
+
+/**
  * 文件上传处理
+ * @TODO 将使用 editor 模块取代 system 提供的编辑器相关功能
  */
 function system_file_upload() {
   switch ($_GET['op']) {
