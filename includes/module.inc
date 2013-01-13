@@ -201,7 +201,7 @@ function module_exists($module) {
  */
 function module_install_schema($type, $module) {
   $ret = array();
-  $function = $module. '_schema';
+  $function = $module . '_schema';
   if (function_exists($function)) {
     $schema = $function();
     if ($type == 'install') {

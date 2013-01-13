@@ -1836,7 +1836,7 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
  */
 function dd_http_request_cookie($cookie) {
   // 时间中一般包含有逗号(,)，在 dd_http_request 中，cookie 也以逗号分隔，为免冲突，替换掉
-  $cookie = preg_replace('/expires=.*?;/', '', $cookie);
+  $cookie = preg_replace(array('/expires=.*?;/i', '/HttpOnly/i', '/Path=.*?;/i'), '', $cookie);
 
   if (strpos($cookie, ',') !== false) {
     $data = explode(',', $cookie);

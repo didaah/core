@@ -31,7 +31,11 @@ function system_modules_page() {
       dd_goto('admin/modules');
   }
   
-  dd_set_tabs(array(l(t('system', '模块列表'), 'admin/modules'), l(t('system', '模块升级'), 'admin/modules/update'), l(t('system', '主题管理'), 'admin/themes')));
+  dd_set_tabs(array(
+    l(t('system', '模块列表'), 'admin/modules'),
+    l(t('system', '模块升级'), 'admin/modules/update'),
+    l(t('system', '主题管理'), 'admin/themes')
+  ));
   
   $modules = module_list('module');
   
@@ -98,6 +102,7 @@ function system_modules_page() {
     '#validate' => array('system_modules_validate'),
     '#theme' => 'system_modules_theme'
   );
+
   $form['fields']['submit']['#type'] = 'submit';
   
   return $form;
@@ -105,10 +110,15 @@ function system_modules_page() {
 
 function system_modules_validate($form, $value) {
   global $conf;
+
+  // 已启用模块列表
+  $list = module_list('module', 'enabled');
+
   foreach ($form['fields']['modules'] as $name => $info) {
-    if ($value['modules'][$name]['check']) {
-      if (!$conf['modules'][$name]) $enabled[] = $name;
-    } else if ($conf['modules'][$name]) {
+    if (!empty($value['modules'][$name]['check'])) {
+      if (empty($list[$name])) $enabled[] = $name;
+    } else if (!empty($conf['modules'][$name])) {
+      // 核心模块不允许禁用
       if (!in_array($name, module_core_module())) $disabled[] = $name;
     }
   }

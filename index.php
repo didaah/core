@@ -38,3 +38,4 @@ if (is_int($return)) {
 
 // 调用 page 模板输出内容
 print theme('page', $return);
+
