@@ -286,14 +286,14 @@ function field_export($field_id = NULL, $module = NULL, $type = NULL) {
 function field_delete($field) {
   module_include_file('field.admin.inc', 'field');
   module_include_file('field/admin.inc');
-  if ($field->deleted) {
+  if (!empty($field->deleted)) {
     if (db_exec('DELETE FROM {fields} WHERE field_id = ?', array($field->field_id))) {
       module_invoke_all('field_call_delete', $field);
-      dd_set_message(t('field', '删除成功'));
+      dd_set_message(t('field', '!name 删除成功', array('!name' => $field->name)));
       field_get_cache_field(NULL, 1); // 更新缓存
       return true;
     } else {
-      dd_set_message(t('field', '删除失败'), 'error');
+      dd_set_message(t('field', '!name 删除失败', array('!name' => $field->name)), 'error');
     }
   } else {
     dd_set_message(t('field', '这个字段不允许删除'), 'error');
@@ -330,11 +330,11 @@ function field_lists($module = NULL, $type = NULL, $filter_header = array()) {
  */
 function field_group_delete($module, $type) {
   if ($fields = field_get_cache_field_group($module, $type)) {
-    
     foreach ($fields as $field) {
+      // 一律视为允许删除
+      $field->deleted = 0;
       field_delete($field);
     }
-
     return true;
   }
 }
@@ -1389,3 +1389,4 @@ function field_validate_date($v, $format, $time = NULL) {
  
   return $msg;
 }
+

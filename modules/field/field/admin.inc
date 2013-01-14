@@ -528,7 +528,7 @@ function field_field_call_links($field, &$links = NULL, $get = NULL) {
  */
 function field_field_call_custom($field) {
   if (in_array($field->field_type, field_get_term_type())) {
-    if ($_GET['field_term_tid']) {
+    if (!empty($_GET['field_term_tid'])) {
       $term = field_term_load($_GET['field_term_tid']);
     }
     switch ($_GET['field_custom']) {
