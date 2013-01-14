@@ -383,7 +383,7 @@ function field_file_field_node_form($field, $node, &$form, $ac) {
     );
     
   } else {
-    $multi = $field->data['multi'] > 1 ? $field->data['multi'] : 0;
+    $multi = $field->data['multi'] > 0 ? $field->data['multi'] : 0;
     if (!empty($node->fields[$field->field_key])) $multi = $field->data['multi'] - count($node->fields[$field->field_key]);
     $disabled = $multi < 1 ? true : false;
     $form['fields']['fields'][$field->field_key] = array(
