@@ -332,7 +332,7 @@ function field_group_delete($module, $type) {
   if ($fields = field_get_cache_field_group($module, $type)) {
     foreach ($fields as $field) {
       // 一律视为允许删除
-      $field->deleted = 0;
+      $field->deleted = 1;
       field_delete($field);
     }
     return true;
