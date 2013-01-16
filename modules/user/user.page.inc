@@ -50,6 +50,10 @@ function user_user_center_info() {
       'is_group' => true, // 定义组信息
       'weight' => 1000,
       'list_title' => t('user', '基本设置'), // 列表标题
+      // 以下三个参数设置与 hook_menu() 相同，可用于控制权限、设置动态菜单，
+      //'access_callback' => 'user_access', // 权限回调函数，默认为 user_access
+      //'access_arguments' => array('user view'),
+      //'title_callback' => '', // 标题回调函数
     ),
     'default' => array(
       'title' => t('user', '个人中心'),
@@ -149,9 +153,8 @@ function _user_get_center_info($center) {
     }
 
     if ($functions = module_hook_get_cache('user_center_info')) {
-      $menu = array();
-      $_menu = array();
       $i = 0;
+      $menu = $_menu = array();
       foreach ($functions as $module => $function) {
         if (function_exists($function)) {
           $result = call_user_func($function);
@@ -160,6 +163,16 @@ function _user_get_center_info($center) {
           if (!is_array($result)) continue;
 
           foreach ($result as $type => $info) {
+
+            if (!empty($info['access_arguments'])) {
+              $accecc_callback = !empty($info['access_callback']) ? $info['access_callback'] : 'user_access';
+              if (!call_user_func_array($info['title_callback'], $info['access_arguments'])) {
+                continue;
+              }
+            } else if (!empty($info['access_callback']) && !call_user_func($info['access_callback'])) {
+              continue;
+            }
+
             // 定义组信息
             if (!empty($info['is_group'])) {
               foreach ($info as $key => $value) {
@@ -167,7 +180,11 @@ function _user_get_center_info($center) {
               }
               continue;
             }
-           
+
+            if (!empty($info['title_callback'])) {
+              $info['title'] = call_user_func($info['title_callback']);
+            }
+          
             // 未定义页面标题，跳过
             if (empty($info['title'])) continue;
             
