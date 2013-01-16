@@ -136,117 +136,119 @@ function user_user_center_view($center) {
 function _user_get_center_info($center) {
   global $language_code; 
 
-  if ($cache = cache_get('user_center_menu_data_' . $language_code)) {
-    $data = $cache->data;
+  /**
+   * 读取自定义设置
+   * @TODO 目前提供自定义排序，未来提供自定义页面名称等设置
+   */
+  if ($cache = cache_get('user_center_info_settings')) {
+    $group = $cache->data['group'];
+    $links = $cache->data['links'];
   } else {
-    
-    /**
-     * 读取自定义设置
-     * @TODO 目前提供自定义排序，未来提供自定义页面名称等设置
-     */
-    if ($cache = cache_get('user_center_info_settings')) {
-      $group = $cache->data['group'];
-      $links = $cache->data['links'];
-    } else {
-      $group = array('weight' => array(), 'list_title' => array());
-      $links = array('weight' => array());
-    }
+    $group = array('weight' => array(), 'list_title' => array(), 'access' => array());
+    $links = array('weight' => array());
+  }
 
-    if ($functions = module_hook_get_cache('user_center_info')) {
-      $i = 0;
-      $menu = $_menu = array();
-      foreach ($functions as $module => $function) {
-        if (function_exists($function)) {
-          $result = call_user_func($function);
-          
-          // hook_user_center_info() 必须返回数组
-          if (!is_array($result)) continue;
+  if ($functions = module_hook_get_cache('user_center_info')) {
+    $i = 0;
+    $menu = $_menu = array();
+    foreach ($functions as $module => $function) {
+      if (function_exists($function)) {
+        $result = call_user_func($function);
+        
+        // hook_user_center_info() 必须返回数组
+        if (!is_array($result)) continue;
 
-          foreach ($result as $type => $info) {
+        foreach ($result as $type => $info) {
 
-            if (!empty($info['access_arguments'])) {
-              $accecc_callback = !empty($info['access_callback']) ? $info['access_callback'] : 'user_access';
-              if (!call_user_func_array($info['title_callback'], $info['access_arguments'])) {
-                continue;
-              }
-            } else if (!empty($info['access_callback']) && !call_user_func($info['access_callback'])) {
+          // 组默认权限
+          if (!isset($group['access'][$type])) $group['access'][$type] = true;
+
+          if (!empty($info['access_arguments'])) {
+            $accecc_callback = !empty($info['access_callback']) ? $info['access_callback'] : 'user_access';
+            if (!call_user_func_array($info['title_callback'], $info['access_arguments'])) {
+              if (!empty($info['is_group'])) $group['access'][$type] = false;
               continue;
             }
-
-            // 定义组信息
-            if (!empty($info['is_group'])) {
-              foreach ($info as $key => $value) {
-                $group[$key][$type] = $value;
-              }
-              continue;
-            }
-
-            if (!empty($info['title_callback'])) {
-              $info['title'] = call_user_func($info['title_callback']);
-            }
-          
-            // 未定义页面标题，跳过
-            if (empty($info['title'])) continue;
-            
-            // 自定义页面排序
-            if (isset($links['weight'][$type])) {
-              $info['weight'] = $i+$links['weight'][$type];
-            } else {
-              $info['weight'] = $i;
-            }
-
-            if (empty($info['group'])) {
-              $info['group'] = $module;
-            }
-
-            if (empty($menu[$info['group']])) {
-              $menu[$info['group']] = array('links' => array());
-              // 自定义分组排序
-              if (isset($group['weight'][$info['group']])) {
-                $menu[$info['group']]['weight'] = $i+$group['weight'][$info['group']];
-              } else {
-                $menu[$info['group']]['weight'] = $i;
-              }
-            }
-            
-            $class = 'user_center_link user_center_link_' . $info['group'];
-
-            if (empty($info['attributes']) || empty($info['attributes']['class'])) {
-              $info['attributes'] = array('class' => $class);
-            } else {
-              $info['attributes']['class'] .= ' ' . $class;
-            }
-
-            if (empty($info['path'])) {
-              $info['path'] = 'user/center/' . $type;
-            }
-
-            //$info['data'] = l($info['title'], $info['path'], $info);
-
-            $info['attributes']['id'] = 'user_center_link_menu_' . $type;
-
-            $_menu[$type] = $info;
-
-            // 只注册一个页面，不做为 link 显示
-            if (!empty($info['link_hide'])) continue;
-
-            $menu[$info['group']]['links'][$type] = $info;
-            $menu[$info['group']]['list_title'] = !empty($group['list_title'][$info['group']]) ? $group['list_title'][$info['group']] : NULL;
-            ++$i;
+          } else if (!empty($info['access_callback']) && !call_user_func($info['access_callback'])) {
+            if (!empty($info['is_group'])) $group['access'][$type] = false;
+            continue;
           }
+
+          // 定义组信息
+          if (!empty($info['is_group'])) {
+            foreach ($info as $key => $value) {
+              $group[$key][$type] = $value;
+            }
+            continue;
+          }
+
+          if (empty($info['group'])) {
+            $info['group'] = $module;
+          }
+
+          // 无权限
+          if (empty($group['access'][$info['group']])) continue;
+
+          if (!empty($info['title_callback'])) {
+            $info['title'] = call_user_func($info['title_callback']);
+          }
+        
+          // 未定义页面标题，跳过
+          if (empty($info['title'])) continue;
+          
+          // 自定义页面排序
+          if (isset($links['weight'][$type])) {
+            $info['weight'] = $i+$links['weight'][$type];
+          } else {
+            $info['weight'] = $i;
+          }
+
+          if (empty($menu[$info['group']])) {
+            $menu[$info['group']] = array('links' => array());
+            // 自定义分组排序
+            if (isset($group['weight'][$info['group']])) {
+              $menu[$info['group']]['weight'] = $i+$group['weight'][$info['group']];
+            } else {
+              $menu[$info['group']]['weight'] = $i;
+            }
+          }
+          
+          $class = 'user_center_link user_center_link_' . $info['group'];
+
+          if (empty($info['attributes']) || empty($info['attributes']['class'])) {
+            $info['attributes'] = array('class' => $class);
+          } else {
+            $info['attributes']['class'] .= ' ' . $class;
+          }
+
+          if (empty($info['path'])) {
+            $info['path'] = 'user/center/' . $type;
+          }
+
+          //$info['data'] = l($info['title'], $info['path'], $info);
+
+          $info['attributes']['id'] = 'user_center_link_menu_' . $type;
+
+          $_menu[$type] = $info;
+
+          // 只注册一个页面，不做为 link 显示
+          if (!empty($info['link_hide'])) continue;
+
+          $menu[$info['group']]['links'][$type] = $info;
+          $menu[$info['group']]['list_title'] = !empty($group['list_title'][$info['group']]) ? $group['list_title'][$info['group']] : NULL;
+          ++$i;
         }
       }
+    }
 
-      // 组排序
-      uasort($menu, 'dd_sort_cmp');
-     
-      $data = array('menu' => $_menu, 'links' => array());
+    // 组排序
+    uasort($menu, 'dd_sort_cmp');
+   
+    $data = array('menu' => $_menu, 'links' => array());
 
-      foreach ($menu as $type => $link) {
-        uasort($link['links'], 'dd_sort_cmp');
-        $data['links'][$type] = $link;
-      }
-      cache_set('user_center_menu_data_' . $language_code, $data);
+    foreach ($menu as $type => $link) {
+      uasort($link['links'], 'dd_sort_cmp');
+      $data['links'][$type] = $link;
     }
   }
 
