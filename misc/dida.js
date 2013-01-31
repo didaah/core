@@ -945,6 +945,10 @@ $(function() {
           uidate_vali(text, instance, (instance.settings.start == 'ok' ? 'start' : 'end'));
         };
       }
+
+      o.beforeShow = function() {
+        setTimeout(function () {$('#ui-datepicker-div').css("z-index", 9999);}, 100); 
+      }
       
       if (o.showTime) {
         o.duration = '';
