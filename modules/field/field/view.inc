@@ -128,14 +128,14 @@ function field_file_field_node_view($field, $node, $view_type) {
     if (strpos($file->filemime, 'image/') !== false) {
       $content['#field_type'] = 'file_image'; // 文件中的图片类型
       if (!empty($field->data['thumbs']['medium'])) {
-        $content['#content'] .= l(img(image_get_thumb($file->fid, $file->filepath, $field->data['thumbs']['medium'])), f($file->filepath),
+        $content['#content'] .= l(img(image_get_thumb($file->fid, $file->filepath, $field->data['thumbs']['medium'])), 'files/' . $file->fid . '/view',
         array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
       } else {
-        $content['#content'] .= l(img($file->filepath), f($file->filepath),
+        $content['#content'] .= l(img($file->filepath), 'files/' . $file->fid . '/view',
         array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
       }
     } else {
-      $content['#content'] .= l(($file->filename ? $file->filename : dirname($file->filepath)), f($file->filepath),
+      $content['#content'] .= l(($file->filename ? $file->filename : dirname($file->filepath)), 'files/' . $file->fid . '/view',
       array('attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
     }
   }

@@ -270,11 +270,9 @@ function field_groups($module, $type) {
  *  字段组名字
  */
 function field_export($field_id = NULL, $module = NULL, $type = NULL) {
-  if (is_object($field)) {
-    module_include_file('field.admin.inc', 'field');
-    module_include_file('field/admin.inc');
-    return _field_export($field_id, $module, $type);
-  } 
+  module_include_file('field.admin.inc', 'field');
+  module_include_file('field/admin.inc');
+  return _field_export($field_id, $module, $type);
 }
 
 /**

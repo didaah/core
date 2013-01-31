@@ -484,10 +484,12 @@ function field_field_call_form($field, &$form) {
 function field_field_call_validate(&$field) {
   switch ($field->field_type) {
     case 'file':
-      if (strpos($field->data['filetype'], '|') !== false) {
-        $field->data['filetype'] = explode('|', $field->data['filetype']);
-      } else if ($field->data['filetype']) {
-        $field->data['filetype'] = array($field->data['filetype']);
+      if (!empty($field->data) && !empty($field->data['filetype'])) {
+        if (strpos($field->data['filetype'], '|') !== false) {
+          $field->data['filetype'] = explode('|', $field->data['filetype']);
+        } else {
+          $field->data['filetype'] = array($field->data['filetype']);
+        }
       }
       if ($field->data['filesize'] && !is_numeric($field->data['filesize'])) {
         dd_set_message(t('field', '文件大小只能是数字'), 'error');
