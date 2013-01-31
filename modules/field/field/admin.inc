@@ -87,9 +87,13 @@ function field_field_call_form($field, &$form) {
       $options = array(t('field', '任意'));
       
       dd_add_js('modules/field/field.admin.js');
-      
-      $value = $field->data['validate']['settings'];
 
+      if (!empty($field->data['validate']['settings'])) {
+        $value = $field->data['validate']['settings'][$field->data['validate']['type']];
+      } else {
+        $value = array();
+      }
+      
       // 自定义允许或禁止值
       $custom_fields = array(
         'value_type' => array(

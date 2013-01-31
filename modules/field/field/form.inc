@@ -279,7 +279,11 @@ function field_textfield_field_node_form($field, $node, &$form, $ac) {
 
   if (empty($field->data['validate']['type'])) return;
 
-  $v = !empty($field->data['validate']['settings']) ? $field->data['validate']['settings'] : array();
+  if (!empty($field->data['validate']['settings']) && !empty($field->data['validate']['settings'][$field->data['validate']['type']])) {
+    $v = $field->data['validate']['settings'][$field->data['validate']['type']];
+  } else {
+    $v = array();
+  }
   
   switch ($field->data['validate']['type']) {
     case 'date': case 'date_time':
