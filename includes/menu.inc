@@ -378,6 +378,7 @@ function menu_get_val($parts) {
 }
 
 function menu_match($load, $path = NULL) {
+  $return = array();
   foreach ($load as $key => $match) {
     if (!is_array($match)) {
       if (!$return[$key] = menu_menu_match(arg($key, $path), $match)) {
@@ -385,7 +386,13 @@ function menu_match($load, $path = NULL) {
       }
     } else {
     	$function = $match[0];
-    	$match[0] = arg($key, $path);
+      foreach ($match as $id => $value) {
+        if ($id == 0) {
+          $match[0] = arg($key, $path);
+        } else if (arg($value, $path)) {
+          $match[$id] = arg($value, $path);
+        }
+      }
     	if (!$return[$key] = call_user_func_array($function, $match)) {
         return false;
       }
