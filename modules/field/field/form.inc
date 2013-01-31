@@ -313,7 +313,9 @@ function field_textfield_field_node_form($field, $node, &$form, $ac) {
           $js['minDate'] = $v['minDate'];
         }
         if (!empty($v['start_or_end']) && !empty($v['field_key'])) {
-          $js[$v['start_or_end']] = 'input[name=\'fields[' . $v['field_key'] . ']\']';
+          $js[$v['start_or_end']] = 'ok';
+          $map = array('start' => 'end', 'end' => 'start');
+          $js[$map[$v['start_or_end']]] = 'input[name=\'fields[' . $v['field_key'] . ']\']';
         }
         dd_add_js(array('uidate' => array($js)), 'setting');
       }
