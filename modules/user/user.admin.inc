@@ -276,18 +276,31 @@ function user_set_perm_validate($form, $value) {
  * 管理员新增会员
  */
 function user_admin_add() {
-	global $conf;
+  global $conf;
+
 	_user_admin_tabs();
   $form = user_register_form('admin');
   unset($form['fields']['captcha']);
+
+  $form['fields']['status'] = array(
+    '#type' => 'radio',
+    '#title' => t('user', '状态'),
+    '#default_value' => var_get_key('user', 'status', 1) == 1 ? 1 : 0,
+    '#required' => 1,
+    '#description' => t('user', '激活状态才能登录'),
+    '#options' => array(t('user', '隐藏'), t('user', '激活')),
+  );
+ 
   $opt = user_roles_opt();
   unset($opt[var_get_key('user', 'anonymous_role', 1)]);
+
   $form['fields']['rid'] = array(
     '#type' => 'select',
     '#title' => t('user', '角色'),
     '#required' => 1,
     '#options' => $opt,
   );
+
   $form['fields']['button'] = array(
     '#type' => 'submit',
     '#weight' => 100,

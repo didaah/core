@@ -32,8 +32,8 @@ if (!empty($_args['cron_name'])) {
 
 if (!empty($__cron_module) && !empty($__cron_name)) {
   module_include_file('cronjobs.inc', $__cron_module);
-  $cronjobs = module_invoke($__cron_module, 'cronjobs');
-
+  $cronjobs = module_invoke($__cron_module, 'cronjobs', 0);
+  
   if ($cronjobs[$__cron_name]) {
     $cron = $cronjobs[$__cron_name];
     $module = !empty($cron['module']) ? $cron['module'] : $__cron_module;
@@ -169,7 +169,7 @@ function _cron_jobs() {
 
   module_include_file('cronjobs.inc');
 
-  $cronjobs = _module_invoke_all('cronjobs');
+  $cronjobs = _module_invoke_all('cronjobs', 0);
 
   // 获取所有 php 进程，找出正在执行的任务
   if ($process = _cron_get_php_ps()) {

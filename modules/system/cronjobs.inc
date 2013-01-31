@@ -10,10 +10,8 @@
 
 /**
  * @Implement of hook_cronjobs()
- * @param array $timestamp
- *  所定义的每个任务上次执行时间
  */
-function system_cronjobs($timestamp) {
+function system_cronjobs() {
 
   return false; // 请参见以下代码
 

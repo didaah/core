@@ -39,10 +39,7 @@ function user_default() {
 
 /**
  * @Implement of hook_user_center() 
- * @param string $op 
- * @param object $account 
- * @access public
- * @return void
+ * @return array
  */
 function user_user_center_info() {
   return array(
@@ -68,7 +65,7 @@ function user_user_center_info() {
       'title' => t('user', '编辑资料')
     ),
     'logout' => array(
-      'title' => l(t('user', '安全离开'), 'user/logout', array('query' => 't=' . $_SERVER['REQUEST_TIME'])),
+      'title' => t('user', '安全离开'),
       'weight' => 1000,
       'path' => 'user/logout'
     )

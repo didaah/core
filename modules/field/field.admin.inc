@@ -515,7 +515,6 @@ function field_form_select_validate($form, $v) {
 function _field_groups($module, $type) {
   if ($fetch = db_query('SELECT field_id, groups FROM {fields} WHERE module = ? AND type = ?',
   array($module, $type))) {
-    
     dd_set_help(t('field', '管理字段分组在表单中显示时的 fieldset 信息'));
 
     $datas = custom_get('field_groups_' . $module . $type);

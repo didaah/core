@@ -254,11 +254,9 @@ function field_load($field_id, $clear = NULL) {
  * @return array
  */
 function field_groups($module, $type) {
-  if (is_object($field)) {
-    module_include_file('field.admin.inc', 'field');
-    module_include_file('field/admin.inc');
-    return _field_groups($module, $type);
-  } 
+  module_include_file('field.admin.inc', 'field');
+  module_include_file('field/admin.inc');
+  return _field_groups($module, $type);
 }
 // }}}
 
