@@ -102,23 +102,31 @@ function field_field_call_form($field, &$form) {
           '#default_value' => $value['value_type'],
           '#options' => array(
             1 => t('field', '普通模式'),
-            2 => t('block', '正则模式'),
-            3 => t('block', 'PHP 模式')
+            2 => t('field', '正则模式'),
+            3 => t('field', 'PHP 模式')
           )
         ),
         'values' => array(
           '#type' => 'textarea',
           '#default_value' => $value['values'],
           '#attributes' => array('rows' => 6, 'cols' => 60),
-          '#description' => theme('item_list', array(
-              t('field', '模式说明：'),
-              t('field', '普通模式：一行一条记录，首尾空格将被清除'),
-              t('field', '正则模式：符合PHP标准的正则表达式。以斜杠开头，如：/a.*z/ 表示字符串以a开头，以z结尾'),
-              t('field', 'PHP模式：不包含 php 标签，必须用 return 而不是 echo，返回 false 或 true 或 数组，false 表示未通过验证。可用变量：$field_value - 当前输入值，$field - 当前字段，$field_type - 操作类型')
-            )
-          )
         )
       );
+
+      $item = array(
+        t('field', '模式说明：'),
+        t('field', '普通模式：一行一条记录，首尾空格将被清除'),
+        t('field', '正则模式：符合PHP标准的正则表达式。以斜杠开头，如：/a.*z/ 表示字符串以a开头，以z结尾')
+      );
+
+      // 允许使用 php 输入法的用户
+      if ($GLOBALS['_filter_is_php_code'] == true && user_access('filter use php')) {
+        $custom_fields['value_type']['#options'][3] = t('field', 'PHP 模式');
+        $item[] = t('field', 'PHP模式：不包含 php 标签，必须用 return 而不是 echo，返回 false 或 true 或 数组，false 表示未通过验证。可用变量：$field_value - 当前输入值，$field：当前字段，$field_type：操作类型，$is_ajax：是否为 ajax 验证');
+      }
+
+      $custom_fields['values']['#description'] = theme('item_list', $item);
+
 
       // 字段值过滤条件
       $data_fields = array(
@@ -370,19 +378,27 @@ function field_field_call_form($field, &$form) {
       
       dd_add_js('modules/field/field.admin.js');
 
-      $value_fields = array(
+      if (!empty($field->data['validate']['settings'])) {
+        $value = $field->data['validate']['settings'][$field->data['validate']['type']];
+      } else {
+        $value = array();
+      }
+      
+      // 自定义允许或禁止值
+      $custom_fields = array(
         'value_type' => array(
           '#type' => 'radio',
           '#title' => t('field', '匹配模式'),
-          '#default_value' => $field->data['validate']['settings']['value_type'],
+          '#default_value' => $value['value_type'],
           '#options' => array(
             1 => t('field', '普通模式'),
             2 => t('field', '正则模式'),
+            3 => t('field', 'PHP 模式')
           )
         ),
         'values' => array(
           '#type' => 'textarea',
-          '#default_value' => $field->data['validate']['settings']['values'],
+          '#default_value' => $value['values'],
           '#attributes' => array('rows' => 6, 'cols' => 60),
         )
       );
@@ -390,13 +406,13 @@ function field_field_call_form($field, &$form) {
       $item = array(
         t('field', '模式说明：'),
         t('field', '普通模式：一行一条记录，首尾空格将被清除'),
-        t('field', '正则模式：符合PHP标准的正则表达式。以斜杠开头，如：/a.*z/ 表示字符串以a开头，以z结尾'),
+        t('field', '正则模式：符合PHP标准的正则表达式。以斜杠开头，如：/a.*z/ 表示字符串以a开头，以z结尾')
       );
 
       // 允许使用 php 输入法的用户
       if ($GLOBALS['_filter_is_php_code'] == true && user_access('filter use php')) {
         $custom_fields['value_type']['#options'][3] = t('field', 'PHP 模式');
-        $item[] = t('field', 'PHP模式：不包含 php 标签，必须用 return 而不是 echo，返回 false 或 true 或 数组，false 表示未通过验证。可用变量：$field_value - 当前输入值，$field - 当前字段，$field_type - 操作类型');
+        $item[] = t('field', 'PHP模式：不包含 php 标签，必须用 return 而不是 echo，返回 false 或 true 或 数组，false 表示未通过验证。可用变量：$field_value - 当前输入值，$field：当前字段，$field_type：操作类型，$is_ajax：是否为 ajax 验证');
       }
 
       $custom_fields['values']['#description'] = theme('item_list', $item);
@@ -404,11 +420,11 @@ function field_field_call_form($field, &$form) {
       $value_fields = array(
         'custom_ok' => array(
           'title' => t('field', '自定义(允许特定值)'),
-          'fields' => $fields,
+          'fields' => $custom_fields,
         ),
         'custom_not' => array(
           'title' => t('field', '自定义(不允许特定值)'),
-          'fields' => $fields,
+          'fields' => $custom_fields,
         ),
       );     
 

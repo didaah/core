@@ -53,7 +53,7 @@ function field_tags_field_node_validate($field, $value, &$error, $form, $ac) {
 
   if (empty($field->data['validate']['type']) || empty($value->fields[$field->field_key])) return;
   
-  $v = !empty($field->data['validate']['settings']) ? $field->data['validate']['settings'] : array();
+  $v = !empty($field->data['validate']['settings']) ? $field->data['validate']['settings'][$field->data['validate']['type']] : array();
 
   switch ($field->data['validate']['type']) {
     case 'custom_ok':
@@ -70,9 +70,10 @@ function field_tags_field_node_validate($field, $value, &$error, $form, $ac) {
             $e = true;
           }
         break;
-        case 3: // php 模式
+        case 3: // php 模式，返回 false 表示未通过验证，true 表示通过验证，array 允许值列表
           $field_value = $value->fields[$field->field_key];
-          if (eval($v['values']) == false) {
+          $_return = eval($v['values']);
+          if (empty($_return) || (is_array($_return) && !in_array($field_value, $_return))) {
             $e = true;
           }
         break;
@@ -96,9 +97,10 @@ function field_tags_field_node_validate($field, $value, &$error, $form, $ac) {
             $e = true;
           }
         break;
-        case 3: // php 模式
+        case 3: // php 模式，返回 false 表示未通过验证，true 表示通过验证，array 允许值列表
           $field_value = $value->fields[$field->field_key];
-          if (eval($v['values']) == false) {
+          $_return = eval($v['values']);
+          if (empty($_return) || (is_array($_return) && in_array($field_value, $_return))) {
             $e = true;
           }
         break;
@@ -127,7 +129,7 @@ function field_textfield_field_node_validate($field, $value, &$error, $form, $ac
       $e = t('field', '%string 的长度不小于 %length 字符', array('%string' => $field->name, '%length' => $field->data['validate']['minsize']));
     } else if (!empty($field->data['validate']['type'])) { 
       $showtime = 0;
-      $v = !empty($field->data['validate']['settings']) ? $field->data['validate']['settings'] : array();
+      $v = !empty($field->data['validate']['settings']) ? $field->data['validate']['settings'][$field->data['validate']['type']] : array();
       switch ($field->data['validate']['type']) {
         case 'figure':
           if (preg_match('/[^0-9]/', $value->fields[$field->field_key])) {
@@ -188,9 +190,40 @@ function field_textfield_field_node_validate($field, $value, &$error, $form, $ac
                 $e = true;
               }
             break;
-            case 3: // php 模式
-              $field_value = $value->fields[$field->feild_key];
-              if (eval($v['values']) == false) {
+            case 3: // php 模式，返回 false 表示未通过验证，true 表示通过验证，array 允许值列表
+              $field_value = $value->fields[$field->field_key];
+              $_return = eval($v['values']);
+              if (empty($_return) || (is_array($_return) && !in_array($field_value, $_return))) {
+                $e = true;
+              }
+            break;
+            default:
+              $e = true;
+          }
+          if ($e) $e = t('field', '!string 的值不被允许', array('!string' => $field->name));
+        break;
+        case 'url':
+          if (!preg_match('/https?:\/\/([a-z0-9]*?)\.(.*)/i', $value->fields[$field->field_key])) {
+            $e = t('field', '请输入正确的网址，如：http://www.didaah.org/');
+          }
+        break;  
+        case 'custom_not':
+          switch ($v['value_type']) {
+            case 1: // 普通模式
+              $values = dd_line_to_array($v['values'], 1);
+              if (array_search($value->fields[$field->field_key], $values) !== false) {
+                $e = true;
+              }
+            break;
+            case 2: // 正则模式
+              if (preg_match($v['values'], $value->fields[$field->field_key])) {
+                $e = true;
+              }
+            break;
+            case 3: // php 模式，返回 false 表示未通过验证，true 表示通过验证，array 不允许值列表
+              $field_value = $value->fields[$field->field_key];
+              $_return = eval($v['values']);
+              if (empty($_return) || (is_array($_return) && in_array($field_value, $_return))) {
                 $e = true;
               }
             break;
@@ -231,7 +264,7 @@ function field_textfield_field_node_validate($field, $value, &$error, $form, $ac
     }
 
     if (empty($e) && !empty($field->data['validate']['unique'])) {
-      if ($value->nid) {
+      if (!empty($value->nid)) {
         if (db_query('SELECT field_id FROM {fields_small} WHERE nid != ? AND field_id = ? AND text = ?',
         array($value->nid, $field->field_id, $value->fields[$field->field_key]), array('return' => 'column'))) {
           $e = t('field', '%string 已经存在', array('%string' => $field->name));

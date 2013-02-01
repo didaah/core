@@ -83,16 +83,19 @@ function  _field_system_tools_ajax($v, $g) {
 
     case 'auto': // 输入 ajax 验证
       if ($field = field_load($g['fid'])) {
-        if ($field->data['validate']['type'] == 'custom_ok' && $field->data['validate']['settings']['values']) {
-          $json['error'] = 0;
-           switch ($field->data['validate']['settings']['value_type']) {
-            case 1: // 普通模式
-              $json['contents'] = dd_line_to_array($field->data['validate']['settings']['values'], 1);
-            break;
-            case 3: // php 模式
-              $field_value = $v['value'];
-              $field_type = 'autocomplete';
-              $json['contents'] = eval($field->data['validate']['settings']['values']);
+        if (in_array($field->data['validate']['type'], array('custom_ok', 'custom_not'))) {
+          $value = $field->data['validate']['settings'][$field->data['validate']['type']];
+          if (!empty($value['values'])) {
+            $json['error'] = 0;
+            switch ($value['value_type']) {
+              case 1: // 普通模式
+                $json['contents'] = dd_line_to_array($value['values'], 1);
+              break;
+              case 3: // php 模式
+                $field_value = $v['value'];
+                $field_type = 'autocomplete';
+                $json['contents'] = eval($value['values']);
+            }
           }
         }
       }

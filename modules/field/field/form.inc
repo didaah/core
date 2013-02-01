@@ -244,15 +244,16 @@ function field_tags_field_node_form($field, $node, &$form, $ac) {
     '#description' => t(NULL, $field->data['input_description'])
   );
   
+  dd_jqui();
+  
   if (!empty($field->data['validate']['autocomplete'])) {
     // 提示已有值列表
-    dd_jqui();
     $form['fields']['fields'][$field->field_key]['#autocomplete'] = array(
       'url' => url('ajax', array('query' => 'fid=' . $field->field_id . '&op=autotag&module=field')),
       'dom' => '.form_field_tags_autocomplete_' . $field->field_key,
     );
     $form['fields']['fields'][$field->field_key]['#attributes'] = array('class' => 'form_field_tags_autocomplete_' . $field->field_key);
-  } else if (!empty($field->data['validate']['type']) && $field->data['validate']['type'] == 'custom_ok') {
+  } else if (!empty($field->data['validate']['type']) && in_array($field->data['validate']['type'], array('custom_ok', 'custom_not'))) {
     // 提示允许值列表
     $dom = 'ui_field_tags_autocomplete_' . $field->field_id;
     $form['fields']['fields'][$field->field_key]['#attributes'] = array('class' => 'ui_field_autocomplete ' . $dom);
@@ -323,7 +324,7 @@ function field_textfield_field_node_form($field, $node, &$form, $ac) {
       dd_jqui();
       $form['fields']['fields'][$field->field_key]['#attributes'] = array('class' => 'ui_date_click ' . $dom);
     break;
-    case 'custom_ok':
+    case 'custom_ok': case 'custom_not':
       $dom = 'ui_field_textfield_autocomplete_' . $field->field_id;
       $form['fields']['fields'][$field->field_key]['#attributes'] = array('class' => 'ui_field_autocomplete ' . $dom);
       $form['fields']['fields'][$field->field_key]['#autocomplete'] = array(
