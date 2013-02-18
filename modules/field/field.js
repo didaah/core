@@ -4,8 +4,8 @@ fields.option_count = 0;
 
 fields.ajaxOptions = function($$) {
   var id = $$.attr('alt');
-  if (settings.fields[id]) {
-    var opt = settings.fields[id];
+  if (Dida.settings.fields[id]) {
+    var opt = Dida.settings.fields[id];
     var d = $$.val();
     $('.field_select_value_'+id).val(d);
     if (fields.ajaxCache[d]) {
