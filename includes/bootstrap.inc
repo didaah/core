@@ -334,6 +334,7 @@ function dd_unset_globals() {
 function dd_goto($path = '', $query = NULL, $file = NULL, $fragment = NULL, $http_response_code = 301) {
   $url = url($path, array('query' => $query, 'fragment' => $fragment, 'absolute' => true, 'file' => $file));
   session_write_close();
+  dd_page_header();
   header('Location: '. $url, true, $http_response_code);
   exit();
 }
@@ -1045,7 +1046,7 @@ function dd_user_validate() {
     $active = dd_get_cookie('time');
     $time = time();
     dd_set_cookie('time', $time);
-
+    
     if ($_SESSION['user']->session == $_COOKIE[session_name()]) {
  
       if (empty($user->__SETVALIDATE)) {
@@ -1070,6 +1071,7 @@ function dd_user_validate() {
           $user->active = $time;
           $user->exp += $exp;
           $user->online += $online;
+          $_SESSION['user'] = $user;
         }
       }
     }

@@ -10,9 +10,14 @@ jQuery.fn.extend({
       }
     });
     
-    $(this).children('li').addClass('js_menu_level_one_li').children('a')
-    .addClass('js_menu_level_one_a').wrapInner(function() {
-      return '<span/>';
+    $(this).children('li').addClass('js_menu_level_one_li').children('a').each(function() {
+      $(this).addClass('js_menu_level_one_a').wrapInner(function() {
+        return '<span/>';
+      });
+
+      if ($(this).hasClass('active')) {
+        $(this).addClass('js_menu_level_one_a_active');
+      }
     });
     
     $('.js_menu_level_parent').css({position: 'relative'}).hover(function() {
