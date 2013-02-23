@@ -1352,8 +1352,8 @@ function user_login_form($redirect = NULL) {
       $query = '&' . $query;
     }
 
-    if (strpos($_GET['q'], 'user/login') === false) {
-      $query .= '&redirect=' . urlencode($_SERVER['REQUEST_URI'] . '&1');
+    if (!empty($_GET['q']) && strpos($_GET['q'], 'user/login') === false) {
+      $query .= '&redirect=' . urlencode(url($_GET['q']) . '&1');
     }
 
     $url = url('user/login/ajax', array('query' => 'ajax=submit' . $query));
