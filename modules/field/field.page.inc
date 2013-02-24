@@ -7,7 +7,8 @@
 function field_page($field) {
   dd_set_title(array($field->name));
   dd_set_breadcrumb(array(l($field->name, 'fields/'.$field->field_id)));
-  return module_invoke($field->module, 'field_view', $field);
+  $content = module_invoke($field->module, 'field_view', $field);
+  return theme('field_node_list', $content, $field, 'field');
 }
 
 /**
@@ -16,8 +17,9 @@ function field_page($field) {
  
 function field_term_page($term) {
   dd_set_title(array($term->name, $term->field->name));
-  dd_set_breadcrumb(array(l($term->field->name, 'fields/'.$term->field->field_id), $term->name));
-  return module_invoke($term->field->module, 'field_term_view', $term);
+  dd_set_breadcrumb(array(l($term->field->name, 'fields/' . $term->field->field_id), $term->name));
+  $content = module_invoke($term->field->module, 'field_term_view', $term);
+  return theme('field_node_list', $content, $term, 'term');
 }
 
 /**

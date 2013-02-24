@@ -1312,6 +1312,16 @@ function field_theme() {
        */
       'args' => array('module', 'node', 'type'),
     ),
+   'field_node_list' => array(
+      'tpl' => 'field_node_list.tpl.php',
+      'description' => '字段或类别所属节点列表浏览页模板',
+      /**
+       * $content 输出的内容
+       * $data $field 或 $term
+       * $type term (显示字段下某一类别) 或 field (显示字段下所有类别)
+       */
+      'args' => array('content', 'data', 'type'),
+    ),
   );
 }
 
@@ -1332,6 +1342,31 @@ function field_template_preprocess_fields(&$var, $hook) {
     $var['theme_config']->tpl[] = 'fields_' . $var['module'] . '.tpl.php';
   } 
 }
+
+/**
+ * @Implement of hook_template_preprocess_x()
+ * 
+ * 字段、类别列表页输出模板：
+ * field_node_list_{$field->module}_{$field->type}_{$field->field_key}.tpl.php
+ * field_node_list_{$field->module}_{$field->type}.tpl.php
+ * field_node_list_{$field->module}.tpl.php
+ * field_node_list.tpl.php
+ * 
+ */
+function field_template_preprocess_field_node_list(&$var, $hook) {
+  if ($var['type'] == 'term') {
+    $field = $var['data']->field;
+  } else {
+    $field = $var['data'];
+  }
+  if (!empty($field)) {
+    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '_' . $field->type . '_' . $field->field_key . '.tpl.php';
+    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '_' . $field->type . '.tpl.php';
+    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '.tpl.php';
+    $var['field'] = $field;
+  }
+}
+
 
 /**
  * @Implement of hook_init()
