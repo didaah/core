@@ -390,9 +390,14 @@ function field_file_field_node_form($field, $node, &$form, $ac) {
     );
     
   } else {
-    $multi = $field->data['multi'] > 0 ? $field->data['multi'] : 0;
-    if (!empty($node->fields[$field->field_key])) $multi = $field->data['multi'] - count($node->fields[$field->field_key]);
-    $disabled = $multi < 1 ? true : false;
+    if ($field->data['multi'] > 1) {
+      $multi = !empty($field->data['multi']) ? $field->data['multi'] : 0;
+      if (!empty($node->fields[$field->field_key])) $multi = $field->data['multi'] - count($node->fields[$field->field_key]);
+      $disabled = $multi < 1 ? true : false;
+    } else {
+      $multi = NULL;
+      $disabled = false;
+    }
     $form['fields']['fields'][$field->field_key] = array(
       '#title' => t(NULL, $field->name),
       '#type' => 'file',
@@ -462,7 +467,11 @@ function field_file_field_node_form($field, $node, &$form, $ac) {
       $table[] = $rows;
     }
 
-    $header = array(t('field', '文件信息'), t('field', '标题与描述'), t('field', '操作'));
+    $header = array(t('field', '文件信息'), t('field', '标题与描述'));
+
+    if (count($table[1]) > 2) {
+      $header[] = t('field', '操作');
+    }
 
     $form['fields']['fields']['____' . $field->field_key] = array(
       '#type' => 'value',
