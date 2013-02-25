@@ -1313,8 +1313,8 @@ function dd_storage_admin($ext_type, $ext_type2 = NULL, $ext_id = NULL, $fetch =
   
   dd_set_sub_tabs(array(l(t('system', '清除缓存'), $_GET['q'], array('query' => 'storage_op=cache'))));
   
-  if ($_GET['storage_op']) {
-    if ($_GET['storage_id']) {
+  if (!empty($_GET['storage_op'])) {
+    if (!empty($_GET['storage_id'])) {
       switch ($_GET['storage_op']) {
         case 'update':
           $v = db_query('SELECT * FROM {storage} WHERE id = ? AND ext_type = ?',
@@ -1359,7 +1359,7 @@ function dd_storage_admin($ext_type, $ext_type2 = NULL, $ext_id = NULL, $fetch =
   }
   
   if ($fetch) {
-    $redirect = urlencode(url($_GET['q'], array('query' => dd_query_string_encode($_GET, array_merge(array('q', 'storage_op', 'storage_id'), array_keys($_COOKIE))))));
+    $redirect = urlencode(url($_GET['q'], array('query' => dd_query_string_encode($_GET, array('q', 'storage_op', 'storage_id', 'redirect')))));
     foreach ($fetch as $o) {
       
       if ($info[$ext_type][$o->ext_type2]['admin_view'] && function_exists($info[$o->ext_type][$o->ext_type2]['admin_view'])) {
@@ -1392,23 +1392,29 @@ function dd_storage_admin($ext_type, $ext_type2 = NULL, $ext_id = NULL, $fetch =
             '#start' => -30,
             '#end' => 30
           )
-        ), 'class' => 'center_table'),
+        ), 'class' => 'weight'),
         
         array('data' => dd_imp(array(
             l(t('system', '编辑'), $_GET['q'], array(
-              'query' => 'storage_op=update&storage_id='.$o->id.'&redirect='.$redirect,
+              'query' => 'storage_op=update&storage_id=' . $o->id . '&redirect=' . $redirect,
               'fragment' => 'dd_storage_form'
             )),
             l(t('system', '删除'), $_GET['q'], array(
-              'query' => 'storage_op=delete&storage_id='.$o->id,
+              'query' => 'storage_op=delete&storage_id=' . $o->id,
               'attributes' => array('class' => 'confirmajax')
             ))
-          )), 'class' => 'center_table', 'width' => 70
+          )), 'class' => 'links'
         )
       );
     }
     
-    $output = theme('table', array(t('system', '内容'), t('system', '排序'), t('system', '操作')), $table);
+    $output = theme(
+      'table',
+      array(t('system', '内容'), t('system', '排序'), t('system', '操作')),
+      $table, 
+      array('class' => 'dida_storage_admin_table')
+    );
+
     $output .= pager_view(array(), 10, 1);
     
   }
@@ -1455,6 +1461,12 @@ function _system_get_option_name($key, $options = NULL) {
  * @return array
  */
 function dd_storage_form($v = NULL, $info = NULL) {
+  $form = array(
+    'settings' => array(),
+    'fields' => array(),
+    '__data' => $info,
+  );
+
   $form['fields']['data']['title'] = array(
     '#type' => 'textfield',
     '#title' => t('system', '标题'),
@@ -1537,9 +1549,9 @@ function dd_storage_form($v = NULL, $info = NULL) {
 }
 
 function dd_storage_form_validate(&$form, &$v) {
-  if (!$t = module_invoke_all('dd_storage_validate', $v['_dida_values'])) {
+  if (!$t = module_invoke_all('dd_storage_validate', $v['_dida_values'], $form, $form['__data'])) {
     $validate = NULL;
-    if ($form['fields']['file'] && $_FILES['file']) {
+    if (!empty($form['fields']['file']) && !empty($_FILES['file'])) {
       if (is_array($form['fields']['file']['#options'])) {
         $validate = $form['fields']['file']['#options'];
       }
@@ -1547,7 +1559,8 @@ function dd_storage_form_validate(&$form, &$v) {
       $validate['no_insert'] = true;
       $validate['savepath'] = 'storage';
     }
-    if (!$v['_dida_values']->id) {
+
+    if (empty($v['_dida_values']->id)) {
       if (db_exec('INSERT INTO {storage} (ext_type, data) VALUES (?, 0)', array($v['_dida_values']->ext_type))) {
         $v['_dida_values']->id = db_last_insert_id();
       } else {
@@ -1573,7 +1586,7 @@ function dd_storage_form_validate(&$form, &$v) {
     }
     
     if (dd_storage_save($v['_dida_values'])) {
-      module_invoke_all('dd_storage_save', $v['_dida_values']);
+      module_invoke_all('dd_storage_save', $v['_dida_values'], $form, $form['__data']);
       dd_set_message(t('system', '操作成功'));
     }
     

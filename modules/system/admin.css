@@ -47,7 +47,11 @@
 
 .system_storage_admin_info_list {
   overflow: hidden;
-  width:450px;
+}
+
+.dida_storage_admin_table .weight,
+.dida_storage_admin_table .links {
+  width: 60px;
 }
 
 /*site mneu*/
