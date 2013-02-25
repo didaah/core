@@ -2236,10 +2236,11 @@ function dd_is_spider() {
  * @param (string) $theme
  *  载入的主题
  */
-function dd_jqui($theme = 'base') {
+function dd_jqui($theme = 'ui-lightness') {
   dd_add_js('misc/jquery.bgiframe.js');
-  dd_add_js('misc/ui/jquery.ui.js');
-  dd_add_css('misc/ui/themes/base/jquery.ui.css');
+  dd_add_js('misc/ui/jquery-ui.js');
+  dd_add_js('misc/ui/jquery-ui-i18n.js');
+  dd_add_css('misc/ui/themes/' . $theme . '/jquery-ui-min.css');
 }
 
 /**
@@ -2249,7 +2250,7 @@ function dd_jqui($theme = 'base') {
  */
 function dd_jqedit($v = array()) {
   $args = array(
-    'indicator' => '<img src="'.f('misc/images/loading.gif').'">',
+    'indicator' => '<img src="' . f('misc/images/loading.gif') . '">',
     'submit' => t('system', '确定'),
     'cancel' => t('system', '取消'),
     'tooltip' => t('system', '点此编辑'),
