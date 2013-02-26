@@ -415,15 +415,13 @@ function _field_save(&$field) {
     AND type = ?', array($field->field_key, $field->module, $field->type), array('return' => 'column')))) {
     $error['field_key']['#error'][] = t('field', '%string 已经存在', array('%string' => $field->field_key));
   } else {
-    if (!$field->weight) $field->weight = 0;
-    if (!$field->required) {
-      $field->required = 0;
-    } else {
-      $field->required = 1;
-    }
+    
+    if (empty($field->access)) $field->access = array();
+    if (empty($field->weight)) $field->weight = 0;
+    $field->required = empty($field->required) ? 0 : 1;
     if (!isset($field->deleted)) $field->deleted = 1;
-    if (!$field->locked) $field->locked = 0;
-    if (!$field->field_func) $field->field_func = '';
+    if (empty($field->locked)) $field->locked = 0;
+    if (empty($field->field_func)) $field->field_func = '';
     
     // 触发 hook_field_call_validate()
     if (!$error = module_alter_all('field_call_validate', $field)) {
@@ -445,7 +443,7 @@ function _field_save(&$field) {
           }
         }
       }
-
+      
       if (db_write_record('fields', $field, $args)) {
         dd_set_message(t('field', '保存成功'));
       } else {

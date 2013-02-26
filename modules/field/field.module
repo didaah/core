@@ -68,24 +68,37 @@ function field_access($op, $field, $node = NULL, $ac = NULL) {
   if ($ac->uid == 1) return true;
   
   static $access;
+
   if (!isset($access[$ac->uid])) {
     $access[$ac->uid] = array();
     $access[$ac->uid][$field->field_id] = array();
   }
+
   if (!isset($access[$ac->uid][$field->field_id][$op])) {
-    $access[$ac->uid][$field->field_id][$op] = false;
-    if ($field->data['access']) {
-      $access[$ac->uid][$field->field_id][$op] = module_invoke_all('field_get_node_access', $op, $field, $node, $ac);
-    } else if (!$field->access) {
-      $access[$ac->uid][$field->field_id][$op] = true;
-    } else if ($field->access[$op] && $ac->roles) {
+    // 默认不允许
+    $field->is_access = false;
+    
+    if (empty($field->access) && empty($field->access[$op])) {
+      // 若没有进行权限设置，则均视为允许
+      $field->is_access = true;
+    } else if (!empty($ac->roles)) {
+      // 按角色判断权限
       foreach ($ac->roles as $rid => $k) {
         if (in_array($rid, $field->access[$op])) {
-          $access[$ac->uid][$field->field_id][$op] = true;
+          $field->is_access = true;
         }
       }
     }
+
+    /**
+     * 通过以上基本验证，触发 hook_field_get_access()
+     * 若通过验证，请将 $field->is_access 设为 true，反之设为 false
+     */
+    module_invoke_all('field_get_node_access', $op, $field, $node, $ac);
+    
+    $access[$ac->uid][$field->field_id][$op] = $field->is_access;
   }
+  
   return $access[$ac->uid][$field->field_id][$op];
 }
 
