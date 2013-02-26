@@ -105,6 +105,8 @@ function field_tags_field_node_save($field, $value, $node, &$form, $ac) {
  * textfield 
  */
 function field_textfield_field_node_save($field, $value, $node, &$form, $ac) {
+  db_exec('DELETE FROM {fields_small} WHERE nid = ? AND field_id = ?', array($value->nid, $field->field_id));
+
   if (!empty($field->data['validate']['type'])) {
     if ($text = module_invoke_all('field_type_textfield', 'node_save', $field->data['validate']['type'], $field, $value->fields[$field->field_key])) {
       $value->fields[$field->field_key] = $text;
@@ -114,8 +116,6 @@ function field_textfield_field_node_save($field, $value, $node, &$form, $ac) {
   if (isset($value->fields[$field->field_key])) {
     db_exec('INSERT INTO {fields_small} (nid, field_id, text) VALUES (?, ?, ?)',
     array($value->nid, $field->field_id, $value->fields[$field->field_key]));
-  } else {
-    db_exec('DELETE FROM {fields_small} WHERE nid = ? AND field_id = ?', array($value->nid, $field->field_id));
   }
 }
 
@@ -123,11 +123,10 @@ function field_textfield_field_node_save($field, $value, $node, &$form, $ac) {
  * textarea 
  */
 function field_textarea_field_node_save($field, $value, $node, &$form, $ac) {
+  db_exec('DELETE FROM {fields_long} WHERE nid = ? AND field_id = ?', array($value->nid, $field->field_id));
   if (isset($value->fields[$field->field_key])) {
     db_exec('INSERT INTO {fields_long} (nid, field_id, text) VALUES (?, ?, ?)',
     array($value->nid, $field->field_id, $value->fields[$field->field_key]));
-  } else {
-    db_exec('DELETE FROM {fields_long} WHERE nid = ? AND field_id = ?', array($value->nid, $field->field_id));
   }
 }
 

@@ -64,7 +64,10 @@ function field_system_tools_ajax($v, $g) {
  */
 
 function field_access($op, $field, $node = NULL, $ac = NULL) {
+  if ($op == 'view' && $GLOBALS['user']->uid == 1) return true;
+  
   if (!$ac) $ac = $GLOBALS['user'];
+
   if ($ac->uid == 1) return true;
   
   static $access;
@@ -81,7 +84,7 @@ function field_access($op, $field, $node = NULL, $ac = NULL) {
     if (empty($field->access) && empty($field->access[$op])) {
       // 若没有进行权限设置，则均视为允许
       $field->is_access = true;
-    } else if (!empty($ac->roles)) {
+    } else if (!empty($ac->roles) && is_array($field->access[$op])) {
       // 按角色判断权限
       foreach ($ac->roles as $rid => $k) {
         if (in_array($rid, $field->access[$op])) {
@@ -657,23 +660,35 @@ function field_file_delete($file) {
 function field_get_node_load($module, $type, & $node, $ac = NULL, $clear = NULL) {
   global $conf;
   
-  if (!$conf['field_count'][$module . $type]) return;
+  if (empty($conf['field_count'][$module . $type])) return;
   
+  if (!$datas = field_get_cache_field_group($module, $type)) return;
+
   if (!$clear && $cache = cache_get($module . $type . $node->nid, 'cache_field')) {
-    if (!empty($node->fields) && is_array($node->fields) && is_array($cache->data)) {
-      $node->fields += $cache->data;
-    } else {
-      $node->fields = $cache->data;
+    if (is_array($cache->data)) {
+      foreach ($datas as $field) {
+        if (isset($cache->data[$field->field_key]) && !field_access('view', $field, $node, $ac)) {
+          unset($cache->data[$field->field_key]);
+        }
+      }
+
+      if (!empty($node->fields) && is_array($node->fields)) {
+        $node->fields += $cache->data;
+      } else {
+        $node->fields = $cache->data;
+      }
     }
     return;
   }
-  
-  if (!$datas = field_get_cache_field_group($module, $type)) return;
 
   module_include_file('field/load.inc');
   
   foreach ($datas as $field_id => $field) {
-    if (!field_access('view', $field, $node, $ac)) continue;
+    /**
+     * 不同字段类型的数据存储方式不同，由定义类型的模块自行处理
+     * 读取后，附加到 $node->fields 中，必须以 $field->field_key 做为键名，避免冲突
+     * 如：$node->fields['username'] = array('xxx', 'ttt');
+     */
 
     if (!$field->field_func) {
       $function = $field->field_module . '_' . $field->field_type . '_field_node_load';

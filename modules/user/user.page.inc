@@ -304,8 +304,8 @@ function user_page_center($type = 'default') {
 
   $center->body = '';
 
-  $center->user = $user;
-
+  $center->user = user_load($user->uid);
+  
   $center->args = arg();
 
 	$center->type = $type;

@@ -1480,11 +1480,17 @@ function dd_storage_form($v = NULL, $info = NULL) {
     '#default_value' => $v->data['path'],
     '#required' => 1,
   );
+ 
+  $form['fields']['data']['target'] = array(
+    '#type' => 'radio',
+    '#title' => t('system', '打开'),
+    '#default_value' => empty($v->data['target']) ? 0 : 1,
+    '#options' => array(t('system', '默认'), t('system', '新窗口打开')),
+  );
   
   $form['fields']['weight'] = array(
     '#type' => 'weight',
     '#title' => t('system', '排序'),
-    '#required' => 1,
     '#default_value' => $v->weight,
     '#start' => -30,
     '#end' => 30

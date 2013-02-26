@@ -3,6 +3,7 @@
 
 /**
  * 权限注册：hook_perm();
+ * 生成注册表单之前：hook_user_before_register_form($op)
  * 用户注册表单：hook_user_register_form(&$form)
  * 用户注册验证：hook_user_register_validate($form, $v)
  * 用户写入成功：hook_user_insert(&$ac)
@@ -892,6 +893,9 @@ function user_validate($v, $ac = NULL) {
 function user_register_form($op = 'user') {
 	global $conf;
 
+  // 准备注册表单之前，可对全局变量进行覆写，结合 hook_user_register_form()，实现不同的注册表单
+  module_invoke_all('user_before_register_form', $op);
+
   $form['settings'] = array(
     '#validate' => array('user_register_validate'),
     '#ajax_validate' => true,
@@ -914,6 +918,12 @@ function user_register_form($op = 'user') {
     '#attributes' => array(
       'class' => "{email:true}"
     ),
+  );
+
+  $form['fields']['op'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $op,
+    '#constant' => 1
   );
 
   $form['fields']['name'] = array(
@@ -945,7 +955,14 @@ function user_register_form($op = 'user') {
       'class' => "{equalTo:'#password'}"
     ),
   );
-  
+
+  // 默认角色
+  $form['fields']['rid'] = array(
+    '#type' => 'hidden',
+    '#constant' => 1,
+    '#default_value' => var_get_key('user', 'default_role', 2),
+  );
+ 
   if (($conf['user']['select_lang'] || $op == 'admin') && count($conf['languages']) > 1) {
 	  $form['fields']['language'] = array(
 	    '#type' => 'select',
@@ -991,7 +1008,7 @@ function user_register_form($op = 'user') {
     '#value' => t('user', '确认注册'),
     '#field_suffix' => l(t('user', '已经注册?'), 'user/login')
   );
-
+  
   return $form;
 }
 
@@ -1075,6 +1092,7 @@ function user_set_roles($uid, $rid) {
 	} else if ($rid && $rid != var_get_key('user', 'anonymous_role', 1)) {
 		db_exec('INSERT INTO {user_roles} (uid, rid) VALUES (?, ?)', array($uid, $rid));
 	}
+  user_set_role_count();
 }
 
 /**
