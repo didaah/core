@@ -206,14 +206,17 @@ jQuery.fn.extend({
 
       var is_show = 1, _height = 0;
 
-      function show(id) {
+      function show() {
         if (!is_show) return;
 
         is_show = 0;
 
         if (opt.isTab) _dataBtn.eq(currentId).removeClass('current');
 
-        _height += _data.eq(currentId).height();
+        _height = _data.eq(currentId).height();
+        for (var i = 0; i < currentId; i++) {
+          _height += _data.eq(i).height();
+        }
 
         currentId += 1;
 
@@ -221,7 +224,7 @@ jQuery.fn.extend({
           currentId = 0;
           _height = 0;
         }
-
+        
         _target.animate({top: '-' + _height + 'px' }, {queue: false, duration: 500});
 
         if (opt.isTab) _dataBtn.eq(currentId).addClass('current');
@@ -238,20 +241,12 @@ jQuery.fn.extend({
       });
      
       if (opt.isTab) {
-        _self.find('.focus_change_btn').eq(0).hover(function() {
-          clearInterval(showTimer)
-          showTimer = null;
-        }, function() {
-          if (!showTimer) {
-            showTimer = window.setInterval(show, opt.varyTime);
-          }
-        });
-
         _dataBtn.click(function() {
           return false;
         });
 
         _dataBtn.hover(function() {
+          clearInterval(showTimer)
           _dataBtn.removeClass('current');
           if (!is_show) return;
           var h = $(this).index();
@@ -259,6 +254,8 @@ jQuery.fn.extend({
             currentId = h > 0 ? h - 1 : imgCount-1;
             show();
           }
+        }, function() {
+          showTimer = window.setInterval(show, opt.varyTime);
         });
       }
     }
