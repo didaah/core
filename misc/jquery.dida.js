@@ -171,16 +171,23 @@ jQuery.fn.extend({
 
     if (opt.dom) {
       _data = $(opt.dom + ' .focus_change_list li');
+      _target = $(opt.dom + ' .focus_change_list');
       _self = $(opt.dom);
     } else if (this.attr('id')) {
       _data = $('#' + this.attr('id') + ' .focus_change_list li');
+      _target = $('#' + this.attr('id') + ' .focus_change_list');
       _self = $('#' + this.attr('id'));
     } else {
       _data = $('.focus_change_list li', this);
+      _target = $('.focus_change_list', this);
       _self = $(this);
     }
 
-    var currentId, timeInt, imgCount, showTimer;
+    _self.css({'overflow': 'hidden', 'position': 'relative'});
+
+    _target.css({'position': 'absolute', 'left': 0, 'top': 0, 'width': '100%'});
+
+    var currentId = 0, timeInt, imgCount, showTimer;
     
     imgCount = _data.size();
 
@@ -192,19 +199,12 @@ jQuery.fn.extend({
           html += '<a href="#" class="focus_change_btn_item_' + i + '">' + i + '</a>';
         }
         html += '</div>';
-
         _self.append(html);
-        
         _dataBtn = _self.find('.focus_change_btn a');
         _dataBtn.eq(0).addClass('current');
       }
-      
-      _data.each(function(i) {
-        if (i > 0) $(this).hide();
-        currentId = 0;
-      });
-     
-      var is_show = 1;
+
+      var is_show = 1, _height = 0;
 
       function show(id) {
         if (!is_show) return;
@@ -213,23 +213,20 @@ jQuery.fn.extend({
 
         if (opt.isTab) _dataBtn.eq(currentId).removeClass('current');
 
+        _height += _data.eq(currentId).height();
+
         currentId += 1;
 
-        if (currentId >= imgCount) currentId = 0;
+        if (currentId >= imgCount) {
+          currentId = 0;
+          _height = 0;
+        }
 
-        _data.each(function(i) {
-          if (i != currentId) {
-            if ($(this).is(':visible')) {
-              $(this).animate({width: 'toggle', height: '100%'}, opt.fadeOutTime, function() {
-                _data.eq(currentId).animate({width: 'toggle', height: '100%'}, opt.fadeInTime, function() {
-                  is_show = 1;
-                  if (opt.isTab) _dataBtn.eq(currentId).addClass('current');
-                });
-              });
-            }
-          }
-        });
+        _target.animate({top: '-' + _height + 'px' }, {queue: false, duration: 500});
 
+        if (opt.isTab) _dataBtn.eq(currentId).addClass('current');
+        
+        is_show = 1;
       }
       
       showTimer = window.setInterval(show, opt.varyTime);
