@@ -468,8 +468,8 @@ function field_file_field_node_form($field, $node, &$form, $ac) {
     }
 
     $header = array(t('field', '文件信息'), t('field', '标题与描述'));
-
-    if (count($table[1]) > 2) {
+    
+    if (count($table[0]) > 2) {
       $header[] = t('field', '操作');
     }
 
