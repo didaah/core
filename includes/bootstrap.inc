@@ -3144,8 +3144,7 @@ function dd_to_js($var) {
         array('\r', '\n', '\x3c', '\x3e', '\x26'),
         addslashes($var)) .'"';
       } else {
-        return str_replace(array("\r", "\n", "<", ">", "&", ':::code:::'),
-        array('\r', '\n', '\x3c', '\x3e', '\x26', ''), $var);
+        return str_replace(array(':::code:::'), array(''), $var);
       }
     case 'array':
       if (empty ($var) || array_keys($var) === range(0, sizeof($var) - 1)) {
