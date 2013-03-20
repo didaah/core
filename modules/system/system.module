@@ -1164,12 +1164,10 @@ function front_page() {
       foreach ($contents as $d) {
         $front->content .= $d['#data'];
       }
-    } else {
-      $front->content = custom_get('front_default');
     }
-  } else if (!$front) {
-    $front->content = custom_get('front_default');
   }
+
+  if (empty($front->content)) $front->content = custom_get('front_default');
   
   return theme('front', $front);
 }

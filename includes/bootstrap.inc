@@ -1315,8 +1315,9 @@ function conf_init() {
   
   session_start();
 
-  if (!empty($_COOKIE['remember'])) {
+  if (dd_get_cookie('remember')) {
     setcookie(session_name(), session_id(), -1, '/', $cookie_domain);
+    dd_set_cookie('remember', 0);
   }
 }
 
@@ -2785,7 +2786,7 @@ function dd_get_css($css = NULL) {
 
     if ($css_path && $filename) {
       $filepath = file_directory_path() . '/cache/css_js/' 
-        . md5($base_theme_name . $filename.$conf['cache_css_and_js_timestamp']) . '.css';
+        . md5($base_theme_name . $filename . $conf['cache_css_and_js_timestamp']) . '.css';
 
       if (!is_file($filepath)) {
         foreach (array('core', 'module', 'theme') as $key) {
@@ -2801,7 +2802,7 @@ function dd_get_css($css = NULL) {
         _file_save_data($contents, $filepath);
       }
 
-      $output .= '<link type="text/css" rel="stylesheet" media="all" href="'. $base_path . $filepath.'" />'."\n";
+      $output .= '<link type="text/css" rel="stylesheet" media="all" href="'. $base_path . $filepath . '" />'."\n";
     }
   }
 
