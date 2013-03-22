@@ -1108,13 +1108,15 @@ function dd_form_checkbox($field) {
       }
 
       $field['#attributes']['id'] = $id .'_'. $key;
+      
+      $att = $field['#attributes'];
 
       if (is_array($data)) {
         foreach ($data as $_key => $value) {
           if ($_key == 'data' || $_key == 'name') {
             $text = $value;
           } else {
-            $field['#attributes'][$_key] = $value;
+            $att[$_key] = $value;
           }
         }
       } else {
@@ -1123,7 +1125,7 @@ function dd_form_checkbox($field) {
 
       $output .= ' value="' . $key . '" name="' . $field['#name'] . '[' . $key . ']" type="checkbox"';
 
-      $output .= dd_attributes($field['#attributes']) . '/><span class="option_label">' . $text . '</span></span>';
+      $output .= dd_attributes($att) . '/><span class="option_label">' . $text . '</span></span>';
     }
   } else {
     $output .= '<input';
@@ -1226,28 +1228,28 @@ function dd_form_radio($field) {
     }
 
     foreach ($field['#options'] as $key => $data) {
+      $field['#attributes']['id'] = $id . '_' . $key;
+      $att = $field['#attributes'];
+
       if (is_array($data)) {
         foreach ($data as $_key => $value) {
           if ($_key == 'data' || $_key == 'name') {
             $text = $value;
           } else {
-            $field['#attributes'][$_key] = $value;
+            $att[$_key] = $value;
           }
         }
       } else {
         $text = $data;
       }
 
-      $field['#attributes']['id'] = $id . '_' . $key;
-      
       $output .= '<span class="form_radio_field"><input';
       
-      if ((string)$field['#value'] == (string) $key) $output .= ' checked="checked"';
+      if ((string) $field['#value'] == (string) $key) $output .= ' checked="checked"';
 
       $output .= ' value="' . $key . '" name="' . $field['#name'] . '" type="radio"';
-      $output .= dd_attributes($field['#attributes']) . '/>';
+      $output .= dd_attributes($att) . '/>';
       $output .= '<span class="form_radio_text">' . $text . '</span></span>';
-
     }
   } else {
     $output .= '<span class="form_radio_field"><input';
