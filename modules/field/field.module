@@ -1375,8 +1375,8 @@ function field_template_preprocess_fields(&$var, $hook) {
  * @Implement of hook_template_preprocess_x()
  * 
  * 字段、类别列表页输出模板：
- * field_node_list_{$field->module}_{$field->type}_{$field->field_key}.tpl.php
- * field_node_list_{$field->module}_{$field->type}.tpl.php
+ * field_node_list_{$field->module}_{$field->field_key}_{$field->type}.tpl.php
+ * field_node_list_{$field->module}_{$field->field_key}.tpl.php
  * field_node_list_{$field->module}.tpl.php
  * field_node_list.tpl.php
  * 
@@ -1388,8 +1388,8 @@ function field_template_preprocess_field_node_list(&$var, $hook) {
     $field = $var['data'];
   }
   if (!empty($field)) {
-    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '_' . $field->type . '_' . $field->field_key . '.tpl.php';
-    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '_' . $field->type . '.tpl.php';
+    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '_' . $field->field_key . '_' . $field->type . '.tpl.php';
+    $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '_' . $field->field_key . '.tpl.php';
     $var['theme_config']->tpl[] = 'field_node_list' . $field->module . '.tpl.php';
     $var['field'] = $field;
   }
