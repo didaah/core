@@ -10,14 +10,6 @@ function _system_file_view($file) {
   dd_set_title(array($file->filename));
 
   $file->filebody = filter_view($file->filebody);
-  
-  if ($user->uid == $file->uid) {
-    $file->name = $user->name;
-  } else if (!empty($user->uid)) {
-    $file->name = db_query('SELECT name FROM {users} WHERE uid = ?', array($file->uid), array('return' => 'column'));
-  } else {
-    $file->name = var_get_key('user', 'anonymous', '游客');
-  }
 
   module_invoke_all('file_view', $file);
 

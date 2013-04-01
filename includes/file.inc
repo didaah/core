@@ -878,10 +878,16 @@ function file_mkdir($path, $mode = 0775, $recursive = 1) {
  *  是否触发 hook_file_load()
  */
 function file_load($fid, $invoke = true) {
-  if ($files = db_query('SELECT * FROM {files} WHERE fid = ?', array($fid), array('return' => 'one'))) {
-    if ($invoke) module_invoke_all('file_load', $files);
-    return $files;
+  static $files;
+
+  if (!isset($files[$fid])) {
+    if ($files[$fid] = db_query('SELECT f.*, u.name FROM {files} f LEFT JOIN {users} u ON f.uid = u.uid WHERE f.fid = ?',
+    array($fid), array('return' => 'one'))) {
+      if ($invoke) module_invoke_all('file_load', $files[$fid]);
+    }
   }
+
+  return $files[$fid];
 }
 
 /**
