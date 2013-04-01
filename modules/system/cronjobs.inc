@@ -21,7 +21,7 @@ function system_cronjobs() {
   // 可通过 timestamp['test'] 获取本任务上一次执行时间，可能为 0
   $cronjobs['test'] = array(
     'name' => t('system', '测试任务'), // 显示名，必需
-    'scripts' => 'test.inc', // 必需，对应的脚本，该脚本必须位于模块的 scripts 目录，如：system/scripts，将调用 php 执行该脚本
+    'script' => 'test.inc', // 必需，对应的脚本，该脚本必须位于模块的 scripts 目录，如：system/scripts，将调用 php 执行该脚本
     'param' => array('date' => 20120102, 'id' => 'name'), // 可选参数，数据类型：array。将做为参数传递给 scripts
     'minHour' => 13, // 可选参数，设置最小时间，当前小时必须大于该数字，才启动任务
     'year' => '*', // 年，每一年
