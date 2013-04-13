@@ -112,6 +112,10 @@ li {
   text-align: center;
 }
 
+.site_menu_children {
+  display: none;
+}
+
 .site_menu_children li {
   background: #fff;
   border: 1px solid #ccc;
