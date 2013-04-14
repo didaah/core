@@ -414,6 +414,30 @@ function dida_setup() {
               dd_set_message($message);
             }
 
+            // 创建头像字段
+            $field = array(
+              'name' => t('field', '头像'),
+              'module' => 'user',
+              'type' => 'field',
+              'field_type' => 'file',
+              'field_key' => 'avatar',
+              'weight' => -20,
+              'data' => array(
+                'multi' => 1,
+                'filesize' => 4096,
+                'filename' => '[uid]',
+                'extension' => 'jpg',
+                'savepath' => 'avatar',
+                'thumbs' => array(
+                  'thumb' => '85x85',
+                  'medium' => '200x200',
+                )
+              )
+            );
+            
+            $data = (object) $field;
+            field_save($data);
+
             /**
              * 基本安装完成后，可继续执行自定义安装
              * 自定义安装文件名称为：install.custom.php
@@ -429,6 +453,7 @@ function dida_setup() {
               install_custom();
             }
             
+            // 登录超级用户 
             user_login(user_load(1));
             dd_goto('user/login');
           }

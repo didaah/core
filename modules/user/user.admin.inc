@@ -539,14 +539,11 @@ function user_admin_fields() {
 		l(t('user', '分组管理'), 'admin/users/fields/groups'),
 		l(t('user', '导出字段'), 'admin/users/fields/export')
 	);
-	global $user;
-	
-	if ($user->count < 3) {
-	  if (!field_get_cache_field_key('user', 'field', 'avatar')) {
-  	  dd_set_help(t('user', '测试一下，创建一个头像字段，!link',
-  	  array('!link' => l(t('user', '点这儿'), 'admin/users/fields/test'))));
-	  }
-	}
+
+  if (!field_get_cache_field_key('user', 'field', 'avatar')) {
+    dd_set_help(t('user', '你需要创建一个头像字段吗？!link',
+    array('!link' => l(t('user', '点这儿'), 'admin/users/fields/test'))));
+  }
 	
   $args = arg();
   switch ($args[3]) {
@@ -587,7 +584,7 @@ function _user_field_test() {
       'weight' => -20,
       'data' => array(
         'multi' => 1,
-        'filesize' => 1024,
+        'filesize' => 4096,
         'filename' => '[uid]',
         'extension' => 'jpg',
         'savepath' => 'avatar',
