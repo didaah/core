@@ -52,6 +52,11 @@ function bootstrap($op, $inc = NULL) {
     dd_to_install();
   }
 
+  // 若限制了域名，则验证 HTTP_HOST
+  if (!empty($conf['default_host']) && $_SERVER['HTTP_HOST'] != $conf['default_host']) {
+    dd_goto('http://' . $conf['default_host'] . $_SERVER['REQUEST_URI']);
+  }
+
   if (!$conf['status']) dd_get_online();
 
   set_error_handler('dd_php_error');

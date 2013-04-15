@@ -752,6 +752,13 @@ function system_site_settings() {
     ),
   );
 
+  $form['fields']['default_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('system', '域名限制'),
+    '#default_value' => var_get('default_host', ''),
+    '#description' => t('system', '若填写：didaah.org，则通过其它域名的访问，都将重定向')
+  );
+
   $form['fields']['sql_info'] = array(
     '#type' => 'radio',
     '#title' => t('system', 'SQL执行语句'),
@@ -776,6 +783,7 @@ function system_site_settings() {
     '#options' => array(t('system', '不记录'), t('system', '记录')),
     '#description' => t('system', '记录网站的每一次访问')
   );
+
   $form['fields']['history_enabled_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('system', '保留最新'),
@@ -783,6 +791,7 @@ function system_site_settings() {
     '#default_value' => var_get('history_enabled_limit', 100000),
     '#field_suffix' => t('system', '条访问记录，0 为不限制')
   );
+
   $form['fields']['logs_enabled_limit'] = array(
     '#type' => 'textfield',
     '#title' => t('system', '保留最新'),
@@ -790,6 +799,7 @@ function system_site_settings() {
     '#default_value' => var_get('logs_enabled_limit', 100000),
     '#field_suffix' => t('system', '条系统日志，0 为不限制')
   );
+
   $form['fields']['site_mode'] = array(
     '#type' => 'radio',
     '#title' => t('system', '开发模式'),
@@ -798,6 +808,7 @@ function system_site_settings() {
     '#description' => t('system', '开发模式将禁用某些缓存，以便于调试'),
     '#options' => array(t('system', '否'), t('system', '是')),
   );
+
   $form['fields']['admin_custom_links'] = array(
     '#type' => 'radio',
     '#title' => t('system', '管理区块快捷方式'),
@@ -809,6 +820,7 @@ function system_site_settings() {
     ),
     '#description' => t('system', '允许拥有后台管理权限的用户添加一些快捷链接，供自己使用'),
   );
+
   $form['fields']['cache_css_and_js'] = array(
     '#type' => 'radio',
     '#title' => t('system', '合并CSS和JS'),
@@ -816,6 +828,7 @@ function system_site_settings() {
     '#default_value' => var_get('cache_css_and_js', 0),
     '#options' => array(t('system', '不合并'), t('system', '合并')),
   );
+
   $form['fields']['filter_cache'] = array(
     '#type' => 'radio',
     '#title' => t('system', '缓存输入法'),
@@ -824,6 +837,7 @@ function system_site_settings() {
     '#options' => array(t('system', '不缓存'), t('system', '缓存')),
     '#description' => t('system', '可以将通过输入法过滤的内容缓存到数据库，减少 PHP 开销，但将数据库将增多'),
   );
+
   $form['fields']['alias'] = array(
     '#type' => 'radio',
     '#title' => t('system', '别名优先'),
@@ -832,6 +846,7 @@ function system_site_settings() {
     '#options' => array(t('system', '否'), t('system', '是')),
     '#description' => t('system', '若存在别名，通过系统路径访问时，跳转到别名'),
   );
+
   $form['fields']['cron_min_time'] = array(
     '#type' => 'textfield',
     '#title' => t('system', 'CRON 时间间隔'),
@@ -839,18 +854,21 @@ function system_site_settings() {
     '#default_value' => var_get('cron_min_time', 3600),
     '#description' => t('system', '两次 cron 间隔最小时间，以秒为单位，防止cron被频繁执行'),
   );
+
   $form['fields']['cron_pass'] = array(
     '#type' => 'textfield',
     '#title' => t('system', 'CRON 执行密码'),
     '#default_value' => var_get('cron_pass'),
     '#description' => t('system', '不设置请留空'),
   );
+
   $form['fields']['crypt_default_key'] = array(
     '#type' => 'textfield',
     '#title' => t('system', '默认密钥'),
     '#default_value' => var_get('crypt_default_key', $GLOBALS['cookie_domain']),
     '#description' => t('system', '用于特定内容简单加密，如：cookie'),
   );
+
   $form['fields']['front_view_type'] = array(
     '#type' => 'select',
     '#title' => t('user', '网站首页'),
@@ -866,6 +884,7 @@ function system_site_settings() {
       $options[$module] =  $info['name'];
     }
   }
+
   $form['fields']['front_view_module'] = array(
     '#type' => 'select',
     '#title' => t('system', '交给模块处理'),
