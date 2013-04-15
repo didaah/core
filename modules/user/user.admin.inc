@@ -37,18 +37,21 @@ function user_admin_default() {
   
   if ($fetch = pager_query($query. table_sql($header), 20, 0, NULL, $args)) {
     foreach ($fetch as $o) {
-    	$items = array(l(t('user', '编辑'), 'admin/users/view/'.$o->uid.'/edit'));
+    	$items = array(l(t('user', '编辑'), 'admin/users/view/' . $o->uid . '/edit'));
     	
     	switch ($o->status) {
     		case 1:
-    			$items[] = l(t('user', '阻止'), 'admin/users/view/'.$o->uid.'/hide', array('attributes' => array('class' => 'confirm')));
+    			$items[] = l(t('user', '阻止'), 'admin/users/view/' . $o->uid . '/hide', array('attributes' => array('class' => 'confirm')));
     		break;
     		case 2:
-    			$items[] = l(t('user', '解冻'), 'admin/users/view/'.$o->uid.'/show', array('attributes' => array('class' => 'confirm')));
+    			$items[] = l(t('user', '解冻'), 'admin/users/view/' . $o->uid . '/show', array('attributes' => array('class' => 'confirm')));
     		break;
     		default:
-    			$items[] = l(t('user', '激活'), 'admin/users/view/'.$o->uid.'/active', array('attributes' => array('class' => 'confirm')));
+    			$items[] = l(t('user', '激活'), 'admin/users/view/' . $o->uid . '/active', array('attributes' => array('class' => 'confirm')));
     	}
+      $items[] = l(t('user', '踢下线'), 'admin/users/view/' . $o->uid . '/logout', array(
+        'attributes' => array('alt' => t('user', "如该用户处于登录状态，强行让其下线。\n确认吗？"), 'class' => 'confirm')
+      ));
       $table[] = array(
         $o->mail, $o->name, $o->count, format_interval($o->online), format_date($o->created), format_date($o->active),
         dd_imp($items)
@@ -57,7 +60,7 @@ function user_admin_default() {
   }
 
   $output = dd_get_form('form_admin_search');
-  $output .= theme('table', $header, $table);
+  $output .= theme('table', $header, $table, array('class' => 'center_table'));
   $output .= pager_view();
   return $output;
 }
@@ -97,6 +100,17 @@ function user_admin_view($ac) {
         l(t('user', '密码修改'), $_GET['q'])
       ));
 		return dd_get_form('user_admin_new_pass', $ac);
+    case 'logout':
+      // 强制用户下线
+      global $conf;
+      if (!empty($conf['dida_user_enforce_logout'])) {
+        $conf['dida_user_enforce_logout'][] = $ac->uid;
+      } else {
+        $conf['dida_user_enforce_logout'] = array($ac->uid);
+      }
+      var_set('dida_user_enforce_logout', $conf['dida_user_enforce_logout']);
+			dd_goto('admin/users');
+		exit;     
 		case 'hide':
 			if (db_exec('UPDATE {users} SET status = 2, session = 0 WHERE uid = ?', array($ac->uid))) {
         /**
@@ -433,7 +447,7 @@ function user_set_settings() {
     '#options' => $options,
     '#description' => t('user', '将用户首页完全交给某个模块处理，除非某个模块建议这么做，否则请不要选择'),
   );
-
+ 
   $form['settings'] = array(
     '#validate' => array('user_set_settings_validate')
   );
