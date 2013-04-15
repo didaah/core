@@ -49,6 +49,9 @@ function menu_get_item($path = NULL) {
     
     $systemUrl = $cacheUrl = $url;
 
+    // 防止 url 过长
+    $cacheUrl = md5($cacheUrl);
+
     $item = NULL;
     
     if ($get_view) {
@@ -77,15 +80,16 @@ function menu_get_item($path = NULL) {
       	if ($cacheUrl != $systemUrl) {
       	  $item['aliasUrl'] = $cacheUrl;
       	}
-      	
-        cache_set($cacheUrl, $item, 'cache_menu');
+
+        // 缓存 1 周
+        cache_set($cacheUrl, $item, 'cache_menu', 604800);
         
         if ($get_view) {
           $current_menu_data = $item;
         }
       } else {
         
-        cache_set($cacheUrl, MENU_NOT_FOUND, 'cache_menu');
+        cache_set($cacheUrl, MENU_NOT_FOUND, 'cache_menu', 604800);
         
         $item = MENU_NOT_FOUND;
       }
@@ -188,7 +192,7 @@ function menu_get_item($path = NULL) {
     
     if ($title) dd_set_title(array($title));
     
-    if ($_POST['_dida_ajax_return_body']) {
+    if (!empty($_POST) && !empty($_POST['_dida_ajax_return_body'])) {
       echo call_user_func_array($item['page_callback'], $page_args);
       exit;
     }
@@ -200,18 +204,11 @@ function menu_get_item($path = NULL) {
   }
 }
 
-// 写入当前 menu 数据
-function menu_set_current_menu_data($key, $data) {
-	global $current_menu_data;
-	$current_menu_data[$key] = $data;
-	cache_set($current_menu_data['systemUrl'], $current_menu_data, 'cache_menu');
-}
-
 // 根据系统路径删除别名
 function menu_delete_path($path) {
   if (db_exec('DELETE FROM {alias} WHERE path = ?', array($path)) && $alias = db_query('SELECT alias FROM {alias} WHERE path = ?', array($path), array('return' => 'column'))) {
     // 清除 menu 缓存
-    cache_del('cid', $alias, 'cache_menu');
+    cache_del('cid', md5($alias), 'cache_menu');
   }
 }
 
@@ -219,7 +216,7 @@ function menu_delete_path($path) {
 function menu_delete_alias($alias) {
   db_exec('DELETE FROM {alias} WHERE alias = ?', array($alias));
   // 清除 menu 缓存
-  cache_del('cid', $alias, 'cache_menu');
+  cache_del('cid', md5($alias), 'cache_menu');
 }
 
 // 写入别名
@@ -228,8 +225,8 @@ function menu_set_alias($path, $alias, $type, $tid) {
   $path = trim($path);
   if (!db_query('SELECT alias FROM {alias} WHERE alias = ?', array($alias), array('return' => 'column'))) {
     // 清除 menu 缓存
-    cache_del('cid', $path, 'cache_menu');
-    cache_del('cid', $alias, 'cache_menu');
+    cache_del('cid', md5($path), 'cache_menu');
+    cache_del('cid', md5($alias), 'cache_menu');
     return db_exec('INSERT INTO {alias} (path, alias, type, tid) VALUES (?, ?, ?, ?)', array($path, $alias, $type, $tid));
   }
 }
@@ -238,7 +235,7 @@ function menu_set_alias($path, $alias, $type, $tid) {
 function menu_update_alias($alias, $oldalias) {
   $alias = trim($alias);
   if (db_exec('UPDATE {alias} SET alias = ? WHERE alias = ?', array($alias, $oldalias)) && $path = db_query('SELECT path FROM {alias} WHERE alias = ?', array($alias), array('return' => 'column'))) {
-    cache_del('cid', $oldalias, 'cache_menu');
+    cache_del('cid', md5($oldalias), 'cache_menu');
     return $path;
   }
 }
