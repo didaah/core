@@ -500,7 +500,7 @@ function user_edit_form($ac, $op = 'user') {
     );
   }
   
-  if (user_access('admin user change mail') || ($user->uid == $ac->uid && user_access('admin user change mail'))) {
+  if (user_access('admin user change mail') || ($user->uid == $ac->uid && user_access('user change mail'))) {
     $form['fields']['mail'] = array(
       '#type' => 'textfield',
       '#default_value' => $ac->mail,
@@ -624,13 +624,13 @@ function user_edit_validate($form, &$value) {
     $ac = user_load($value['uid']);
   }
   
-  if (user_access('admin user change mail') || ($user->uid == $ac->uid && user_access('admin user change mail'))) {
+  if (user_access('admin user change mail') || ($user->uid == $ac->uid && user_access('user change mail'))) {
     if ($ac->mail != $value['mail']) {
       $error = user_default_validate_mail($value['mail']);
     }
   }
   
-  if (!$error && (user_access('admin user change name') || ($user->uid == $ac->uid && user_access('admin user change name')))) {
+  if (!$error && (user_access('admin user change name') || ($user->uid == $ac->uid && user_access('user change name')))) {
     if ($ac->name != $value['name']) {
       $error = user_default_validate_name($value['name']);
     }
@@ -671,10 +671,10 @@ function user_edit_submit($form, &$value) {
   }
   
   
-  if (user_access('admin user change mail') || ($user->uid == $ac->uid && user_access('admin user change mail'))) {
+  if (user_access('admin user change mail') || ($user->uid == $ac->uid && user_access('user change mail'))) {
     $ac->mail = $value['_dida_values']->mail;
   }
-  if (user_access('admin user change name') || ($user->uid == $ac->uid && user_access('admin user change name'))) {
+  if (user_access('admin user change name') || ($user->uid == $ac->uid && user_access('user change name'))) {
     $ac->name = $value['_dida_values']->name;
   }
   
