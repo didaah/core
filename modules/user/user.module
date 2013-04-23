@@ -484,7 +484,7 @@ function user_edit_form($ac, $op = 'user') {
   global $conf, $user;
   
   if (!$ac->data) $ac->data = array();
-  if (user_access('admin user change name') || ($user->uid == $ac->uid && user_access('admin user change name'))) {
+  if (user_access('admin user change name') || ($user->uid == $ac->uid && user_access('user change name'))) {
     $form['fields']['name'] = array(
       '#type' => 'textfield',
       '#default_value' => $ac->name,
