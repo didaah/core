@@ -125,18 +125,26 @@ function field_file_field_node_view($field, $node, $view_type) {
   );
 
   foreach ($node->fields[$field->field_key] as $file) {
-    if (strpos($file->filemime, 'image/') !== false) {
+    // 将节点标题附加到图片名称
+    if (!empty($node->title)) {
+      $title = $node->title;
+    } else if (!empty($node->name)) {
+      $title = $node->name;
+    }
+    $title .= ' ' . $file->filename;
+
+    if (in_array($file->filemime, array('image/jpg', 'image/png', 'image/gif', 'image/jpeg'))) {
       $content['#field_type'] = 'file_image'; // 文件中的图片类型
       if (!empty($field->data['thumbs']['medium'])) {
         $content['#content'] .= l(img(image_get_thumb($file->fid, $file->filepath, $field->data['thumbs']['medium'])), 'files/' . $file->fid . '/view',
-        array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+        array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $title, 'alt' => $title)));
       } else {
         $content['#content'] .= l(img($file->filepath), 'files/' . $file->fid . '/view',
-        array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+        array('html' => 1, 'attributes' => array('target' => '_blank', 'title' => $title, 'alt' => $title)));
       }
     } else {
       $content['#content'] .= l(($file->filename ? $file->filename : dirname($file->filepath)), 'files/' . $file->fid . '/view',
-      array('attributes' => array('target' => '_blank', 'title' => $file->filename, 'alt' => $file->filename)));
+      array('attributes' => array('target' => '_blank', 'title' => $title, 'alt' => $title)));
     }
   }
 
