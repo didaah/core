@@ -1546,8 +1546,8 @@ function dd_set_ping($data, $service = array(), $method = 'weblogUpdates.extende
       'http://ping.baidu.com/ping/RPC2',
       'http://rpc.pingomatic.com/',
       'http://blog.yodao.com/ping/RPC2',
-    // 'http://rpc.technorati.com/rpc/ping',
-    // 'http://blogsearch.google.com/ping/RPC2' // google
+      'http://rpc.technorati.com/rpc/ping',
+      'http://blogsearch.google.com/ping/RPC2' // google
     );
   }
 

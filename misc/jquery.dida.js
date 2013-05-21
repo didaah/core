@@ -192,11 +192,16 @@ jQuery.fn.extend({
     imgCount = _data.size();
 
     if (imgCount > 0) {
-    
       if (opt.isTab) {
         var html = '<div class="focus_change_btn">';
-        for (var i = 1; i <= imgCount; i++) {
-          html += '<a href="#" class="focus_change_btn_item_' + i + '">' + i + '</a>';
+        for (var i = 1, j = 0; i <= imgCount; i++, j++) {
+          html += '<a href="#" class="focus_change_btn_item_' + i + '">';
+          if (_data.eq(j).attr('thumb')) {
+            html += '<img src="'+ _data.eq(j).attr('thumb') +'" />';
+          } else {
+            html += j;
+          }
+          html += '</a>';
         }
         html += '</div>';
         _self.append(html);
