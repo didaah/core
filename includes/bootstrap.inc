@@ -2791,14 +2791,14 @@ function dd_get_css($css = NULL) {
 
     if ($css_path && $filename) {
       $filepath = file_directory_path() . '/cache/css_js/' 
-        . md5($base_theme_name . $filename . $conf['cache_css_and_js_timestamp']) . '.css';
+        . md5($base_theme_name . $filename) . '.css';
 
       if (!is_file($filepath)) {
         foreach (array('core', 'module', 'theme') as $key) {
           if ($css_path[$key]) {
             foreach ($css_path[$key] as $path) {
               $data = file_get_contents($path);
-              $base = $base_path . dirname($path) .'/';
+              $base = $base_path . dirname($path) . '/';
               _dd_build_css_path(NULL, $base);
               $contents .= preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_dd_build_css_path', $data);
             }
@@ -2807,7 +2807,7 @@ function dd_get_css($css = NULL) {
         _file_save_data($contents, $filepath);
       }
 
-      $output .= '<link type="text/css" rel="stylesheet" media="all" href="'. $base_path . $filepath . '" />'."\n";
+      $output .= '<link type="text/css" rel="stylesheet" media="all" href="'. $base_path . $filepath . '?' . $conf['cache_css_and_js_timestamp'] . '" />'."\n";
     }
   }
 
@@ -3116,7 +3116,7 @@ function dd_get_js($scope = 'header', $js = NULL) {
   if ($js_path && $filename) {
 
     $filepath = file_mkdir(file_directory_path() . '/cache/css_js') . '/' 
-      . md5($base_theme_name . $filename . $conf['cache_css_and_js_timestamp']) . '.js';
+      . md5($base_theme_name . $filename) . '.js';
 
     if (!is_file($filepath)) {
       foreach ($js_path as $path) {
@@ -3125,7 +3125,7 @@ function dd_get_js($scope = 'header', $js = NULL) {
       _file_save_data($contents, $filepath);
     }
 
-    $output .= '<script type="text/javascript" src="'. $base_path .$filepath .'"></script>'."\n";
+    $output .= '<script type="text/javascript" src="'. $base_path .$filepath .'?' . $conf['cache_css_and_js_timestamp'] . '"></script>'."\n";
   }
 
   return $output . $inline;
