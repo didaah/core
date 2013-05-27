@@ -63,7 +63,7 @@ function filter_tags_php($text) {
   // 判断全局是否启用 php code
   if ($GLOBALS['_filter_is_php_code'] == true) {
     if (strpos($text, '<?php') !== false) {
-      return preg_replace_callback('/<\?php(.*?)\?>$/ms', '_filter_tags_php', $text);
+      return preg_replace_callback('/<\?php(.*?)\?>/ms', '_filter_tags_php', $text);
     }
   }
   return $text;
