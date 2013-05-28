@@ -730,7 +730,7 @@ function t($module, $index, $args = array(), $language = NULL) {
   global $language_code, $conf;
 
   if (empty($language)) $language = $language_code;
-
+  
   /**
    * 1、$module 为空，需要加载翻译文件并翻译
    * 2、请求的语言 $language 与模块 ($module) info 中指定的界面语言不相同，需要加载翻译文件并翻译

@@ -161,6 +161,7 @@ jQuery.fn.extend({
       fadeOutTime: o.fadeOutTime || 500,
       fadeInTime: o.fadeInTime || 500,
       dom: o.dom,
+      direction: o.direction || 'y', //
       isTab: o.isTab || true,
       varyTime: o.varyTime || 4000
     }
@@ -185,7 +186,11 @@ jQuery.fn.extend({
 
     _self.css({'overflow': 'hidden', 'position': 'relative'});
 
-    _target.css({'position': 'absolute', 'left': 0, 'top': 0, 'width': '100%'});
+    if (opt.direction == 'y') {
+      _target.css({'position': 'absolute', 'left': 0, 'top': 0, 'width': '100%'});
+    } else {
+      _target.css({'position': 'absolute', 'left': 0, 'top': 0, 'width': _self.width()*_data.size() + 'px'});
+    }
 
     var currentId = 0, timeInt, imgCount, showTimer;
     
@@ -209,7 +214,7 @@ jQuery.fn.extend({
         _dataBtn.eq(0).addClass('current');
       }
 
-      var is_show = 1, _height = 0;
+      var is_show = 1, _height = 0, _width = 0;
 
       function show() {
         if (!is_show) return;
@@ -218,19 +223,26 @@ jQuery.fn.extend({
 
         if (opt.isTab) _dataBtn.eq(currentId).removeClass('current');
 
-        _height = _data.eq(currentId).height();
-        for (var i = 0; i < currentId; i++) {
-          _height += _data.eq(i).height();
+        if (opt.direction == 'y') {
+          _height = _data.eq(currentId).height();
+          for (var i = 0; i < currentId; i++) {
+            _height += _data.eq(i).height();
+          }
+          currentId += 1;
+          if (currentId >= imgCount) {
+            currentId = 0;
+            _height = 0;
+          }
+          _target.animate({top: '-' + _height + 'px' }, {queue: false, duration: 500});
+        } else {
+           _width = (currentId+1)*_self.width();
+          currentId += 1;
+          if (currentId >= imgCount) {
+            currentId = 0;
+            _width = 0;
+          }
+          _target.animate({left: '-' + _width + 'px' }, {queue: false, duration: 500});
         }
-
-        currentId += 1;
-
-        if (currentId >= imgCount) {
-          currentId = 0;
-          _height = 0;
-        }
-        
-        _target.animate({top: '-' + _height + 'px' }, {queue: false, duration: 500});
 
         if (opt.isTab) _dataBtn.eq(currentId).addClass('current');
         
