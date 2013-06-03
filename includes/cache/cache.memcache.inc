@@ -26,12 +26,13 @@ if (cache_memcache_connect()) {
         $mem->flush();
       break;
       case 'empty': // 清除表中所有数据
-        if ($keys = $mem->get('__table_' . $mem_prefix . $table . '_keys')) {
-          foreach ($keys as $key => $k) {
-            $mem->delete($key, 0);
-          }
-          $mem->delete('__table_' . $mem_prefix . $table . '_keys', 0);
-        }
+        $mem->flush(); // @TODO 全部清除，非最佳处理方式
+        //if ($keys = $mem->get('__table_' . $mem_prefix . $table . '_keys')) {
+        //  foreach ($keys as $key => $k) {
+        //    $mem->delete($key, 0);
+        //  }
+        //  $mem->delete('__table_' . $mem_prefix . $table . '_keys', 0);
+        //}
       break;
       case '*': // 模糊匹配
         if ($keys = $mem->get('__table_' . $mem_prefix . $table . '_keys')) {
