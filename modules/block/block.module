@@ -409,8 +409,8 @@ function dd_get_block($theme = NULL, $region = NULL) {
             if ($b['content']) {
               $block_value = $b['content'];
             }
-            if ($b['title']) {
-              $block->title = check_plain($b['title']);
+            if (!empty($b['title'])) {
+              $block->title = $b['title'];
             }
           } else {
             $block_value = $b;

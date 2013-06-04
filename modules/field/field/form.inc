@@ -84,10 +84,10 @@ function field_select_field_node_form($field, $node, &$form, $ac) {
     } else if ($node->fields[$field->field_key]) {
       $default_value = $node->fields[$field->field_key]->tid;
     } else {
-      $default_value = array();
+      $default_value = 0;
     }
-
-    if ($default_value && $terms = _field_get_form_term_childrens($default_value)) {
+    
+    if (!empty($default_value) && $terms = _field_get_form_term_childrens($default_value)) {
       static $ajaxId;
       $ajaxId = 0;
       $terms = array_reverse($terms);
