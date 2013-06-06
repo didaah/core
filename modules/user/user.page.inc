@@ -196,6 +196,8 @@ function _user_get_center_info($center) {
           // 自定义页面排序
           if (isset($links['weight'][$type])) {
             $info['weight'] = $i+$links['weight'][$type];
+          } else if (!empty($info['weight'])) {
+            $info['weight'] += $i;
           } else {
             $info['weight'] = $i;
           }
