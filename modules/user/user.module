@@ -2083,7 +2083,11 @@ function theme_username($ac, $link = true) {
       $output = l($ac->name, 'user/center');
     } else if ($link && user_is_user_view($ac)) {
       // 有浏览个人主页权限的用户
-      $output = l($ac->name, $ac->path);
+      if (!empty($ac->path)) {
+        $output = l($ac->name, $ac->path);
+      } else {
+        $output = l($ac->name, 'user/' . $ac->uid);
+      }
     } else {
       $output = $ac->name;
     }  
