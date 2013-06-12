@@ -400,6 +400,7 @@ function field_set_cache_term($module = NULL, $type = NULL) {
   
   if ($fetch) {
     global $conf;
+    $conf['field_term_children'] = array();
     foreach ($fetch as $o) {
       if ($o->pid && ($o->field_type == 'select' || $o->field_type == 'selects')) {
         $conf['field_term_children'][$o->field_id] = 1;
@@ -1284,6 +1285,8 @@ function field_system_cache_clear($op = 'list', $v = NULL) {
     );
     case 'submit':
       if ($v['value']['fields']) {
+        dd_set_message(t('field', '字段缓存清除成功'));
+        cache_del('empty', NULL, 'cache_field');
         field_get_cache_field(NULL, 1);
         field_set_cache_term();
       }

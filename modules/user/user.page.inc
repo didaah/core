@@ -161,8 +161,8 @@ function _user_get_center_info($center) {
           if (!isset($group['access'][$type])) $group['access'][$type] = true;
 
           if (!empty($info['access_arguments'])) {
-            $accecc_callback = !empty($info['access_callback']) ? $info['access_callback'] : 'user_access';
-            if (!call_user_func_array($info['title_callback'], $info['access_arguments'])) {
+            $access_callback = !empty($info['access_callback']) ? $info['access_callback'] : 'user_access';
+            if (!call_user_func_array($access_callback, $info['access_arguments'])) {
               if (!empty($info['is_group'])) $group['access'][$type] = false;
               continue;
             }
