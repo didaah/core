@@ -208,6 +208,9 @@ function _cron_jobs() {
         }
       }
 
+      // 默认不执行
+      $is_command = false;
+
       // 上一次执行还没有结束
       if (!empty($process[$command])) {
         // 检查已耗费的时间
@@ -216,16 +219,14 @@ function _cron_jobs() {
           // 已超时，终止进程
           if (!empty($data['timeout']) && $time > $data['timeout']) {
             exec('kill -9 ' . $process[$command]);
-            dd_log('cron_timeout', t('wb', '已终止超时任务 !command，pid：!pid', array('!command' => $command, '!pid' => $process[$command]['pid'])));
+            dd_log('cron_timeout', t('system', '已终止超时任务 !command，pid：!pid', array(
+              '!command' => $command, '!pid' => $process[$command]['pid'])));
           } else if ($time > 3600) {
-            dd_log('cron_timeout', t('wb', '任务 !command 已运行超过 !time 秒了，pid：!pid', array('!command' => $command, '!time' => $time, '!pid' => $process[$command]['pid'])));
+            dd_log('cron_timeout', t('system', '任务 !command 已运行超过 !time 秒了，pid：!pid', array(
+              '!command' => $command, '!time' => $time, '!pid' => $process[$command]['pid'])));
           }
         }
       } else {
-
-        // 检查是否需要执行
-        $is_command = false;
-
         /**
          *  最小时间，当时小时必须大于设定数字，才允许执行
          *  应用场景，如：设置某任务在每天夜里 11 点后，每隔 1 小时执行 1 次
@@ -304,6 +305,7 @@ function _cron_jobs() {
           }
         }
       }
+
       if ($is_command) {
         // 立即执行
         $timestamps[$command] = time(); // 设置执行时间
