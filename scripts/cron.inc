@@ -222,6 +222,7 @@ function _cron_jobs() {
           }
         }
       } else {
+
         // 检查是否需要执行
         $is_command = false;
 
@@ -244,6 +245,7 @@ function _cron_jobs() {
         if (empty($timestamps[$command])) {
           // 上次执行时间戳为 0，则需要执行
           $is_command = true;
+          $id = '#new';
         } else {
 
           // 03 -> 3
@@ -292,6 +294,7 @@ function _cron_jobs() {
                 // 可能带来1分钟的误差，取决于 cron.inc 的执行间隔
                 $is_command = true;
                 $id = '#6';
+                print_r($data);
               } else if (is_numeric($data['minute']) && $data['minute'] < $minute && $timestamps[$command] < (time()-3600)) {
                 // 上次执行在 1 小时之前，需立即执行
                 $is_command = true;
@@ -301,7 +304,6 @@ function _cron_jobs() {
           }
         }
       }
-
       if ($is_command) {
         // 立即执行
         $timestamps[$command] = time(); // 设置执行时间

@@ -460,26 +460,70 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
   return $output;
 }
 
-function theme_table($header, $rows, $attributes = array(), $caption = NULL) {
+// public theme_table($header, $rows, $attributes = array(), $caption = NULL, $sub_header = NULL) {{{ 
+/**
+ * theme_table
+ *  table 解析
+ * @param array $header 
+ *  table 第一行内容，通常为表头
+ * @param array $rows 
+ *  table 内容，每行一个数组单元
+ * @param array $attributes 
+ *  table 属性，可设置 class title 等
+ * @param string $caption 
+ *  table 标题
+ * @param array $sub_header 
+ *  可为 table 设置多行表头，将显示在 thead 之中，紧随第一行内容
+ * @access public
+ * @return string
+ */
+function theme_table(array $header, array $rows, array $attributes = array(), $caption = NULL, $sub_header = NULL) {
   $output = '<table'. dd_attributes($attributes) .">\n";
 
   if (isset($caption)) {
     $output .= '<caption>'. $caption ."</caption>\n";
   }
 
-  if (count($header)) {
+  if (!empty($header)) {
     $ts = table_init($header);
-    $output .= (count($rows) ? ' <thead><tr>' : ' <tr>');
+    if (!empty($rows)) $output .= '<thead>';
+    $output .= '<tr>';
     foreach ($header as $cell) {
       $cell = table_header($cell, $header, $ts);
-      $output .= _theme_table_cell($cell, TRUE);
+      $output .= _theme_table_cell($cell, true);
     }
-    $output .= (count($rows) ? " </tr></thead>\n" : "</tr>\n");
+    $output .= '</tr>';
+
+    if (!empty($sub_header)) {
+      foreach ($sub_header as $row) {
+        $attributes = array();
+        if (isset($row['data'])) {
+          foreach ($row as $key => $value) {
+            if ($key == 'data') {
+              $cells = $value;
+            } else {
+              $attributes[$key] = $value;
+            }
+          }
+        } else {
+          $cells = $row;
+        }
+        $i = 0;
+        $output .= '<tr' . dd_attributes($attributes) . '>';
+        foreach ($cells as $cell) {
+          $cell = table_cell($cell, $header, $ts, $i++);
+          $output .= _theme_table_cell($cell, true);
+        }
+        $output .= '</tr>';
+      }
+    }
+
+    if (!empty($rows)) $output .= '</thead>';
   } else {
     $ts = array();
   }
 
-  if (count($rows)) {
+  if (!empty($rows)) {
     $output .= "<tbody>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
@@ -519,6 +563,7 @@ function theme_table($header, $rows, $attributes = array(), $caption = NULL) {
   $output .= "</table>\n";
   return $output;
 }
+// }}}
 
 /*
   table 格式化
@@ -642,8 +687,9 @@ function table_get_sort($headers) {
   return 'asc';
 }
 
-function _theme_table_cell($cell, $header = FALSE) {
+function _theme_table_cell($cell, $header = false) {
   $attributes = '';
+
   if (is_array($cell)) {
     $data = isset($cell['data']) ? $cell['data'] : '';
     $header |= isset($cell['header']);
