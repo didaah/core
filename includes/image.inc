@@ -306,7 +306,9 @@ function image_gd_resize($source, $destination, $width, $height, $mark = NULL) {
   
   // 添加水印
   if (!empty($mark) || (!isset($mark) && var_get_key('file_image_watermark', 'default', 0))) {
-    $res = image_gd_mark($source, array(), $res);
+    if ($_res = image_gd_mark($source, array(), $res)) {
+      $res = $_res;
+    }
   }
   
   $result = image_gd_close($res, $destination, $info['extension']);
