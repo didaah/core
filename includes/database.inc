@@ -259,9 +259,28 @@ function db_last_insert_id($target = 'default') {
 function db_error($code, $info) {
   if ($code != '0000') {
     $msg = 'Error('.$info[0].')：' . dd_array_to_string($info);
+   
+    if ($debug = debug_backtrace()) {
+      $item = array();
+      foreach (array_reverse($debug) as $i => $de) {
+        if (strpos($de['file'], 'index.php') === false && $de['function'] != 'db_error') {
+          if ($de['file']) {
+            $items[] = '<li>'.t('system', '文件：@file(@line 行，函数 @fun)',
+            array('@file' => $de['file'], '@line' => $de['line'], '@fun' => $de['function'])).'</li>';
+          }
+        }
+        
+        if ($de['function'] == 'db_query' || $de['function'] == 'db_exec') {
+          $items[] = $de['function'] . ':' . $de['args'][0];
+          $items[] = dd_array_to_string($de['args'][1]);
+          $items[] = dd_array_to_string($de['args'][2]);
+        }
+      }
+      $msg .= implode("\n", $items);
+    }
     
     text_log('database_error', dd_error_msg($msg));
-    
+
     if (!$GLOBALS['conf']['debug']) return;
     if ($GLOBALS['conf']['debug'] == 2 && $GLOBALS['user']->uid != 1) return;
     
