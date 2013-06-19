@@ -847,6 +847,14 @@ function system_site_settings() {
     '#description' => t('system', '若存在别名，通过系统路径访问时，跳转到别名'),
   );
 
+  $form['fields']['cron_limits'] = array(
+    '#type' => 'textfield',
+    '#title' => t('system', 'CRON 最大任务'),
+    '#required' => true,
+    '#default_value' => var_get('cron_limits', 100),
+    '#description' => t('system', '通过 cron.inc 调度任务时，允许同时运行的最大任务数'),
+  );
+
   $form['fields']['cron_min_time'] = array(
     '#type' => 'textfield',
     '#title' => t('system', 'CRON 时间间隔'),
