@@ -174,7 +174,7 @@ function _cron_jobs() {
   // 获取所有 php 进程，找出正在执行的任务
   if ($process = _cron_get_php_ps()) {
     $count = count($process);
-    if ($count > 20) {
+    if ($count > var_get('cron_limits', 100)) {
       dd_log('cron_info', t('system', '已有 !count 个任务正在执行中', array('!count' => $count)));
       return;
     }
