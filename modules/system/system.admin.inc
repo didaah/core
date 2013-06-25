@@ -328,9 +328,17 @@ function system_admin_logs(){
   if (arg(2) && !empty($types[arg(2)])) {
     $query .= ' WHERE l.type = ?';
     $args = array(arg(2));
+    if (!empty($_GET['keywords'])) {
+      $query .= ' AND l.value LIKE ?';
+      $args[] = '%' . $_GET['keywords'] . '%';
+    }
     $breadcrumb[] = l(t('system', '系统日志'), 'admin/logs');
     $breadcrumb[] = $types[arg(2)];
   } else {
+    if (!empty($_GET['keywords'])) {
+      $query .= ' WHERE l.value LIKE ?';
+      $args = array('%' . $_GET['keywords'] . '%');
+    }
     $breadcrumb[] = t('system', '系统日志');
   }
 
@@ -385,7 +393,13 @@ function system_admin_logs_delete_form() {
       '#description' => t('system', '请补充 sql语句，如：sid < 1000。注意，错误的 SQL 将有未知风险')
     );
   }
-  
+
+  $form['fields']['keywords'] = array(
+    '#type' => 'textfield',
+    '#default_value' => empty($_GET['keywords']) ? urldecode($_GET['keywords']) : '',
+    '#title' => t('system', '搜索日志'),
+  );
+ 
   $form['fields']['botton']['#type'] = 'submit';
   
   $form['settings'] = array(
@@ -401,6 +415,8 @@ function system_admin_logs_delete_form_validate($form, $v) {
     db_exec('TRUNCATE TABLE {logs}');
   } else if ($v['query'] && $GLOBALS['_filter_is_php_code']) {
     db_exec('DELETE FROM {logs} WHERE ' . $v['query']);
+  } else if (!empty($v['keywords'])) {
+    dd_goto($_GET['q'], 'keywords=' . urlencode($v['keywords'])); 
   }
   
   dd_set_message(t('system', '操作成功'));
