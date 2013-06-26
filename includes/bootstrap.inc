@@ -367,9 +367,11 @@ function dd_goto($path = '', $query = NULL, $file = NULL, $fragment = NULL, $htt
 function l($text, $path, $options = array()) {
   global $current_menu_data;
 
-  if (!$options['attributes']) $options['attributes'] = array();
+  if (empty($options['attributes'])) $options['attributes'] = array();
 
-  if (!$options['attributes']['title']) {
+  if (!empty($options['title'])) $options['attributes']['title'] = $text;
+
+  if (empty($options['attributes']['title'])) {
     $options['attributes']['title'] = $text;
   }
 
