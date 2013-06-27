@@ -786,7 +786,39 @@ $(function() {
       });
     }
   };
-  
+ 
+  $('.table_fixed_header').each(function(i) { 
+    var w = $('#content').width()-20;
+    var width = w;
+    if ($(this).attr('min-width')) {
+      width = parseInt($(this).attr('min-width'));
+    };
+
+    if (width < w) width = w;
+
+    var id = 'table_fixed_header_wrapper_index_' + i;
+    $(this).css('width', width+'px');
+    $(this).wrap('<div class="table_fixed_header_wrapper" id="'+id+'"></div>');
+    var table = '#'+id+'_table';
+    $(this).before('<table id="'+id+'_table" class="table_fixed_header_wrapper_clone"></table>');
+    $('thead', this).clone().prependTo(table);
+    var css = $(this).offset();
+    css.position = 'fixed';
+    css.width = width + 'px';
+    css['text-align'] = $(this).css('text-align');
+
+    $('thead tr:first th', this).each(function(i) {
+      $('thead tr:first th', table).eq(i).css('width', $(this).width()+'px');
+    });
+
+    $(table).append('<tbody></tbody>');
+    $('tr.table_fixed_rows', this).clone().prependTo(table + ' tbody');
+    $('tr.table_fixed_rows td', this).each(function(i) {
+      $('tr.table_fixed_rows td', table).eq(i).css('width', $(this).width()+'px');
+    });
+    $(table).css(css).hide();
+  });
+ 
   //自动完成
   if (Dida.settings.auto) {
     var ui_auto = {};
