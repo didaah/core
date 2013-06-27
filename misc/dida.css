@@ -97,6 +97,18 @@ li {
 .success a {color:#264409;}
 .info a {color:#205791;}
 
+/*fixed table header*/
+.table_fixed_header_wrapper {
+  position: relative;
+  overflow: auto;
+  z-index: 20;
+}
+
+.table_fixed_header_wrapper_clone {
+  background: #fff;
+  margin: 0;
+  z-index: 5;
+}
 /*site_menu*/
 .site_menu {
   height:30px;
