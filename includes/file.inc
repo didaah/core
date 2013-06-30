@@ -446,8 +446,12 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
     if (strpos($validate['filename'], '.') !== false) {
       $file->filename = $validate['filename'];
     } else {
-      $file->extension = strtolower(end(explode('.', $file->filename)));
-      $file->filename = $validate['filename'] . '.' . $file->extension;
+      if (!empty($file->filename)) {
+        $file->extension = strtolower(end(explode('.', $file->filename)));
+        $file->filename = $validate['filename'] . '.' . $file->extension;
+      } else {
+        $file->filename = $validate['filename'];
+      }
     }
   }
   
