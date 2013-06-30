@@ -861,9 +861,9 @@ function file_directory_path() {
  *  返回目录路径，若创建失败，则返回 false
  */
 function file_mkdir($path, $mode = 0775, $recursive = 1) {
-  if (is_dir($path)) {
+  if (is_dir(realpath($path))) {
     return $path;
-  } else if (mkdir($path, $mode, $recursive)) {
+  } else if (mkdir(realpath($path), $mode, $recursive)) {
     return $path;
   } else {
     return false;
