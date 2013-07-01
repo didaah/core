@@ -489,7 +489,8 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
   }
   
   if (empty($file->filepath)) {
-    if (var_get('file_upload_rename', 0)) {
+    // 使用 md5 重命名文件
+    if (var_get('file_upload_rename', 0) && empty($validate('filename'))) {
       $file->filepath = $savepath .'/'. md5($file->filename) . '.' . $file->extension;
     } else {
       $file->filepath = $savepath .'/'. $file->filename;
