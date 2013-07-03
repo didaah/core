@@ -1,0 +1,61 @@
+#禁止下载
+<FilesMatch "\.(engine|inc|info|install|lang|module|profile|test|po|sh|.*sql|theme|tpl(\.php)?|xtmpl|svn-base)$|^(code-style\.pl|Entries.*|Repository|Root|Tag|Template|all-wcprops|entries|format)$">
+  Order allow,deny
+</FilesMatch>
+
+# PHP 设置
+<IfModule mod_php5.c>
+  php_flag magic_quotes_gpc                 off
+  php_flag magic_quotes_sybase              off
+  php_flag register_globals                 off
+  php_flag session.auto_start               off
+  php_value mbstring.http_input             pass
+  php_value mbstring.http_output            pass
+  php_value mbstring.internal_encoding      utf-8
+  php_flag mbstring.encoding_translation    off
+</IfModule>
+
+#重写规则
+Options +FollowSymLinks
+
+#默认404页面
+ErrorDocument 404 /index.php
+
+#默认首页
+DirectoryIndex index.php
+
+#设置 header 缓存过期时间
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault A1209600
+
+  <FilesMatch \.php$>
+    # php 文件例外
+    ExpiresActive Off
+  </FilesMatch>
+</IfModule>
+
+#页面压缩
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml application/x-httpd-php
+  AddOutputFilter DEFLATE js css
+</IfModule>
+
+#伪静态化
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+  
+  # 以下两种方式不能同时启用
+  # 使用 www 访问，未加 www 前缀的访问将跳转
+  # RewriteCond %{HTTP_HOST} !^www\. [NC]
+  # RewriteRule ^ http://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  #
+  # 不使用 www 前缀，以 www 前缀的访问将跳转
+  # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  # RewriteRule ^ http://%1%{REQUEST_URI} [L,R=301]
+  
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !=/favicon.ico
+  RewriteRule ^(.*)$ index.php?q=$1 [L,QSA]
+</IfModule>
