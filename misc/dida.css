@@ -49,6 +49,10 @@ thead {
   margin: 0 auto;
 }
 
+#dialog_inline_wrapper {
+  display: none;
+}
+
 thead img {
   border: none;
 }

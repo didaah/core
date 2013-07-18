@@ -156,6 +156,19 @@ Dida.isImage = function(p) {
   return p && re.test(p);
 };
 
+Dida.dialog_inline = function(text, opt) {
+  $("#dialog_inline_wrapper .dialog_inline_content").html(text);
+  var o = {
+    width: 450,
+    height: 220,
+    modal: true,
+    inlineId: 'dialog_inline_wrapper',
+    title: ''
+  };
+  $.extend(o, opt);
+  $('#dialog_inline_wrapper').dialog(o);
+}
+
 Dida.dialog = function(opt) {
   
   var o = {
@@ -217,11 +230,9 @@ Dida.dialog = function(opt) {
   
   if (!$.isFunction(o.close)) {
     o.close = function(event, ui) {
-      
       if (o.closeCall) {
         Dida.callFunc(o.closeCall, o, event, ui);
       }
-      
       if (o.reload) {
         location.reload();
       }
@@ -229,9 +240,7 @@ Dida.dialog = function(opt) {
   }
   
   if (o.inlineId) {
-
     $('#'+o.inlineId).dialog(o);
-    
   } else if (o.iframe) {
     if (!$.isFunction(o.open)) {
       o.open = function() {
@@ -299,13 +308,10 @@ Dida.dialog = function(opt) {
   $(".ui-icon-dialog-max-min").click(function() {
     var obj = $(this).parents(".ui-dialog").find("#dialog_wrapper");
     if (obj.css('display') == 'none') {
-      
       obj.show();
       $(this).attr('title', Dida.t('system', '最小化')).removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick')
       .parents(".ui-dialog").css('height', 'auto');
-      
       $('#dialog_wrapper').dialog("option", "position", 'center');
-      
     } else {
       obj.hide();
       
@@ -488,6 +494,24 @@ $(function() {
     }
   });
  
+  $('body').append('<div id="dialog_inline_wrapper"><div class="dialog_inline_content"></div></div>');
+
+  $('.dialog_inline').each(function() {
+    $('#' + $(this).attr('inlineId')).addClass('dialog_inline_content').hide();
+  });
+
+  $('.dialog_inline').click(function() {
+    var o = {
+      width: $(this).attr('inlineWidth') || 450,
+      height: $(this).attr('inlineHeight') || 220,
+      modal: true,
+      inlineId: $(this).attr('inlineId'),
+      title: $(this).attr('inlineTitle') || $(this).attr('title')
+    };
+    $('#'+o.inlineId).dialog(o);
+    return false;
+  });
+
   $('.dida_close_page').live('click', function() {
     if ($.browser.msie) {
       window.opener = null;

@@ -511,7 +511,7 @@ function user_admin_roles() {
     $output .= theme('table', array(t('user', '角色名称'), t('user', '权限'), t('user', '总人数'), t('user', '操作')), $table);
     $output .= pager_view();
     
-    dd_jqedit(array('dom' => '.jqedit_text', 'limit' => 16, 'opt' => array('type' => 'charcounter', 'onblur' => 'ignore', 'width' => 150)));
+    dd_jqedit(array('dom' => '.jqedit_text', 'limit' => 16, 'opt' => array('type' => 'charcounter', 'onblur' => 'ignore', 'width' => 80)));
   } else {
     $output .= dd_get_form('user_admin_roles_form');
   }
