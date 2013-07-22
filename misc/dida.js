@@ -595,8 +595,8 @@ $(function() {
       $(this).val("").removeClass('dida_search_form_field_keyword_default');
     }
   }).parents('form').submit(function() {
-    var t = $(this).attr('title') || $(this).attr('alt');
     $(this).find('.dida_search_form_field_keyword,.dida_form_field_placeholder_keyword').each(function() {
+      var t = $(this).attr('title') || $(this).attr('alt');
       if ($(this).val() == t) {
         $(this).val("");
       }
