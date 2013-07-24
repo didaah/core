@@ -57,8 +57,6 @@ function bootstrap($op, $inc = NULL) {
     dd_goto('http://' . $conf['default_host'] . $_SERVER['REQUEST_URI']);
   }
 
-  if (!$conf['status']) dd_get_online();
-
   set_error_handler('dd_php_error');
 
   switch ($op) {
@@ -122,8 +120,9 @@ function bootstrap($op, $inc = NULL) {
 
       switch ($conf['status']) {
         case 2: //登录后可浏览
-          if (!$user->uid && $_GET['q'] != 'user/login') dd_get_online();
+          if (empty($user->uid) && $_GET['q'] != 'user/login') dd_get_online();
           break;
+        case 0:
         case 3: //超级管理员可浏览
           if ($user->uid != 1 && $_GET['q'] != 'user/login') dd_get_online();
       }
