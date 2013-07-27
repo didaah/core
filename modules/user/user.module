@@ -2110,45 +2110,45 @@ function user_alias_reservation() {
  */
 function user_share_fav() {
   return array(
-    'qq_huqian' => array(
-      'title' => 'QQ 书签',
+    'qq_shuqian' => array(
+      'title' => t('user', 'QQ 书签'),
       'href' => 'http://shuqian.qq.com/post?title=<title>&uri=<url>',
       'icon' => 'misc/icon/share_qq.gif',
     ),
     'baidu_cang' => array(
-      'title' => 'Baidu 搜藏',
+      'title' => t('user', 'Baidu 搜藏'),
       'href' => 'http://cang.baidu.com/do/add?it=<title>&iu=<url>&dc=<desc>&tn=<tags>',
       'icon' => 'misc/icon/share_baidu.gif',
     ),
     'google_bookmark' => array(
-      'title' => 'Google 书签',
+      'title' => t('user', 'Google 书签'),
       'href' => 'http://www.google.com/bookmarks/mark?op=edit&bkmk=<url>&title=<title>&labels=<tags>&annotation=<desc>',
       'icon' => 'misc/icon/share_google.gif',
     ),
     'kaixin001' => array(
-      'title' => '开心网',
+      'title' => t('user', '开心网'),
       'href' => 'http://www.kaixin001.com/repaste/share.php?rurl=<url>&rcontent=<url>&rtitle=<title>',
       'icon' => 'misc/icon/share_kaixin.gif',
     ),
     'renren' => array(
-      'title' => '人人网',
+      'title' => t('user', '人人网'),
       'href' => 'http://share.renren.com/share/buttonshare.do?link=<url>&title=<title>',
       'icon' => 'misc/icon/share_renren.gif',
     ),
     'douban' => array(
-      'title' => '豆瓣网',
+      'title' => t('user', '豆瓣网'),
       'href' => 'http://www.douban.com/recommend/?url=<url>&title=<title>',
       'icon' => 'misc/icon/share_douban.gif',
     ),
     'sina_t' => array(
-      'title' => '新浪微博',
+      'title' => t('user', '新浪微博'),
       'href' => 'http://v.t.sina.com.cn/share/share.php?url=<url>&title=<title>&pic=<pic>',
       'icon' => 'misc/icon/share_sina.gif',
     ),
     'qq_t' => array(
-      'title' => '腾讯微博',
+      'title' => t('user', '腾讯微博'),
       'href' => 'http://v.t.qq.com/share/share.php?title=<title>&url=<url>&title=<title>&pic=<pic>',
-      'icon' => 'misc/icon/share_qq.gif',
+      'icon' => 'misc/icon/share_qq_weibo.png',
     ),
   );
 }
