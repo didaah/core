@@ -3499,7 +3499,7 @@ function dd_get_share_fav($url, $title, $desc = '', $tags = '', $pic = '') {
       if ($list['href']) {
         $link = strtr($list['href'], $args);
         if ($list['icon']) {
-          $data = l(img($list['icon']), $link, array('html' => true,
+          $data = l(img($list['icon'], $list['title'], $list['title']), $link, array('html' => true,
           'attributes' => array('target' => '_blank', 'title' => $list['title'])));
         } else {
           $data = l($list['title'], $link, array('attributes' => array('target' => '_blank')));
