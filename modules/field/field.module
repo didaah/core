@@ -1124,7 +1124,7 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
     if (!empty($content)) {
       if (empty($view_type)) {
         $node->field_view[$content['#field_type']][$field->field_key] = $content;
-      } else if ($vite_type == 1) {
+      } else if ($view_type == 1) {
         $node->field_view[$field->field_key] = $content;
       } else {
         $node->field_view[$field->field_id] = $content;
