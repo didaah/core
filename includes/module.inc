@@ -889,9 +889,7 @@ function module_get_schema($table, $clear = NULL) {
       $_tables = db_show_tables();
       
       if ($modules = module_list('module', 'all')) {
-        
         foreach ($modules as $module => $info) {
-          
           $install_filepath = DIDA_ROOT .'/'. $info['path'] .'/'. $module. '.install';
           if (is_file($install_filepath)) include_once $install_filepath;
           
@@ -899,7 +897,6 @@ function module_get_schema($table, $clear = NULL) {
           if (function_exists($function)) {
             $alter_schemas[$module] = $function;
           }
-          
         }
         
         foreach ($modules as $module => $info) {
@@ -928,9 +925,7 @@ function module_get_schema($table, $clear = NULL) {
             }
           }
         }
-        
         cache_set('schema', $tables, 'cache', 0, 0);
-        
       }
     } else {
       $tables = $cache->data;
