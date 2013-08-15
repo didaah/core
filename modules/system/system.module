@@ -331,6 +331,8 @@ function system_call_custom($v) {
       system_images_error();
     break;
     case 'cache_clear':
+      global $conf;
+      $conf['site_mode'] = 1; // 开发模式
       dd_add_css('modules/system/system.css');
       dd_add_js('modules/system/system.js');
       dd_add_css('modules/system/admin.css');
@@ -340,6 +342,8 @@ function system_call_custom($v) {
       return theme('print', dd_get_form('_system_call_custom_form', 'install'));
     break;
     case 'first_cache':
+      global $conf;
+      $conf['site_mode'] = 1; // 开发模式
       // 首次清除缓存、导入模块、主题相关数据，仅在超级管理员从未登录的情况适用
       if (db_query('SELECT uid FROM {users} WHERE uid = 1 AND count < 1', 
       NULL, array('return' => 'column'))) {
@@ -351,7 +355,7 @@ function system_call_custom($v) {
         theme_get_cache(); 
         module_invoke_all('first_cache');
       }
-
+    break;
   }
 }
 
