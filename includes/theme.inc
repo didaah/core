@@ -125,7 +125,7 @@ function theme() {
    * file：加载文件，相对于模块目录
    */
   if ($theme['file']) {
-    $filepath = DIDA_ROOT .'/'. $module_path . '/' . $theme['file'];
+    $filepath = $module_path . '/' . $theme['file'];
     if (is_file($filepath)) include_once $filepath;
   }
   

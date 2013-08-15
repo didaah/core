@@ -386,7 +386,7 @@ function _system_call_custom_form($op) {
   );
   
   if ($op == 'cache_clear') {
-    $form['fields']['button']['#field_prefix'] = dd_form_ajax_all_check(array('alt' => '_system_call_custom_cache_clear_type_value'));
+    $form['fields']['button']['#field_prefix'] = form_util_all_check(array('alt' => '_system_call_custom_cache_clear_type_value'));
   }
   
   $form['settings'] = array(
