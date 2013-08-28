@@ -22,22 +22,9 @@ function menu_get_item($path = NULL) {
     $get_view = false;
   }
   
-  if (!$url) {
+  if (empty($url)) {
     return front_page();
   } else {
-    /*
-    // 目录式结构
-    if (substr($url, -1) == '/') {
-      $url = substr($url, 0, -1);
-    } else if (strpos($url, '.') === false) {
-      if (!$path && isset($_GET['q'])) {
-        dd_goto($url, dd_query_string_encode($_REQUEST, array_merge(array('q'), array_keys($_COOKIE))));
-      } else {
-        $access[$path] = false;
-      }
-    }
-    */
-    
     if (substr($url, -1) == '/') {
       $url = substr($url, 0, -1);
     }
@@ -84,13 +71,12 @@ function menu_get_item($path = NULL) {
         // 缓存 1 周
         cache_set($cacheUrl, $item, 'cache_menu', 604800);
         
-        if ($get_view) {
+        // 当前路径信息
+        if (!empty($get_view)) {
           $current_menu_data = $item;
         }
       } else {
-        
         cache_set($cacheUrl, MENU_NOT_FOUND, 'cache_menu', 604800);
-        
         $item = MENU_NOT_FOUND;
       }
     }
@@ -150,11 +136,12 @@ function menu_get_item($path = NULL) {
       return $access[$path];
     }
     
-    if ($item['file']) {
-      require_once DIDA_ROOT .'/'. $item['file'];
+    if (!empty($item['file'])) {
+      require_once DIDA_ROOT . '/' . $item['file'];
     }
     
-    if ($item['page_arguments']) {
+    if (!empty($item['page_arguments'])) {
+      $page_args = array();
       if ($load) {
         foreach (unserialize($item['page_arguments']) as $arg) {
           if ($load[$arg]) {
@@ -168,7 +155,8 @@ function menu_get_item($path = NULL) {
       }
     }
     
-    if (!$item['title']) {
+    if (!empty($item['title_callback'])) {
+      $title_args = array();
       if ($item['title_arguments']) {
         if ($load) {
           foreach (unserialize($item['title_arguments']) as $arg) {
@@ -182,23 +170,58 @@ function menu_get_item($path = NULL) {
           $title_args = unserialize($item['title_arguments']);
         }
       }
-      
-      if ($item['title_callback']) {
-        $title = call_user_func_array($item['title_callback'], $title_args);
-      }
-    } else {
+      $title = call_user_func_array($item['title_callback'], $title_args);
+    } else if (!empty($item['title'])) {
       $title = t($item['module'], $item['title']);
+    } else {
+      $title = '';
     }
-    
-    if ($title) dd_set_title(array($title));
-    
+ 
+    if (!empty($item['page_template'])) {
+      $template_args = array();
+      if (!empty($item['template_arguments'])) {
+        if ($load) {
+          foreach ($item['template_arguments'] as $key => $arg) {
+            if ($load[$arg]) {
+              $template_args[$key] = $load[$arg];
+            } else {
+              $template_args[$key] = $arg;
+            }
+          }
+        } else {
+          $template_args = $item['template_arguments'];
+        }
+      }
+      $template_file = array(
+        DIDA_ROOT . $conf['base_theme'] . '/' . $item['module'] . '/' . $item['page_template'],
+        DIDA_ROOT . '/' . $conf['modules'][$item['module']]['path'] . '/tpl/' . $item['page_template'],
+      );
+    }
+   
+    if (!empty($title)) dd_set_title(array($title));
+     
+    $output = '';
+
+    if (!empty($item['page_callback'])) $output = call_user_func_array($item['page_callback'], $page_args);
+    if (!empty($template_file)) {
+      foreach ($template_file as $tpl) {
+        if (is_file($tpl)) {
+          /**
+           * 可在 tpl 中使用 $output，该变量为 page_callback 函数所返回数据
+           */
+          $template_args['output'] = $output;
+          $output = theme_render_tpl($tpl, $template_args);
+          break;
+        }
+      }
+    }
+
     if (!empty($_POST) && !empty($_POST['_dida_ajax_return_body'])) {
-      echo call_user_func_array($item['page_callback'], $page_args);
+      echo $output;
       exit;
     }
-    
-    return call_user_func_array($item['page_callback'], $page_args);
-    
+
+    return $output;
   } else {
     return MENU_NOT_FOUND;
   }
