@@ -832,8 +832,6 @@ function field_get_node_form($module, $type, $node = NULL, &$form = NULL, $field
   }
 
   dd_add_js('modules/field/field.js');
-
-  dd_add_css('modules/field/field.css');
   
   // 加载所有模块目录下 field/form.inc 文件，可将 {$field_module}_{$field_type}_field_node_form() 函数定义在该文件中
   module_include_file('field/form.inc');
@@ -884,7 +882,6 @@ function field_get_multi_level_field($field, $value, &$form = NULL) {
   if (!$field->field_id) return;
   
   dd_add_js('modules/field/field.js');
-  dd_add_css('modules/field/field.css');
   global $conf;
 
   $options = field_get_cache_term($field->module, $field->type);
@@ -1080,8 +1077,6 @@ function field_get_node_validate($module, $type, $value, $node = NULL, &$form = 
  */
 function field_get_node_html($module, $node, $type = NULL) {
   if (empty($node->field_view)) return false;
-  
-  dd_add_css(dd_get_path('module', 'field') . '/field.css'); 
   
   return theme('fields', $module, $node, $type);
 }

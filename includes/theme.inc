@@ -15,25 +15,47 @@ function theme_init() {
   $conf['base_logo'] = $base_path . ($base_theme_info['logo'] ? $base_theme_info['logo'] : 'misc/images/logo.png');
   $conf['base_favicon'] = $base_path . ($base_theme_info['favicon'] ? $base_theme_info['favicon'] : 'misc/images/favicon.ico');
 
-  if (is_file(DIDA_ROOT .'/'. $base_theme_info['path'] . '/template.php')) {
-    require_once DIDA_ROOT .'/'. $base_theme_info['path'] . '/template.php';
+  if (is_file(DIDA_ROOT . '/' . $base_theme_info['path'] . '/template.php')) {
+    require_once DIDA_ROOT . '/' . $base_theme_info['path'] . '/template.php';
   }
 
-  if (empty($base_theme_info['styles_remove']['misc/dida.css'])) {
-    dd_add_css('misc/dida.css', 'theme');
+  if (empty($base_theme_info['framework'])) {
+    $base_theme_info['framework'] = 'default'; // 若 theme info 文件中未指定框架，则加载默认
   }
+
+  $base_theme_info['framework_path'] = 'misc/themes/' . $base_theme_info['framework'];
   
-  if (empty($base_theme_info['styles'])) {
-    dd_add_css($base_theme_info['path'].'/css/style.css', 'theme');
+  if (is_file(DIDA_ROOT . '/' . $base_theme_info['framework_path'] . '/info.php')) {
+    require_once DIDA_ROOT . '/' . $base_theme_info['framework_path'] . '/info.php';
   } else {
-    foreach ($base_theme_info['styles'] as $style) {
-      dd_add_css($base_theme_info['path'].'/'. $style, 'theme');
+    // 使用默认框架
+    require_once DIDA_ROOT . '/misc/themes/default/info.php';
+    $base_theme_info['framework_path'] = 'misc/themes/default';
+  }
+
+  if (!empty($info['scripts'])) {
+    foreach ($info['scripts'] as $script) {
+      dd_add_js($base_theme_info['framework_path'] . '/' . $script, 'theme');
+    }
+  }
+
+  if (!empty($info['styles'])) {
+    foreach ($info['styles'] as $style) {
+      dd_add_css($base_theme_info['framework_path'] . '/' . $style, 'theme');
     }
   }
   
-  if ($base_theme_info['scripts']) {
+  if (empty($base_theme_info['styles'])) {
+    dd_add_css($base_theme_info['path'] . '/css/style.css', 'theme');
+  } else {
+    foreach ($base_theme_info['styles'] as $style) {
+      dd_add_css($base_theme_info['path'] . '/'. $style, 'theme');
+    }
+  }
+  
+  if (!empty($base_theme_info['scripts'])) {
     foreach ($base_theme_info['scripts'] as $script) {
-      dd_add_js($base_theme_info['path'].'/'. $script, 'theme');
+      dd_add_js($base_theme_info['path'] . '/' . $script, 'theme');
     }
   }
 
@@ -124,7 +146,7 @@ function theme() {
    * 包含文件
    * file：加载文件，相对于模块目录
    */
-  if ($theme['file']) {
+  if (!empty($theme['file'])) {
     $filepath = $module_path . '/' . $theme['file'];
     if (is_file($filepath)) include_once $filepath;
   }

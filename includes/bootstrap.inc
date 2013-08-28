@@ -2582,7 +2582,6 @@ function dd_get_menu($menus = NULL, $first = true) {
     static $i;
 
     if (!empty($first)) {
-      dd_add_js('$(\'.site_menu\').menuLevel();', 'inline');
       $custom_data = var_get('site_menu_system', array());
     }
 
@@ -2747,7 +2746,7 @@ function dd_add_css($data = NULL, $type = 'module', $media = 'all', $cached = tr
  * @return (string) css html 标记
  */
 function dd_get_css($css = NULL) {
-  global $base_path, $conf, $base_theme_name;
+  global $base_path, $conf, $base_theme_name, $base_theme_info;
 
   if (!isset($css)) {
     $css = dd_add_css();
@@ -2760,6 +2759,11 @@ function dd_get_css($css = NULL) {
    * function default_alter_css(&$css) {
    *   unset($css['modules/system/system.css']);
    * }
+   *
+   * 也可以在 theme info 中移除指定 css、js 文件，如：
+   * 'styles_remove' => array(
+   *   'modules/system/admin.css' => true,
+   * ),
    * 
    */
   module_alter($base_theme_name, 'alter_css', $css);
@@ -2770,6 +2774,7 @@ function dd_get_css($css = NULL) {
     uasort($css['files'], 'dd_sort_cmp');
 
     foreach ($css['files'] as $path => $info) {
+      if (!empty($base_theme_info['styles_remove'][$path])) continue;
       // 只缓存站内 css 文件
       if (strpos($path, 'http://') === false && strpos($path, 'https://') === false) {
         if ($GLOBALS['conf']['cache_css_and_js'] && $info['cached']) {
@@ -3029,7 +3034,7 @@ function dd_add_js($data = NULL, $type = 'module', $cached = true, $scope = 'hea
  * @return (string)
  */
 function dd_get_js($scope = 'header', $js = NULL) {
-  global $conf, $base_path, $base_theme_name, $language_code;
+  global $conf, $base_path, $base_theme_name, $language_code, $base_theme_info;
   static $init;
   
   if (empty($init)) {
@@ -3092,7 +3097,7 @@ function dd_get_js($scope = 'header', $js = NULL) {
   uasort($js['files'], 'dd_sort_cmp');
 
   foreach ($js['files'] as $path => $info) {
-
+    if (!empty($base_theme_info['scripts_remove'][$path])) continue;
     if ($conf['cache_css_and_js'] && $info['cached']) {
       $js_path[] = $path;
       $filename .= $path;

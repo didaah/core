@@ -81,8 +81,6 @@ function user_user_center_info() {
  * @return void
  */
 function user_user_center_view($center) {
-  dd_add_css('modules/user/user.css');
-
   switch ($center->type) {
     case 'default':
       if ($data = _module_invoke_all('user_center_default', $center)) {

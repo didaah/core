@@ -9,17 +9,20 @@ $info = array(
   'description' => '缺省主题', //描述 ，可选
   'preview_original' => 'images/preview_original.png', // 预览原图，相对路径，可选
   'preview_thumb' => 'images/preview_thumb.png', // 预览缩略图，可选，和原图同时提供
-  'region' => array(
+  'region' => array( // 定义页面区域，在 page.tpl.php 中，可使用 $left、$right 等调用，主体内容区域为 $content，不需要设置
   	'left' => '左栏',
   	'right' => '右栏',
   	'bottom' => '底部',
   ),
+  'framework' => 'default', // 主题框架，默认将使用 default。主题框架位于 misc/themes 下
   'styles' => array( // 附加css，相对于主题文件夹，如：css/my.css。若无，则默认加载 css/style.css
     'css/style.css'
   ),
-  'styles_remove' => array( // 指定要移除的系统 css，支持移除的系统 css 如下
-    //'misc/dida.css' => true, // 通用 css
+  'scripts' => array(), // 附加js，相对于主题文件夹，如：js/my.js
+  'styles_remove' => array( // 指定要移除的 css
+    //'misc/system/admin.css' => true,
   ),
-  'scripts' => array( // 附加js，相对于主题文件夹，如：js/my.js
-  )
+  'scripts_remove' => array( // 指定要移除的 js
+    //'misc/dida.js' => true,
+  ),
 );

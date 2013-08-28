@@ -1960,8 +1960,6 @@ function user_field_term_view($term) {
     $output = system_no_content();
   }
   
-  dd_add_css('modules/user/user.css');
-  
   return $output;
 }
 
@@ -1984,8 +1982,6 @@ function user_field_view($field) {
   } else {
     $output = system_no_content();
   }
-  
-  dd_add_css('modules/user/user.css');
   
   return $output;
 }
