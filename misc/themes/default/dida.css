@@ -1,7 +1,5 @@
 /* $Id$ */
 
-/* 本 css 文件默认加载，在主题 info 中可设置禁止加载，详见 default 主题的 default.info 文件 */
-
 html {
   margin:0;
   padding:0;
@@ -152,20 +150,20 @@ li {
 
 .js_menu_level_parent .js_menu_level_one_a span {
 	padding-right: 12px;
-  background: url(images/spindown-open.gif) right center no-repeat;
+  background: url(../../images/spindown-open.gif) right center no-repeat;
 }
 
 .js_menu_level_children {
-  background: url(images/spindown-closed.gif) right center no-repeat;
+  background: url(../../images/spindown-closed.gif) right center no-repeat;
 }
 
 .js_menu_level_parent .js_menu_level_one_a span {
 	padding-right: 12px;
-  background: url(images/spindown-open.gif) right center no-repeat;
+  background: url(../../images/spindown-open.gif) right center no-repeat;
 }
 
 .js_menu_level_children {
-  background: url(images/spindown-closed.gif) right center no-repeat;
+  background: url(../../images/spindown-closed.gif) right center no-repeat;
 }
 
 h2.system_no_content {
@@ -459,12 +457,12 @@ span.option_label, span.form_radio_text{
 
 .sort_active_desc{
 	padding-right: 14px;
-  background: url(images/arrow-desc.png) right 0 no-repeat;
+  background: url(../../images/arrow-desc.png) right 0 no-repeat;
 }
 
 .sort_active_asc {
 	padding-right: 16px;
-  background: url(images/arrow-asc.png) right 0 no-repeat;
+  background: url(../../images/arrow-asc.png) right 0 no-repeat;
 }
 
 /*fieldset*/
@@ -489,11 +487,11 @@ legend {
 }
 
 legend.desc {
-  background: url(images/arrow-desc.png) left 0 no-repeat;
+  background: url(../../images/arrow-desc.png) left 0 no-repeat;
 }
 
 legend.asc {
-  background: url(images/arrow-asc.png) left 0 no-repeat;
+  background: url(../../images/arrow-asc.png) left 0 no-repeat;
 }
 
 /*jquery ui*/
@@ -541,7 +539,7 @@ legend.asc {
 }
 
 .ja_loading {
-  background-image: url(images/throbber.gif);
+  background-image: url(../../images/throbber.gif);
   background-repeat: no-repeat;
   background-position:left -19px;
   padding-left: 15px;
@@ -798,7 +796,7 @@ span.ja_loading {
 }
 
 .loading_image {
-	background: url(images/loading.gif) no-repeat center center;
+	background: url(../../images/loading.gif) no-repeat center center;
 }
 
 .loading_size {
@@ -879,6 +877,347 @@ span.ja_loading {
   text-align: center;
 }
 
+/*admin cache*/
+#system_cache_clear_value .form_checkbox_option {
+  display: block;
+}
+
+#system_site_settings .form_item, #system_site_global .form_item {
+  margin: 5px 0;
+  border-bottom:1px dotted #CCC;
+  padding: 5px 0;
+}
+
+.system_admin_default_block {
+  border-bottom:1px solid #CCC;
+  padding: 5px;
+  margin: 5px;
+}
+
+.system_admin_default_block .title {
+  background: #E5F5DE;
+  padding: 5px 0;
+}
+
+.system_admin_default_block_system a {
+  padding-left: 12px;
+}
+
+#_system_call_custom_form_value .form_checkbox_option {
+  display: block;
+}
+
+/*jqui*/
+.jqedit_text textarea, .jqedit_text button {
+  font-size: 12px;
+}
+
+/*field*/
+#field_admin_list {
+  text-align: center;
+}
+
+.user_admin_role_module {
+  background: #DE7424;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/*themes*/
+.admin_themes_table td {
+  text-align: center;
+}
+
+.system_storage_admin_info_list {
+  overflow: hidden;
+}
+
+.dida_storage_admin_table .weight,
+.dida_storage_admin_table .links {
+  width: 60px;
+}
+
+/*site mneu*/
+ul.admin_site_menu {
+  margin-left: 50px;
+}
+
+ul.admin_site_menu ul {
+  margin-left: 24px;
+}
+
+ul.admin_site_menu em {
+  color: #f00;
+}
+
+/*filter*/
+#system_admin_format_form label {
+  display: block;
+}
+
+/*system block*/
+#block_system_adminLink .item-list {
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border:1px solid #AAAAAA;
+  margin-bottom: 10px;
+  padding: 5px 3px;
+}
+
+#block_system_adminLink .item-list h3 {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border:1px solid #1567B4;
+  margin: 2px 0;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  cursor: crosshair;
+  color: #031729;
+  padding: 0;
+}
+
+#block_system_adminLink .item_click_op {
+	background: url(../../images/arrow-desc.png) right center no-repeat;
+	float: right;
+	display: block;
+	width: 13px;
+  height: 26px;
+  line-height: 26px;
+  cursor: pointer;
+}
+
+#block_system_adminLink .item-list-hide {
+  background: url(../../images/arrow-asc.png) right center no-repeat;
+}
+
+#block_system_adminLink .item_hover {
+  border:1px solid #4076B9;
+}
+
+#block_system_adminLink ul {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border:1px solid #B4AF8B;
+  padding: 2px 3px;
+  margin: 4px 0;
+}
+
+#block_system_adminLink li a {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: 1px solid #aaaaaa;
+  display: block;
+  line-height: 24px;
+  width: 100%;
+  text-align: center;
+  margin: 2px 0;
+}
+
+#block_system_adminLink li a:hover {
+  border: 1px solid #2E5AAD;
+}
+
+#block_system_adminLink li a.active {
+  background: #fff;
+  border: 1px solid #C1760F;
+  text-align: right;
+  font-weight: bold; 
+}
+
+#admin_custom_add_form {
+  text-align: center;
+}
+
+#admin_custom_add_form input {
+  margin: 2px auto;
+  display: block;
+  text-align: left;
+}
+
+.system_admin_block_link_remove {
+  display: block;
+  text-align: right;
+  color: #8B8986;
+  cursor: pointer;
+}
+
+.system_admin_block_link_remove_active {
+	color: #f00;
+}
+
+/*tips*/
+.dida_tips {
+	cursor: help;
+}
+
+.dida_tips_view {
+	display: none;
+	position: absolute;
+	padding: 5px 8px;
+	background: #fff;
+	color: #03368E;
+	border: 1px solid #ccc;
+	max-width: 350px;
+	_width: 350px;
+	text-align: left;
+}
+
+/* block */
+#field_form .dd_label, #block_add_form .dd_label, #block_settings_form .dd_label {
+  display: inline-block;
+  width: 60px;
+  text-align: left;
+}
+#system_admin_format_form .dd_label {
+  display: block;
+  text-align: left;
+}
+
+.block_item .dd_label {
+  color:#034B03;
+  display:inline;
+  text-align: left;
+  padding-left: 5px;
+}
+
+.block_item .item-list, .block_item .item-list ul, .block_item .item-list li {
+  display:inline;
+  padding: 0 2px;
+}
+
+.block_item {
+  border-bottom: 1px solid #ccc;
+  padding: 5px 0;
+}
+
+.block_item .title {
+  color:#034B03;
+  font-weight: bold;
+  text-align:left;
+  padding: 5px 0;
+}
+
+/*fields*/
+.form_item_selects {
+  border: 1px solid #ccc;
+  margin: 5px 0;
+}
+
+.field_form_selects_view {
+  padding: 5px;
+}
+
+.field_form_selects_view span {
+  margin: 5px;
+}
+
+/*fields view*/
+.fields-node-view {
+  margin: 5px 0;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.fields-node-view-name {
+  padding-right: 10px;
+}
+
+.fields-node-view-list-textarea .fields-node-view-content,
+.fields-node-view-list-file_image .fields-node-view-content {
+  display: block;
+}
+
+.fields-node-view-list-file .fields-node-view-content img {
+  padding: 2px;
+  border: 1px solid #ccc;
+}
+
+.fields-node-view-list-file .fields-node-view-content a:hover img {
+  border: 1px solid #09c;
+}
+
+.fields-node-view a {
+  padding-right: 8px;
+}
+
+/* user */
+img.form_captcha_img {
+  vertical-align:middle;
+}
+
+#user_term_list_view li {
+	float: left;
+	height: 130px;
+	width: 120px;
+	margin: 2px;
+	text-align: center;
+}
+
+.user_field_list_avatar {
+  display: block;
+  text-align: center;
+  margin: 0 auto;
+  height: 100px;
+}
+
+#user_term_list_view li a {
+	padding: 6px 0;
+	display: block;
+}
+
+#user_field_list_view li {
+  float: left;
+  height: 160px;
+  width: 130px;
+  margin: 2px;
+  text-align: center;
+}
+
+#user_field_list_view li a {
+  padding: 3px 0;
+  display: block;
+}
+
+.user_field_list_term a {
+	color: #55504B;
+}
+
+/*user center*/
+#user-center {
+  overflow: hidden;
+  height: auto;
+}
+
+#user-center-header {
+  text-align: right;
+  border-bottom:1px solid #ccc;
+  padding-right: 5px;
+}
+
+#user-center-link {
+  text-align: center;
+  float: left;
+  padding: 0;
+  width: 18%;
+}
+
+#user-center-body {
+  border-left: 1px solid #ccc;
+  min-height: 200px;
+  padding: 5px;
+  width: 80%;
+  float: left;
+}
+
+.item_user_center_link_item {
+  border-bottom: 1px solid #ccc;
+}
+
+.item_user_center_link_item h3 {
+  border-bottom: 1px solid #eee;
+}
 /* grid */
 .container {width:950px;margin:0 auto;}
 .column, .span-1, .span-2, .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-9, .span-10, .span-11, .span-12, .span-13, .span-14, .span-15, .span-16, .span-17, .span-18, .span-19, .span-20, .span-21, .span-22, .span-23, .span-24 {float:left;margin-right:10px;}
