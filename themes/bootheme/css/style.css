@@ -254,11 +254,18 @@ label.form_required {
   text-align: left;
 }
 
+#system_site_settings_type_submit,
 #user_admin_new_pass_type_button,
 #user_admin_edit_form_type_submit,
 #user_set_settings_type_submit,
 #_user_center_newpass_submit,
 #user_edit_form_submit {
+  margin-left: 140px;
+}
+
+#system_site_settings_admin_language .form_description {
+  display: block;
+  padding: 0;
   margin-left: 140px;
 }
 
@@ -271,7 +278,6 @@ label.form_required {
   display: inline;
   margin-left: 5px;
 }
-
 
 /*block*/
 .sidebar .block {
