@@ -972,7 +972,7 @@ function form_wrapper_element($field, $form) {
   $element .= $field['#element']['#error'];
  
   if (!empty($field['#element']['#description'])) {
-    $field['#html'] .= '<span class="description form_description">' . $field['#element']['#description'] . '</span>';
+    $element .= '<span class="description form_description">' . $field['#element']['#description'] . '</span>';
   }
 
   if (isset($field['#prefix']) || isset($field['#suffix'])) {

@@ -2397,7 +2397,7 @@ function dd_element_message($messages) {
       }
       $output .= " </ul>\n";
     } else {
-      $output .= $messages[0];
+      $output .= $data[0];
     }
     $output .= "</div>\n";
   }
