@@ -81,6 +81,10 @@ td.table_submit {
 }
 
 /*misc*/
+label {
+  display: inline;
+}
+
 .table_fixed_header_wrapper_clone {
   height: 40px;
   line-height: 40px;
@@ -299,8 +303,15 @@ label.form_required {
   margin-right: 5px;
 }
 
+#print .user_login_form #user_login_form_type_submit,
 .block #user_login_form_type_submit {
   margin-right: 5px;
+}
+
+#print .user_login_form {
+  width: 550px;
+  margin: 0 auto;
+
 }
 /*block*/
 .sidebar .block {
