@@ -843,6 +843,24 @@ $(function() {
     $(table).css(css).hide();
   });
  
+  $('.table_fixed_header_wrapper').scroll(function(i) {
+    var t = $(this).scrollLeft();
+    var s = $(this).offset();
+    $('.table_fixed_header_wrapper_clone', this).css('left', (s.left-t)+'px');
+  });
+
+  $(window).scroll(function() {
+    var t = $(this).scrollTop();
+    $('.table_fixed_header').each(function(i) { 
+      var id = '#table_fixed_header_wrapper_index_' + i + '_table';
+      if (t > $(this).offset().top) {
+        $(id).css({top: 0}).show();
+      } else {
+        $(id).hide();
+      }
+    });
+  });
+
   //自动完成
   if (Dida.settings.auto) {
     var ui_auto = {};

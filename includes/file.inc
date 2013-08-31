@@ -59,7 +59,7 @@ function file_test() {
  */
 function file_get_form($field) {
   $name = str_replace(array('[', ']'), array('_'), $field['#name']);
-  $output = dd_form_label($field);
+  $output = '';
   if ($field['#required'] && strpos($field['#attributes']['class'], 'required') === false) {
     $field['#attributes']['class'] .= ' required';
   }
@@ -75,13 +75,13 @@ function file_get_form($field) {
       $type = implode('|', $field['#filetype']);
     }
     
-    $output .= '<input id="multi_'.$dom.'" class="multi" filelength="'.$field['#multi'].'" accept="'.$type.'" type="file" name="'.$field['#name'].'[]"'.dd_attributes($field['#attributes']).'/>' . dd_form_error($field);
+    $output .= '<input id="multi_'.$dom.'" class="multi" filelength="'.$field['#multi'].'" accept="'.$type.'" type="file" name="'.$field['#name'].'[]"'.dd_attributes($field['#attributes']).'/>';
     $output .= '<div id="multi_list_'.$dom.'"></div>';
     dd_add_js(array('multi' => array(array('dom' => $dom))), 'setting');
     
     ++$dom;
   } else {
-    $output .= '<input type="file" name="'.$field['#name'].'" value="" '.dd_attributes($field['#attributes']).'/>' . dd_form_error($field);
+    $output .= '<input type="file" name="'.$field['#name'].'" value="" '.dd_attributes($field['#attributes']).'/>';
   }
   return $output;
 }

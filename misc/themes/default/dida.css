@@ -1113,6 +1113,10 @@ ul.admin_site_menu em {
   margin: 5px;
 }
 
+#field_export_content_view {
+  width: 99%;
+  height: 350px;
+}
 /*fields view*/
 .fields-node-view {
   margin: 5px 0;

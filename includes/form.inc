@@ -115,10 +115,6 @@ function dd_get_form($form_id) {
           ),
         ),
       */
-      //ajax验证和提交将跳过系统默认验证，应在ajax页面调用dd_ajax_validate()来验证
-      if ($form['settings']['#ajax_submit']['des']) {
-        $output = '<div id="ajax_description" class="description"></div>';
-      }
       dd_add_js('misc/jquery.form.js');
     }
     
@@ -198,17 +194,9 @@ function dd_get_form($form_id) {
   }
 
   $fields = dd_form_sort(dd_form_field($form, $form_values, $error));
-  
-  $output .= '<form ' . dd_attributes($form['#args']) . '>';
 
-  if (!empty($form['settings']['#title'])) {
-    $output .= '<h3>'.$form['settings']['#title'].'</h3>';
-  }
+  $form['#content'] = '';
 
-  if (!empty($form['settings']['#description'])) {
-    $output .= '<div class="description form_description form_setting_description">' . $form['settings']['#description'] . '</div>';
-  }
-  
   $tpl = DIDA_ROOT . '/' . $conf['themes'][$base_theme_name]['path'] . '/form/' . $form['#form_id'] . '.tpl.php';
   
   if (is_file($tpl)) {
@@ -220,18 +208,48 @@ function dd_get_form($form_id) {
      */
     ob_start();
     include $tpl;
-    $output .= ob_get_contents();
+    $form['#content'] .= ob_get_contents();
     ob_end_clean();
   } else {
-    $output .= dd_form_html($form, $fields);
+    $form['#content'] .= dd_form_html($form, $fields);
   }
 
-  $output .= dd_form_hidden(array('#name' => 'form_id', '#value' => $form_id));
-  $output .= dd_form_hidden(array('#name' => 'form_token', '#value' => $form_token));
+  $form['#content'] .= dd_form_hidden(array('#name' => 'form_id', '#value' => $form_id));
+  $form['#content'] .= dd_form_hidden(array('#name' => 'form_token', '#value' => $form_token));
+
+  return theme_get_element('form_get_html', $form);
+}
+
+// public form_get_html($form) {{{ 
+/**
+ * form_get_html
+ * 输入表单 html
+ * 
+ * @param $array $form 
+ * @access public
+ * @return string
+ */
+function form_get_html($form) {
+  $output = '';
+  //ajax验证和提交将跳过系统默认验证，应在ajax页面调用dd_ajax_validate()来验证
+  if (!empty($form['settings']['#ajax_submit']) && !empty($form['settings']['#ajax_submit']['des'])) {
+    $output = '<div id="ajax_description" class="description"></div>';
+  }
+  $output .= '<form ' . dd_attributes($form['#args']) . '>';
+
+  if (!empty($form['settings']['#title'])) {
+    $output .= '<h3>'.$form['settings']['#title'].'</h3>';
+  }
+
+  if (!empty($form['settings']['#description'])) {
+    $output .= '<div class="description form_description form_setting_description">' . $form['settings']['#description'] . '</div>';
+  }
+
+  $output .= $form['#content'];
   $output .= '</form>';
-  
   return $form['settings']['#prefix'] . $output . $form['settings']['#suffix'];
 }
+// }}}
 
 /**
  * 获取表单字段类型，可使用 hook_form_type_info() 来扩展字段类型，示例：
@@ -310,6 +328,10 @@ function form_get_type_info() {
     'file' => array(
       'name' => t('system', '文件上传'),
       'callback' => 'dd_form_file',
+    ),
+    'value' => array(
+      'name' => t('system', '内容显示'),
+      'callback' => 'dd_form_value',
     ),
   );
 
@@ -869,14 +891,20 @@ function _dd_form_element(&$form, $field, $value, $error) {
   if (!empty($field['#fieldset_suffix'])) {
     $field['#fieldset_suffix_html'] = '</div></fieldset>';
   }
+
+  if (!empty($field['#value']) && empty($field['#type'])) {
+    $field['#type'] = 'value';
+  }
   
   if (!empty($types[$field['#type']]) && function_exists($types[$field['#type']]['callback'])) {
+    if (empty($field['#attributes'])) $field['#attributes'] = array();
+
     if ($field['#type'] == 'file' && empty($form['#args']['enctype'])) {
       $form['#args']['enctype'] = 'multipart/form-data';
     }
     
     if (empty($field['#attributes']['id'])) {
-      $field['#attributes']['id'] = $field['#form_id'].'_type_'.$field['__name'];
+      $field['#attributes']['id'] = $field['#form_id'] . '_type_' . $field['__name'];
     }
     
     if (empty($field['#attributes']['class'])) {
@@ -884,26 +912,76 @@ function _dd_form_element(&$form, $field, $value, $error) {
     } else {
       $field['#attributes']['class'] .= ' form_value_' . $field['#type'];
     }
-
-    $element = call_user_func($types[$field['#type']]['callback'], $field, $form). $field['#field_suffix'];
-  } else if ($field['#value']) {
-    $form['#type'] = 'value';
-    $element = dd_form_label($field) . $field['#value'] . $field['#field_suffix'];
   }
 
-  if ($field['#description']) {
-    $element .= '<span class="description form_description">' . $field['#description'] . '</span>';
+  $field = form_field_element($field);
+
+  form_set_ahah($field);
+
+  return $field;
+}
+// }}}
+
+// public form_field_element($field) {{{ 
+/**
+ * form_field_element
+ * 将表单字段数据分解为可供主题使用的元素
+ * 
+ * @param array $field 
+ *  表单的一个字段
+ * @access public
+ * @return array
+ */
+function form_field_element($field) {
+  $types = form_get_type_info();
+
+  $keys = array(
+    '#description', '#prefix', '#suffix', '#field_prefix', '#field_suffix', '#fieldset_suffix_html', '#fieldset_prefix_html'
+  );
+
+  $field['#element'] = array(
+    '#label' => theme_get_element('dd_form_label', $field),
+    '#error' =>  theme_get_element('dd_form_error', $field),
+  );
+
+  foreach ($keys as $key) {
+    $field['#element'][$key] = !empty($field[$key]) ? $field[$key] : '';
+  }
+
+  if (!empty($field['#type']) && !empty($types[$field['#type']]['callback'])) {
+    $field['#element']['#content'] = theme_get_element($types[$field['#type']]['callback'], $field, $form);
+  }
+
+  return theme_get_element('form_wrapper_element', $field);
+}
+// }}}
+
+// public form_wrapper_element($field) {{{ 
+/**
+ * form_wrapper_element
+ * 将表单字段元素组合为 html
+ * 
+ * @param array $field 
+ * @access public
+ * @return array
+ */
+function form_wrapper_element($field, $form) {
+  $element = $field['#element']['#label'] . $field['#element']['#field_prefix'];
+  $element .= $field['#element']['#content'];
+  $element .= $field['#element']['#field_suffix'];
+  $element .= $field['#element']['#error'];
+ 
+  if (!empty($field['#element']['#description'])) {
+    $field['#html'] .= '<span class="description form_description">' . $field['#element']['#description'] . '</span>';
   }
 
   if (isset($field['#prefix']) || isset($field['#suffix'])) {
-    $element =  $field['#fieldset_prefix_html'] . $field['#prefix'] .$element. $field['#suffix'] . $field['#fieldset_suffix_html'];
-  } else if (!$form['settings']['#theme'] && $field['#type'] != 'hidden') {
-    $element = $field['#fieldset_prefix_html'] . '<div id="' . $field['#form_id'] . '_' . $field['__name'] . '" class="form_item form_item_' . $field['#type'] . '">' . $element . '</div>'  . $field['#fieldset_suffix_html'];
+    $element = $field['#element']['#prefix'] . $element . $field['#element']['#suffix'];
+  } else if (empty($form['settings']['#theme']) && $field['#type'] != 'hidden') {
+    $element = '<div id="' . $field['#form_id'] . '_' . $field['__name'] . '" class="form_item form_item_' . $field['#type'] . '">' . $element . '</div>';
   }
 
-  $field['#html'] = $element;
-
-  form_set_ahah($field);
+  $field['#html'] = $field['#element']['#fieldset_prefix_html'] . $element . $field['#element']['#fieldset_suffix_html'];
 
   return $field;
 }
@@ -926,6 +1004,20 @@ function dd_form_error($field) {
 }
 // }}}
 
+// public dd_form_value($field) {{{ 
+/**
+ * dd_form_value
+ * 内容显示字段
+ * 
+ * @param array $field 
+ * @access public
+ * @return string
+ */
+function dd_form_value($field) {
+  return $field['#value'];
+}
+// }}}
+
 // public dd_form_textfield($field) {{{ 
 /**
  * dd_form_textfield
@@ -942,7 +1034,7 @@ function dd_form_textfield($field) {
   $field['#attributes']['value'] = check_plain($field['#value']);
   $field['#attributes']['type'] = 'text';
 
-  return dd_form_label($field) . '<input' . dd_attributes($field['#attributes']) . '/>' . dd_form_error($field);
+  return '<input' . dd_attributes($field['#attributes']) . '/>';
 }
 // }}}
 
@@ -1002,9 +1094,8 @@ function dd_form_weight($field) {
  * @return string
  */
 function dd_form_password($field) {
-  $output .= dd_form_label($field);
-  $output .= '<input type="password" name="' . $field['#name'] . '" value="' . $field['#value'] . '"';
-  $output .= dd_attributes($field['#attributes']) . '/>' . dd_form_error($field);
+  $output = '<input type="password" name="' . $field['#name'] . '" value="' . $field['#value'] . '"';
+  $output .= dd_attributes($field['#attributes']) . '/>';
   return $output;
 }
 // }}}
@@ -1022,8 +1113,8 @@ function dd_form_password($field) {
 function dd_form_textarea($field) {
   if (empty($field['#attributes']['rows'])) $field['#attributes']['rows'] = 10;
   if (empty($field['#attributes']['cols'])) $field['#attributes']['cols'] = 60;
-  $output = dd_form_label($field) . '<div class="form_textarea"><textarea name="' . $field['#name'] . '"';
-  $output .= dd_attributes($field['#attributes']).'>' . $field['#value'] . '</textarea></div>' . dd_form_error($field);
+  $output = '<div class="form_textarea"><textarea name="' . $field['#name'] . '"';
+  $output .= dd_attributes($field['#attributes']).'>' . $field['#value'] . '</textarea></div>';
   return $output;
 }
 // }}}
@@ -1065,7 +1156,7 @@ function dd_form_captcha($field, $form = NULL) {
     $field['#attributes']['class'] .= ' form_field_input_captcha';
   }
 
-  $html =  dd_form_label($field) . '<input type="text" name="' . $field['#name'] . '" value="';
+  $html = '<input type="text" name="' . $field['#name'] . '" value="';
   $html .= $field['#value'] . '"' . dd_attributes($field['#attributes']).'/>';
   $html .= '<span class="form_captcha" alt="' . $key . '" title="' . t('system', '点击换一个验证码') . '">';
 
@@ -1078,7 +1169,7 @@ function dd_form_captcha($field, $form = NULL) {
     $html .= t('system', '获取验证码');
   }
 
-  $html .= '</span>' . dd_form_error($field);
+  $html .= '</span>';
 
   return $html;
 }
@@ -1094,7 +1185,7 @@ function dd_form_captcha($field, $form = NULL) {
  * @return string
  */
 function dd_form_checkbox($field) {
-  $output = dd_form_label($field);
+  $output = '';
   
   if (!empty($field['#options'])) {
     $id = $field['#attributes']['id'];
@@ -1133,7 +1224,7 @@ function dd_form_checkbox($field) {
     $output .= ' value="1" name="' . $field['#name'] . '" type="checkbox"' . dd_attributes($field['#attributes']) . '/>';
   }
 
-  return $output . dd_form_error($field);
+  return $output;
 }
 // }}}
 
@@ -1146,7 +1237,7 @@ function dd_form_checkbox($field) {
  * @return string
  */
 function dd_form_select($field) {
-  $output = dd_form_label($field) . '<select name="' . $field['#name'] . '"' . dd_attributes($field['#attributes']) . '>';
+  $output = '<select name="' . $field['#name'] . '"' . dd_attributes($field['#attributes']) . '>';
 
   foreach ($field['#options'] as $key => $data) {
     $output .= '<option';
@@ -1166,7 +1257,7 @@ function dd_form_select($field) {
 
   $output .= '</select>';
 
-  return $output . dd_form_error($field);
+  return $output;
 }
 // }}}
 
@@ -1180,7 +1271,7 @@ function dd_form_select($field) {
  * @return string
  */
 function dd_form_selects($field) {
-  $output = dd_form_label($field) . '<select name="'.$field['#name'].'[]"' . dd_attributes($field['#attributes']) . ' multiple="multiple">';
+  $output = '<select name="'.$field['#name'].'[]"' . dd_attributes($field['#attributes']) . ' multiple="multiple">';
   
   foreach ($field['#options'] as $key => $data) {
     $output .= '<option';
@@ -1200,7 +1291,7 @@ function dd_form_selects($field) {
 
   $output .= '</select>';
 
-  return $output . dd_form_error($field);
+  return $output;
 }
 // }}}
 
@@ -1216,7 +1307,7 @@ function dd_form_selects($field) {
  * @return string
  */
 function dd_form_radio($field) {
-  $output = dd_form_label($field);
+  $output = '';
 
   if (is_array($field['#options'])) {
     $id = $field['#attributes']['id'];
@@ -1258,7 +1349,7 @@ function dd_form_radio($field) {
     $output .= '/></span>';
   }
 
-  return $output . dd_form_error($field);
+  return $output;
 }
 // }}}
 
@@ -1290,7 +1381,7 @@ function dd_form_file($field) {
  * @return string
  */
 function dd_form_button($field) {
-  return dd_form_label($field) . '<input type="button" name="' . $field['#name'] . '" value="' . ($field['#value'] ? $field['#value'] : 'Button').'"' . dd_attributes($field['#attributes']) . '/>';
+  return '<input type="button" name="' . $field['#name'] . '" value="' . ($field['#value'] ? $field['#value'] : 'Button').'"' . dd_attributes($field['#attributes']) . '/>';
 }
 // }}}
 
@@ -1305,7 +1396,7 @@ function dd_form_button($field) {
  * @return string
  */
 function dd_form_submit($field) {
-  return dd_form_label($field) . '<input type="submit" name="' . $field['#name'] . '" value="' . ($field['#value'] ? $field['#value'] : t('system', '确认提交')) . '"' . dd_attributes($field['#attributes']) . '/>';
+  return '<input type="submit" name="' . $field['#name'] . '" value="' . ($field['#value'] ? $field['#value'] : t('system', '确认提交')) . '"' . dd_attributes($field['#attributes']) . '/>';
 }
 // }}}
 
@@ -1319,7 +1410,7 @@ function dd_form_submit($field) {
  * @return string
  */
 function dd_form_image($field) {
-  return dd_form_label($field) . '<input type="image" name="' . $field['#name'] . '" src="' . $field['#src'] . '"' . dd_attributes($field['#attributes']) . '/>';
+  return '<input type="image" name="' . $field['#name'] . '" src="' . $field['#src'] . '"' . dd_attributes($field['#attributes']) . '/>';
 }
 // }}}
 
@@ -1334,18 +1425,12 @@ function dd_form_image($field) {
  */
 function dd_form_label($field) {
   $output = '';
-
-  if ($field['#title'] || $field['#required']) {
-    $output = '<label class="dd_label" for="' . $field['#name'] . '">';
+  if (!empty($field['#title'])) {
+    $output = '<label class="dd_label dd_label_' . $field['#type'] . '" for="' . $field['#name'] . '">';
     if (!empty($field['#title'])) $output .= $field['#title'] . '：';
-    if (!empty($field['#required'])) $output .= '<span class="form_required" title="' . t('system', '此项不能为空。') . '">*</span>';
-    $output .= "</label>\n";
+    if (!empty($field['#required'])) $output .= '<span class="form_required" title="' . t('system', '此项不能为空') . '">*</span>';
+    $output .= '</label>';
   }
-  
-  if (!empty($field['#field_prefix'])) {
-    $output .= $field['#field_prefix'];
-  }
-
   return $output;
 }
 // }}}
@@ -1509,6 +1594,7 @@ function dd_get_form_meta($sort = 'desc', $value = array(), $title = array()) {
  */
 function form_admin_search($name = 'keyword', $form = array(), $title = ''){
   $form['settings']['#validate'][] = 'form_admin_search_validate';
+  $form['settings']['#attributes']['class'] = 'form-inline';
 
   if (empty($form['fields'][$name])) {
     $form['fields'][$name] = array(
@@ -1587,17 +1673,12 @@ function form_date_start_or_end($title, $type = 'get', $return = 'string', $star
   dd_jqui();
 
   if ($return == 'string') {
-    
     $fields['date_start']['#name'] = 'date_start';
     $fields['date_end']['#name'] = 'date_end';
-
-    return '<div class="dd_form_date_start_or_end_wrapper">' . dd_form_textfield($fields['date_start']) .' -- '. dd_form_textfield($fields['date_end']) . '</div>';
-
+    return '<div class="dd_form_date_start_or_end_wrapper">' . form_field_element($fields['date_start']) .' -- '. form_field_element($fields['date_end']) . '</div>';
   } else {
-
     $fields['date_start']['#prefix'] = '<div class="form_inline">';
     $fields['date_end']['#suffix'] = '</div>';
-
     return $fields;
   }
 }

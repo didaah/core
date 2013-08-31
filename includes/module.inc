@@ -47,21 +47,11 @@ function module_enabled_variable($op = 'all') {
       $themes[$name] = array(
         'filename' => $info['filename'],
         'path' => $info['path'],
-        'region' => $info['info']['region'],
-        'styles' => $info['info']['styles'] ? $info['info']['styles'] : NULL,
-        'scripts' => $info['info']['scripts'] ? $info['info']['scripts'] : NULL,
-        'name' => ($info['info']['name'] ? $info['info']['name'] : $info['filename']),
-        'styles_remove' => (!empty($info['info']['styles_remove']) ? $info['info']['styles_remove'] : array()),
-        'language' => $info['info']['language']
       );
-      if ($info['info']['logo']) {
-        $themes[$name]['logo'] = $info['info']['logo'];
-      }
-      if ($info['info']['favicon']) {
-        $themes[$name]['favicon'] = $info['info']['favicon'];
-      }
-      if ($info['info']['settings']) {
-        $themes[$name]['settings'] = $info['info']['settings'];
+      if (!empty($info['info'])) {
+        foreach ($info['info'] as $key => $value) {
+          $themes[$name][$key] = $value;
+        }
       }
     }
     var_set('themes', $themes, 0, 0);

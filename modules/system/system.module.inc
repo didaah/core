@@ -144,9 +144,15 @@ function system_modules_validate($form, $value) {
 }
 
 function system_modules_theme($form, $fields) {
-  $header = array(t('system', '启用'), t('system', '模块信息'), t('system', '说明'), t('system', '操作'));
-  
+  $header = array(
+    array('data' => t('system', '启用'), 'class' => 'checkbox'),
+    array('data' => t('system', '模块信息'), 'class' => 'info'),
+    array('data' => t('system', '说明'), 'class' => 'description'),
+    array('data' => t('system', '操作'), 'class' => 'op')
+  );
+
   $rows = $table = array();
+
   foreach ($fields['modules'] as $module) {
     $item = array(
       '<strong>'.t('system', '名称：').'</strong>' . $module['name']['#value'],
@@ -159,6 +165,7 @@ function system_modules_theme($form, $fields) {
     $v = module_get_ver($module['filename']['#value'], 1);
     
     $links = array();
+
     if ($module['status']['#value'] == 1) {
       if (($module['install']['#value'] == -1 && $v['install']) 
       || ($module['install']['#value'] != -1 && $module['install']['#value'] < $v['ver'])) {
@@ -182,7 +189,11 @@ function system_modules_theme($form, $fields) {
     $table = array_merge($table, $rows);
   }
   
-  $table[] = array(array('data' => $fields['submit']['#html'], 'colspan' => 6));
+  $table[] = array(array(
+    'data' => $fields['submit']['#html'],
+    'colspan' => 6,
+    'class' => 'table_submit'
+  ));
   return theme('table', $header, $table);
 }
 
@@ -313,22 +324,34 @@ function system_themes_theme($form, $fields) {
   }
 
   $header = array(
-    t('system', '预览'), t('system', '名称'), t('system', '启用'),
-    t('system', '路径'), t('system', '版本'), t('system', '说明'),
+    t('system', '预览'),
+    t('system', '名称'),
+    t('system', '启用'),
+    array(
+      'data' => t('system', '路径与说明'),
+      'class' => 'path'
+    ),
+    t('system', '版本'),
     t('system', '操作'),
   );
   
   foreach ($fields['themes'] as $theme) {
     $table[] = array(
-      $theme['thumb']['#value'], $theme['name']['#value'],
-      $theme['check']['#html'], $theme['path']['#value'],
-      $theme['ver']['#value'], $theme['des']['#value'],
+      $theme['thumb']['#value'],
+      $theme['name']['#value'],
+      $theme['check']['#html'],
+      $theme['path']['#value'] . '<br/>' . $theme['des']['#value'],
+      $theme['ver']['#value'],
       (!empty($theme['check']['#value']) ? l(t('system', '设置'), 'admin/themes/setting/' . $theme['filename']['#value']) 
       : l(t('system', '启用'), $_GET['q'], array('query' => 'op=install&name=' . $theme['filename']['#value'])))
     );
   }
-  
-  $table[] = array(array('data' => $fields['submit']['#html'], 'colspan' => 7));
+
+  $table[] = array(array(
+    'data' => $fields['submit']['#html'],
+    'colspan' => 7,
+    'class' => 'table_submit',
+  ));
   return theme('table', $header, $table, array('class' => 'admin_themes_table'));
 }
 

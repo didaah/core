@@ -105,13 +105,19 @@ function filter_user_format($ac = NULL) {
       if ($fids) {
         foreach ($conf['formats'] as $f) {
           if (in_array($f['format'], $fids)) {
-            $options[$f['format']] = $f['name'] .'<br /><span class="description form_description">'. check_plain(t('system', $f['description'])) .'</span><br />';
+            $options[$f['format']] = $f['name'];
+            if  (!empty($f['description'])) {
+              $options[$f['format']] .= '<span class="description form_description form_description_format">' . check_plain(t('system', $f['description'])) . '</span>';
+            }
           }
         }
       }
     } else {
       foreach ($conf['formats'] as $f) {
-        $options[$f['format']] = $f['name'] .'<br /><span class="description form_description">'. check_plain(t('system', $f['description'])) .'</span><br />';
+        $options[$f['format']] = $f['name'];
+        if  (!empty($f['description'])) {
+          $options[$f['format']] .= '<span class="description form_description form_description_format">' . check_plain(t('system', $f['description'])) . '</span>';
+        }
       }
     }
   }

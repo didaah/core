@@ -597,7 +597,12 @@ function _field_export($field_id = NULL, $module = NULL, $type = NULL) {
       $output .= '###'.$field->name."###\n";
       $output .= '[start]'.base64_encode(serialize($field))."[end]\n";
     }
-    return dd_form_textarea(array('#value' => $output, '#name' => 'field_export', '#attributes' => array('rows' => 20, 'cols' => 80)));
+
+    return theme_get_element('dd_form_textarea', array(
+      '#value' => $output,
+      '#name' => 'field_export',
+      '#attributes' => array('id' => 'field_export_content_view')
+    ));
   }
 }
 

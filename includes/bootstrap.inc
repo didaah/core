@@ -2338,7 +2338,7 @@ function dd_dialog_att($height = 400, $width = 600, $iframe = true, $inlineId = 
  * @param (string) $message
  *  信息内容
  * @param (string) $type
- *  信息类型，可自定义，常用：notice、error
+ *  信息类型，可自定义，常用：notice、error、success、warning
  * @param (bool) $repeat
  *  是否替换旧的相同类型的提示信息
  */
@@ -2371,23 +2371,39 @@ function dd_set_message($message = NULL, $type = 'notice', $repeat = true) {
  */
 function dd_get_message() {
   if ($_SESSION['messages']) {
-    foreach ($_SESSION['messages'] as $type => $messages) {
-      $output .= "<div class=\"messages $type\">\n";
-      if (count($messages) > 1) {
-        $output .= " <ul>\n";
-        foreach ($messages as $message) {
-          $output .= '  <li>'. $message ."</li>\n";
-        }
-        $output .= " </ul>\n";
-      } else {
-        $output .= $messages[0];
-      }
-      $output .= "</div>\n";
-    }
+    $output = theme_get_element('dd_element_message', $_SESSION['messages']);
     unset($_SESSION['messages']);
     return $output;
   }
 }
+
+// public dd_element_message($messages) {{{ 
+/**
+ * dd_element_message
+ * 解析提示信息
+ * 
+ * @param array $messages 
+ * @access public
+ * @return string
+ */
+function dd_element_message($messages) {
+  $output = '';
+  foreach ($messages as $type => $data) {
+    $output .= "<div class=\"messages $type\">\n";
+    if (count($data) > 1) {
+      $output .= " <ul>\n";
+      foreach ($data as $message) {
+        $output .= '  <li>'. $message ."</li>\n";
+      }
+      $output .= " </ul>\n";
+    } else {
+      $output .= $messages[0];
+    }
+    $output .= "</div>\n";
+  }
+  return $output;
+}
+// }}}
 
 /**
  * 将数组格式化输出，用于调试
@@ -2467,18 +2483,32 @@ function dd_set_tabs($tab = NULL) {
   }
 }
 
+// public dd_element_sub_tabs($tabs) {{{ 
 /**
- * 获取 tabs 导
+ * dd_element_sub_tabs
+ * 格式式 sub tabs
+ * 
+ * @param array $tabs 
+ * @access public
+ * @return string
+ */
+function dd_element_sub_tabs($tabs) {
+  return theme('item_list', $tabs, NULL, 'ul', array('class' => 'sub_tabs'));
+}
+// }}}
+
+/**
+ * 获取 sub tabs 导航
  * @return (string)
  */
 function dd_get_sub_tabs() {
   if ($tabs = dd_set_sub_tabs()) {
-    return theme('item_list', $tabs, NULL, 'ul', array('class' => 'sub_tabs'));
+    return theme_get_element('dd_element_sub_tabs', $tabs);
   }
 }
 
 /**
- * 写入 sub tabs 导
+ * 设置 sub tabs 导航
  * @param (string or array) $item
  */
 function dd_set_sub_tabs($tab = NULL) {
@@ -2496,15 +2526,34 @@ function dd_set_sub_tabs($tab = NULL) {
   }
 }
 
+// public dd_get_tabs() {{{ 
 /**
- * 获取 sub tabs 导
- * @return (string)
+ * dd_get_tabs
+ * 获取 tabs
+ * 
+ * @access public
+ * @return void
  */
 function dd_get_tabs() {
   if ($tabs = dd_set_tabs()) {
-    return theme('item_list', $tabs, NULL, 'ul', array('class' => 'tabs'));
+    return theme_get_element('dd_element_tabs', $tabs);
   }
 }
+// }}}
+
+// public dd_element_tabs($tabs) {{{ 
+/**
+ * dd_element_tabs
+ * 格式化 tabs
+ * 
+ * @param array $tabs 
+ * @access public
+ * @return string
+ */
+function dd_element_tabs($tabs) {
+  return theme('item_list', $tabs, NULL, 'ul', array('class' => 'tabs'));
+}
+// }}}
 
 /**
  * 写入页面标题

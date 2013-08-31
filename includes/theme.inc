@@ -32,6 +32,10 @@ function theme_init() {
     require_once DIDA_ROOT . '/misc/themes/default/info.php';
     $base_theme_info['framework_path'] = 'misc/themes/default';
   }
+  
+  if (is_file(DIDA_ROOT . '/' . $base_theme_info['framework_path'] . '/template.php')) {
+    require_once DIDA_ROOT . '/' . $base_theme_info['framework_path'] . '/template.php';
+  }
 
   if (!empty($info['scripts'])) {
     foreach ($info['scripts'] as $script) {
@@ -123,7 +127,7 @@ function theme_get_cache() {
 }
 
 function theme() {
-  global $conf, $user;
+  global $conf, $user, $base_theme_info;
   
   $temp = !$user->theme ? $conf['themes'][$conf['default_theme']] : $conf['themes'][$user->theme];
   $temp['path'] = DIDA_ROOT . '/' . $temp['path'];
@@ -183,10 +187,11 @@ function theme() {
       'template_preprocess',
       'template_preprocess_' . $hook,
       $theme['module'] . '_template_preprocess_' . $hook,
+      $base_theme_info['framework'] . '_preprocess_framework_' . $hook,
       $temp['filename'] . '_preprocess_' . $hook,
       '_template_preprocess_language'
     );
-    
+
     foreach ($functions as $function) {
       if (function_exists($function)) {
         call_user_func_array($function, $args);
@@ -237,12 +242,16 @@ function theme() {
       }
     }
     
-  } else if ($theme['fun']) {
+  } else if (!empty($theme['fun'])) {
     /**
      * 回调函数处理 theme 请求
      * template.php 可覆写，如：default_template_table
      */
-    $functions = array($temp['filename']. '_template_'. $hook, $theme['fun']);
+    $functions = array(
+      $temp['filename']. '_template_'. $hook,
+      $base_theme_info['framework'] . '_template_framework_' . $hook,
+      $theme['fun']
+    );
     foreach ($functions as $function) {
       if (function_exists($function)) {
         return call_user_func_array($function, $args);
@@ -252,7 +261,7 @@ function theme() {
 }
 
 /** 
- * 所有主题基本预处理函数，将为多语言设置，可为每种语言使用不同的模板，命名规则示例：
+ * theme 基本预处理函数，若站点启用了多语言，可为每种语言使用不同的模板，命名规则示例：
  *  如基本模板为 user.tpl.php，则 en_user.tpl.php 表示英文界面下使用此模板，jp_user.tpl.php 表示日文界面下使用此模板
  * 该模板的优先级最高
  * @param array $var 
@@ -272,7 +281,7 @@ function _template_preprocess_language(&$var, $hook) {
 }
 
 /**
- * 所有主题基本预处理函数 
+ * theme 基本预处理函数 
  * 将传递给所有模板文件的变量，以 site_ 开头
  * 模块应尽量避免使用 site_ 开头来命名模板变量
  * @param array $var 
@@ -304,6 +313,78 @@ function template_preprocess(&$var, $hook) {
   $var['base_theme'] = $GLOBALS['conf']['base_theme'];
   $var['base_path'] = $GLOBALS['base_path'];
 }
+
+// public theme_get_element($function, $v1 = NULL, $v2 = NULL, $v3 = NULL) {{{ 
+/**
+ * theme_get_element
+ * 调用函数  $function 来处理数据，与直接使用 $function() 相比，通过本函数，可调用主题框架或主题中的处理函数
+ * 例如：
+ *  system 模块需要将数据库中的帮助信息转换为 html，并输出到页面，每个主题开发者所希望的 html 结构可能是不一样的
+ *  如果要让主题制作更为灵活，通常需要通过 hook_theme() 来创建一个主题函数或模板文件，为主题提供 hook 接口
+ *  本函数提供了另一种更简便的方式，定义一个 system_help() 函数，里边是模块开发者的默认处理方式，然后调用本函数：
+ *    theme_get_element('system_help', $object, $value);
+ *  本函数将判断主题层是否有定义处理数据，将调用的函数优先级如下：
+ *    template_element_system_help() // 在主题框架 template.php 中定义的函数
+ *    framework_element_system_help() // 在主题 template.php 中定义的函数
+ *    system_help(); // 模块默认的处理函数
+ * 
+ * @param string $function
+ *  默认处理函数，该函数若不存在，将调用 _theme_default_element()
+ * @param mixed $v1 
+ *  数据
+ * @param mixed $v2 
+ *  数据
+ * @param mixed $v3 
+ *  数据
+ * @access public
+ * @return void
+ */
+function theme_get_element($function, $v1 = NULL, $v2 = NULL, $v3 = NULL) {
+  if ($GLOBALS['conf']['site_mode'] == 0) {
+    static $func;
+    if (!isset($func) && $cache = cache_get('element_func')) {
+     $func = $cache->data;
+    } else {
+      $func = array();
+    }
+
+    if (empty($func[$function])) {
+      $func[$function] = $function;
+      foreach (array('template_element_' . $function, 'framework_element_' . $function) as $hook) {
+        if (function_exists($hook)) {
+          $func[$function] = $hook;
+          break;
+        }
+      }
+      cache_set('element_func', $func);
+    }
+
+    return $func[$function]($v1, $v2, $v3);
+
+  } else { // 开发模式
+    foreach (array('template_element_' . $function, 'framework_element_' . $function, $function) as $hook) {
+      if (function_exists($hook)) {
+        return $hook($v1, $v2, $v3);
+      }
+    }
+    return _theme_default_element($v1);
+  }
+}
+// }}}
+
+// protected _theme_default_element($value) {{{ 
+/**
+ * _theme_default_element
+ * 数据解析默认处理函数，不对数据做任何处理，直接返回参数 1
+ * 
+ * @param mixed $value 
+ * @access protected
+ * @return void
+ */
+function _theme_default_element($value) {
+  return $value;
+}
+// }}}
 
 function template_preprocess_page(&$var, $args) {
   global $conf, $user, $base_path;
@@ -417,7 +498,7 @@ function theme_breadcrumb($breadcrumb) {
 }
 
 function theme_help($help) {
-  return '<div class="help">'.implode('', $help).'</div>';
+  return '<div class="help">' . implode('', $help) . '</div>';
 }
 
 function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attributes = NULL, $wrapper = 1) {
@@ -499,7 +580,7 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
  * @access public
  * @return string
  */
-function theme_table(array $header, array $rows, array $attributes = array(), $caption = NULL, $sub_header = NULL) {
+function theme_table(array $header, $rows, array $attributes = array(), $caption = NULL, $sub_header = NULL) {
   $output = '<table'. dd_attributes($attributes) .">\n";
 
   if (isset($caption)) {

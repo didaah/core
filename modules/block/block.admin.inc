@@ -30,7 +30,7 @@ function block_admin_form($theme) {
           '#title' => t('block', '区域'),
           '#type' => 'select',
           '#default_value' => $defaultValue,
-          '#prefix' => '<div class="block_item"><div class="title">' . $block->title.'</div>',
+          '#prefix' => '<div class="block_item"><div class="title">' . $block->title . '</div>',
           '#options' => $regions,
         );
         $form['fields']['region'][$region][$block->bid]['weight'] = array(

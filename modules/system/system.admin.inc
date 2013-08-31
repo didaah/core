@@ -1316,6 +1316,7 @@ function system_cache_clear() {
 }
 
 function system_cache_clear_submit($form, $value) {
+  cache_del('cid', 'element_func');
   if ($value['value']['modules']) {
     module_set_list('module', 'modules');
     module_enabled_variable('module');

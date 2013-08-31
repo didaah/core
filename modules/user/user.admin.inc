@@ -257,7 +257,7 @@ function _user_roles_theme($form, $fields) {
     }
   }
   $table[] = array(array('data' => $fields['submit']['#html'], 'colspan' => $count, 'align' => 'right'));
-  $output .= theme('table', $header, $table, array('class' => 'dida_table_thead_fixed'));
+  $output .= theme('table', $header, $table, array('class' => 'table_fixed_header'));
   return $output;
 }
 
