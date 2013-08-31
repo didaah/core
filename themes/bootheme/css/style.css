@@ -279,6 +279,29 @@ label.form_required {
   margin-left: 5px;
 }
 
+.block #user_login_form {
+  padding: 8px 0;
+}
+
+.block #user_login_form .textfield,
+.block #user_login_form .password {
+  width: 150px;
+}
+
+.block #user_login_form label.error,
+.block #user_login_form .form_description {
+  display: block;
+  text-align: right;
+}
+
+.block #user_login_form_submit {
+  text-align: right;
+  margin-right: 5px;
+}
+
+.block #user_login_form_type_submit {
+  margin-right: 5px;
+}
 /*block*/
 .sidebar .block {
   border-radius: 4px;
