@@ -217,7 +217,12 @@ function framework_element_form_get_html($form) {
  * @Implement of framework_element_x()
  */
 function framework_element_form_wrapper_element($field, $form) {
-  $element = $field['#element']['#label'];
+  if (empty($form['#horizontal'])) {
+    $element = $field['#element']['#label'];
+  } else {
+    $element = '<div class="control-group">' . $field['#element']['#label'] . '<div class="controls">';
+  }
+
   if (!empty($field['#element']['#field_prefix'])) {
     $element .= $field['#element']['#field_prefix'];
   }
@@ -229,6 +234,10 @@ function framework_element_form_wrapper_element($field, $form) {
  
   if (!empty($field['#element']['#description'])) {
     $element .= '<span class="description form_description help-inline">' . $field['#element']['#description'] . '</span>';
+  }
+  
+  if (!empty($form['#horizontal'])) {
+    $element .= '</div></div>';
   }
 
   if (isset($field['#prefix']) || isset($field['#suffix'])) {
