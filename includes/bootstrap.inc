@@ -4149,7 +4149,7 @@ function dd_feed_wrapper($items, $title, $link = NULL, $des = NULL) {
 
   return dd_rss_feed($items, NULL, array(
     'title' => $title .'_'. $conf['site_global']['name'],
-    'description' => ($des ? $des :$conf['site_global']['description']),
+    'description' => ($des ? $des : $conf['site_global']['description']),
     'link' => ($link ? $link : $base_url),
     'image' => array(
       'url' => $logo,

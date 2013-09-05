@@ -62,12 +62,15 @@ function image_get_info($file) {
 
   if (isset($data) && is_array($data)) {
     $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
-    $extension = array_key_exists($data[2], $extensions) ?  $extensions[$data[2]] : '';
-    $details = array('width'     => $data[0],
-                     'height'    => $data[1],
-                     'extension' => $extension,
-                     'file_size' => $file_size,
-                     'mime_type' => $data['mime']);
+    $details = array(
+      'width' => $data[0],
+      'height' => $data[1],
+      'file_size' => $file_size,
+      'mime_type' => $data['mime'],
+   );
+    if (array_key_exists($data[2], $extensions)) {
+      $details['extension'] = $extensions[$data[2]];
+    }
   }
   return $details;
 }

@@ -55,6 +55,8 @@ require_once './includes/bootstrap.inc';
 require_once './includes/database.inc';
 require_once './includes/form.inc';
 require_once './includes/cache.inc';
+require_once './includes/theme.inc';
+require_once './includes/module.inc';
 
 conf_init();
 
@@ -237,7 +239,7 @@ function dida_setup_data_form() {
   
   if ($fields = db_install_form($database['default'])) {
     foreach ($fields as $field) {
-      $form .= '<div class="form_item">' . $field . '</div>';
+      $form .= '<div class="form_item">' . form_field_element($field, 1) . '</div>';
     }
     return $form;
   }
@@ -523,13 +525,13 @@ function _install_setting_chmod() {
       font-size:14px;
       line-height:1.6;
     }
-    a{
+    a {
       color: #1A4686
     }
-    .form_item{
+    .form_item {
       margin: 4px 0;
     }
-    input.form_text{
+    input.form_text {
       font-size: 14px;
       padding:2px 3px;
       font-style: normal;
@@ -537,20 +539,20 @@ function _install_setting_chmod() {
     span.form_required {
       color:#FFAE00;
     }
-    #install_form{
+    #install_form {
       margin: 10px auto;
       border: 1px solid #ccc;
       padding: 0 12px;
       width: 700px;
     }
-    #header{
+    #header {
       margin: 5px auto;
       border: 1px solid #ccc;
       padding: 12px;
       width: 700px;
       color: #3E5803
     }
-    #error{
+    #error {
       width:700px;
       margin: 5px auto;
       background:#FFCCCC;
@@ -558,7 +560,7 @@ function _install_setting_chmod() {
       border:1px solid #DD7777;
       padding: 5px 12px;
     }
-    label{
+    label {
       text-align: right;
       display:-moz-inline-box;
       display:inline-block;

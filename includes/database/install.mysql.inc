@@ -5,40 +5,54 @@
  * 数据库连接信息，由各数据库接口文件自定义
  */
 function db_install_form($database) {
-  $field[] = dd_form_textfield(array(
+  $field = array();
+
+  $field[] = array(
+    '#type' => 'textfield',
     '#name' => 'dbname',
     '#title' => '数据库名称',
     '#required' => 1,
     '#value' => $database['dbname']
-  ));
-  $field[] = dd_form_textfield(array(
+  );
+
+  $field[] = array(
+    '#type' => 'textfield',
     '#name' => 'dbuser',
     '#title' => '数据库用户名',
     '#required' => 1,
     '#value' => $database['dbuser']
-  ));
-  $field[] = dd_form_textfield(array(
+  );
+
+  $field[] = array(
+    '#type' => 'password',
     '#name' => 'dbpass',
     '#title' => '数据库密码',
     '#value' => $database['dbpass']
-  ));
-  $field[] = dd_form_textfield(array(
+  );
+
+  $field[] = array(
+    '#type' => 'textfield',
     '#name' => 'host',
     '#title' => '数据库主机',
     '#required' => 1,
     '#value' => $database['host'] ? $database['host'] : 'localhost'
-  ));
-  $field[] = dd_form_textfield(array(
+  );
+
+  $field[] = array(
+    '#type' => 'textfield',
     '#name' => 'port',
     '#title' => '数据库端口',
     '#required' => 1,
     '#value' => $database['port'] ? $database['port'] : 3306
-  ));
-  $field[] = dd_form_textfield(array(
+  );
+
+  $field[] = array(
+    '#type' => 'textfield',
     '#name' => 'prefix',
     '#title' => '数据库前缀',
     '#value' => $database['prefix']
-  ));
+  );
+
   return $field;
 }
 

@@ -929,10 +929,12 @@ function _dd_form_element(&$form, $field, $value, $error) {
  * 
  * @param array $field 
  *  表单的一个字段
+ * @param bool $html
+ *  返回整个字段或只返回 html
  * @access public
- * @return array
+ * @return array|string
  */
-function form_field_element($field) {
+function form_field_element($field, $html = false) {
   $types = form_get_type_info();
 
   $keys = array(
@@ -952,20 +954,22 @@ function form_field_element($field) {
     $field['#element']['#content'] = theme_get_element($types[$field['#type']]['callback'], $field, $form);
   }
 
-  return theme_get_element('form_wrapper_element', $field);
+  $field = theme_get_element('form_wrapper_element', $field);
+  return !$html ? $field : $field['#html'];
 }
 // }}}
 
-// public form_wrapper_element($field) {{{ 
+// public form_wrapper_element($field, $form) {{{ 
 /**
  * form_wrapper_element
  * 将表单字段元素组合为 html
  * 
  * @param array $field 
+ * @param array $form 
  * @access public
  * @return array
  */
-function form_wrapper_element($field, $form) {
+function form_wrapper_element($field, $form = array()) {
   $element = $field['#element']['#label'] . $field['#element']['#field_prefix'];
   $element .= $field['#element']['#content'];
   $element .= $field['#element']['#field_suffix'];
@@ -1144,7 +1148,7 @@ function dd_form_captcha($field, $form = NULL) {
     'form_id' => $form['#form_id'],
     'tag' => $form['#form_token'],
     'mosaic' => $field['#captcha']['mosaic'],
-    'image' => !empty($field['#captcha']['image']) ? $field['#captcha']['image']: 0
+    'image' => !empty($field['#captcha']['image']) ? $field['#captcha']['image'] : 0,
   );
 
   dd_add_js(array('captcha' => array($key => array(
@@ -1512,7 +1516,7 @@ function dd_form_inline($form) {
 }
 
 function dd_label($v, $class = NULL) {
-  return '<span class="dd_label'.($class ? ' '. $class :  '').'">'.$v.'</span>';
+  return '<span class="dd_label ' . $class . '">' . $v . '</span>';
 }
 
 /**
