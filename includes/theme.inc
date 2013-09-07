@@ -342,10 +342,12 @@ function template_preprocess(&$var, $hook) {
 function theme_get_element($function, $v1 = NULL, $v2 = NULL, $v3 = NULL) {
   if ($GLOBALS['conf']['site_mode'] == 0) {
     static $func;
-    if (!isset($func) && $cache = cache_get('element_func')) {
-     $func = $cache->data;
-    } else {
-      $func = array();
+    if (!isset($func)) {
+      if ($cache = cache_get('element_func')) {
+        $func = $cache->data;
+      } else {
+        $func = array();
+      }
     }
 
     if (empty($func[$function])) {
