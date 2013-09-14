@@ -2003,7 +2003,7 @@ function user_block_list($theme) {
 /**
  * @Implement of hook_block_view()
  */
-function user_block_view($theme, $config = object) {
+function user_block_view($theme, $config = NULL) {
   if ($config->delta == 'login' && $GLOBALS['user']->uid == 0 && arg(1) != 'login') {
     return array(
       'title' => $config->title,

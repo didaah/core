@@ -235,6 +235,15 @@ h2.system_no_content {
   cursor: pointer;
 }
 
+.form_description_format {
+  display: block;
+  margin-left: 16px;
+}
+
+span.option_label,
+span.form_radio_text {
+  cursor: pointer;
+}
 /*print.tpl.php*/
 #print_dialog {
   padding: 5px 12px;

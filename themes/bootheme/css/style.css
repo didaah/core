@@ -80,9 +80,37 @@ td.table_submit {
   display: block;
 }
 
+#dd_database_debug .dd_database_debug_args2,
+#dd_database_debug .dd_database_debug_args1 {
+  width: 30%;
+}
+
+.pager .pager_form_go_input {
+  width: 35px;
+  text-align: center;
+  margin: 0;
+}
+
 /*misc*/
+.right {
+  text-align: right;
+}
+
+.left {
+  text-align: left;
+}
+
+.center {
+  text-align: center;
+}
+
 label {
   display: inline;
+}
+
+.center_table th,
+.center_table td {
+  text-align: center;
 }
 
 .table_fixed_header_wrapper_clone {
@@ -162,7 +190,15 @@ legend.asc {
   background: url(/misc/images/arrow-asc.png) left 0 no-repeat;
 }
 
+.ui-datepicker select.ui-datepicker-month, .ui-datepicker select.ui-datepicker-year {
+  width: 40%;
+}
 /*form*/
+span.option_label,
+span.form_radio_text {
+  cursor: pointer;
+}
+
 select {
   width: auto;
 }
