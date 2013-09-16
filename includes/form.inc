@@ -532,14 +532,14 @@ function _dd_form_required($form, $field, $value) {
   }
   switch ($field['#type']) {
     case 'select': case 'radio':
-      if ($val != '' && !in_array($val, $options)) {
+      if ($val != '' && !dd_in_array($val, $options)) {
         $er = true;
       }
     break;
     case 'selects': case 'checkbox':
       if ($options && is_array($val)) {
         foreach ($val as $check) {
-          if (!in_array($check, $options)) {
+          if (!dd_in_array($check, $options)) {
             $er = true;
             break;
           }
@@ -851,7 +851,9 @@ function _dd_form_element(&$form, $field, $value, $error) {
   
   if ($value['form_id'] == $form['#form_id']) {
     $val = dd_get_value($value, $field['#parents']);
-    if ($val !== false) $field['#value'] = $val;
+    if ($val !== false && !dd_in_array($field['#type'], array('button', 'submit', 'image'))) {
+      $field['#value'] = $val;
+    }
     $field['#error'] = dd_get_error($error, $field['#parents']);
   } else if (!isset($field['#value'])) {
     $field['#value'] = isset($field['#default_value']) ? $field['#default_value'] : '';
@@ -1198,7 +1200,7 @@ function dd_form_checkbox($field) {
     foreach ($field['#options'] as $key => $data) {
       $output .= '<span class="form_checkbox_option" alt="'.$id.'"><input';
 
-      if (is_array($field['#value']) && in_array($key, $field['#value'])) {
+      if (is_array($field['#value']) && dd_in_array($key, $field['#value'])) {
         $output .= ' checked="checked"';
       }
 
@@ -1280,7 +1282,9 @@ function dd_form_selects($field) {
   foreach ($field['#options'] as $key => $data) {
     $output .= '<option';
 
-    if ($field['#value'] && in_array($key, $field['#value'])) $output .= ' selected="selected"';
+    if ($field['#value'] && dd_in_array($key, $field['#value'])) {
+      $output .= ' selected="selected"';
+    }
  
     if (is_array($data)) {
       $text = !empty($data['name']) ? $data['name'] : $data['data'];

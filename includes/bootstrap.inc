@@ -4158,3 +4158,23 @@ function dd_feed_wrapper($items, $title, $link = NULL, $des = NULL) {
   ),
   ));
 }
+
+// public dd_in_array($value, array $array) {{{ 
+/**
+ * dd_in_array
+ *  检查数组中是否存在某个值。in_array() 在检查 int 类型的值时会出现异常，可使用本函数替代
+ * 
+ * @param string $value 
+ * @param array $array 
+ * @access public
+ * @return bool
+ */
+function dd_in_array($value, array $array) {
+  foreach ($array as $v) {
+    if ($value == (string) $v) {
+      return true;
+    }
+  }
+  return false;
+}
+// }}}
