@@ -9,9 +9,7 @@ a:hover, a:active, a.active {
 }
 
 #header .logo img {
-  max-width: 30px;
   max-height: 30px;
-  _width: 30px;
   _height: 30px;
 }
 
