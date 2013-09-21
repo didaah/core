@@ -340,10 +340,11 @@ function template_preprocess(&$var, $hook) {
  * @return void
  */
 function theme_get_element($function, $v1 = NULL, $v2 = NULL, $v3 = NULL) {
+  global $base_theme_name; 
   if ($GLOBALS['conf']['site_mode'] == 0) {
     static $func;
     if (!isset($func)) {
-      if ($cache = cache_get('element_func')) {
+      if ($cache = cache_get('element_func_' . $base_theme_name)) {
         $func = $cache->data;
       } else {
         $func = array();
@@ -358,7 +359,7 @@ function theme_get_element($function, $v1 = NULL, $v2 = NULL, $v3 = NULL) {
           break;
         }
       }
-      cache_set('element_func', $func);
+      cache_set('element_func_' . $base_theme_name, $func);
     }
 
     return $func[$function]($v1, $v2, $v3);
