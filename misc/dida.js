@@ -136,7 +136,6 @@ Dida.messageShow = function(text, opt) {
   } else {
     o = {timeOut: 5000, status: 'status'};
   }
-  
   $('body').append('<div class="js_messageShow '+o.status+'">'+text+'</div>');
   window.setTimeout(function() {$('.js_messageShow').remove();}, o.timeOut);
 };

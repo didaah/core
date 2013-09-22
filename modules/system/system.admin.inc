@@ -50,8 +50,13 @@ function system_admin_default() {
   return $output;
 }
 
+// public system_admin_site_menu() {{{ 
 /**
- * 站点主导航设置
+ * system_admin_site_menu
+ *  站点主导航设置
+ * 
+ * @access public
+ * @return string
  */
 function system_admin_site_menu() {
   dd_set_breadcrumb(array(l(t('system', '系统管理'), 'admin'), t('system', '主导航设置')));
@@ -114,6 +119,7 @@ function system_admin_site_menu() {
 
   return $output;
 }
+// }}}
 
 /**
  * 系统主导航设置表单

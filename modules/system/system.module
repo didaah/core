@@ -1860,6 +1860,19 @@ function system_field_call_form(&$field, &$form) {
     '#required' => 1,
   );
 
+  $form['fields']['data']['target'] = array(
+    '#title' => t('system', '窗口'),
+    '#type' => 'radio',
+    '#weight' => -90,
+    '#options' => array(
+      '_blank' => t('system', '新窗口'),
+      0 => t('system', '原窗口'),
+    ),
+    '#default_value' => !empty($field->data['target']) ? $field->data['target'] : 0,
+    '#description' => t('system', '链接的打开方式'),
+    '#required' => 1,
+  );
+
   $form['fields']['weight']['#type'] = 'textfield';
   $form['fields']['weight']['#attributes']['class'] = '{number: true}';
   $form['fields']['weight']['#description'] = t('system', '只能是正负整数');
@@ -1952,10 +1965,13 @@ function system_site_menu(&$menu) {
 
   foreach ($datas as $field) {
     if (field_access('view', $field)) {
+      $att = array();
       if (!empty($field->data['input_description'])) {
         $att = array('attributes' => array('title' => $field->data['input_description']));
-      } else {
-        $att = array();
+      }
+      
+      if (!empty($field->data['target'])) {
+        $att['attributes']['target'] = '_blank';
       }
 
       $menu['system_' . $field->field_key] = array(
