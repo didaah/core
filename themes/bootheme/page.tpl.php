@@ -16,6 +16,7 @@
             <img src="<?php echo $site_global->logo; ?>" alt="<?php echo $site_global->slogan;?>" title="<?php echo $site_global->name; ?>" />
           </a>
           <?php echo $menu; ?>
+          <?php if (!empty($lang_links)) : ?>
           <ul class="nav pull-right">
             <li class="dropdown">
             <a data-toggle="dropdown" class="dropdown-toggle" role="button" href="#" title="<?php echo t('bootheme', '选择语言'); ?>">
@@ -28,6 +29,7 @@ echo $conf['languages'][$language_code];
               <?php echo $lang_links;?>
             </li>
           </ul>
+          <?php endif ;?>
         </div>
       </div>
     </div>
