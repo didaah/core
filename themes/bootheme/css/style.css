@@ -200,7 +200,7 @@ legend.asc {
 
 .js_messageShow {
   position: fixed;
-  top: 0;
+  top: 50px;
   right: 45%;
   _position: absolute;
   padding: 30px 100px;
@@ -208,6 +208,7 @@ legend.asc {
   background: #fff;
   z-index: 100;
 }
+
 /*form*/
 span.option_label,
 span.form_radio_text {
