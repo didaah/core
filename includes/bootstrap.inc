@@ -1885,7 +1885,7 @@ function dd_error_msg($msg) {
   $error = array(
     '错误信息：'. $msg,
     '发生时间：'. format_date(time()),
-    '当前用户：'.(!empty($GLOBALS['user']) ? $GLOBALS['user']->name : '游客'),
+    '当前用户：'.(!empty($GLOBALS['user']->name) ? $GLOBALS['user']->name : '游客'),
     '用户主机：'. ip_address(),
     '当前页面：'. isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '未知'
   );

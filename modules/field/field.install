@@ -4,7 +4,14 @@
 /**
  * @Implement of hook_update_X()
  */
-function field_update_3(){
+function field_update_4() {
+  return db_add_index('fields_term_node', 'nid', array('nid'));
+}
+
+/**
+ * @Implement of hook_update_X()
+ */
+function field_update_3() {
   /**
    * 增加字段分组，便于表单布局
    */
@@ -29,7 +36,7 @@ function field_update_3(){
 /*
  * @Implement of hook_update_X()
  */
-function field_update_2(){
+function field_update_2() {
 
   /**
    * 改变 fields 表中 field_type、type 字段的长度
@@ -62,7 +69,7 @@ function field_update_2(){
 /**
  * @Implement of hook_update_X()
  */
-function field_update_1(){
+function field_update_1() {
   /**
    * 字段增加索引值 field_key，在节点调用中，可输出关联数组，方便调用
    */
@@ -90,7 +97,7 @@ function field_update_1(){
 /**
  * @Implement of hook_schema()
  */
-function field_schema(){
+function field_schema() {
   $schema['fields'] = array(
     'description' => '字段',
     'fields' => array(
@@ -348,6 +355,9 @@ function field_schema(){
     ),
     'unique keys' => array(
       'tid' => array('tid', 'nid'),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
     ),
     'foreign keys' => array(
     	'tid' => array(
