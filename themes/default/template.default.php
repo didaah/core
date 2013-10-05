@@ -48,12 +48,12 @@ function default_alter_css(&$css) {
   /**
    * 去除由 system 模块加载的 system.css 文件
    */
-  unset($css[dd_get_path('module', 'system') . '/system.css']);
+  unset($css['files'][dd_get_path('module', 'system') . '/system.css']);
 
   /**
    * 增加一个 css，键名即为 css 文件路径，相对于程序根目录。
    */
-  $css[dd_get_path('theme', 'default') . '/test.css'] = array('type' => 'theme', 'cached' => true);
+  $css['files'][dd_get_path('theme', 'default') . '/test.css'] = array('type' => 'theme', 'cached' => true);
 }
 
 /**
@@ -65,12 +65,12 @@ function default_alter_js(&$js) {
   /**
    * 去除由 system 模块加载的 system.js 文件
    */
-  unset($css[dd_get_path('module', 'system') . '/system.js']);
+  unset($js['files'][dd_get_path('module', 'system') . '/system.js']);
 
   /**
    * 增加一个 js，键名即为 js 文件路径，相对于程序根目录。
    */
-  $css[dd_get_path('theme', 'default') . '/test.js'] = array('type' => 'theme', 'cached' => true);
+  $js['files'][dd_get_path('theme', 'default') . '/test.js'] = array('type' => 'theme', 'cached' => true);
 }
 
 /**

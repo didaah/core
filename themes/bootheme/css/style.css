@@ -121,7 +121,7 @@ label {
 .table_fixed_header_wrapper {
   position: relative;
   overflow: auto;
-  z-index: 20;
+  z-index: 1000;
 }
 
 .system_no_content {
@@ -140,8 +140,13 @@ li {
   list-style: none outside none;
 }
 
+#ajax_description,
 .error {
   color: #FF0000;
+}
+
+#ajax_description {
+  padding: 5px 0;
 }
 
 .ext_sort_order {
