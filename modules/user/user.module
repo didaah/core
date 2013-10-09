@@ -1773,20 +1773,20 @@ function user_site_menu(&$menu) {
   
   if (!$user->uid) {
     $menu['user'] = array(
-        'login' => array(
-          '#weight' => 999,
-          '#data' => l(t('user', '登录'), 'user/login'),
-          '#childrens' => array(
-            l(t('user', '找回密码'), 'user/pass')
-          )
-        )
+      'login' => array(
+        '#weight' => 999,
+        '#data' => l(t('user', '登录'), 'user/login'),
+        '#childrens' => array(),
+      )
     );
+    $menu['user']['login']['#childrens'][] = l(t('user', '登录'), 'user/login');
     if (user_is_register()) {
       $menu['user']['login']['#childrens'][] = $menu['user']['register'] = array(
         '#data' => l(t('user', '注册'), 'user/register'),
-        '#weight' => 1000
       );
+      $menu['user']['register']['#weight'] = 1000;
     }
+    $menu['user']['login']['#childrens'][] = l(t('user', '找回密码'), 'user/pass');
   } else {
     if ($user->uid == 1) {
       $menu['admin'] = array(
