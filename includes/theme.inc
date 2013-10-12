@@ -450,7 +450,7 @@ function template_preprocess_page(&$var, $args) {
       $arg = str_replace(array('/', '\\', '\0'), '', $arg);
       if (!is_numeric($arg)) {
         $args_id .= '_'.$arg;
-        $args_value .= 'page_wrapper'.$args_id . ' ';
+        $args_value .= 'page_wrapper' . $args_id . ' ';
       }
       $var['theme_config']->tpl[] = $tpl . '_' . $arg . '.tpl.php';
       if (!is_numeric($arg)) {

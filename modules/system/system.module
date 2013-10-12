@@ -922,8 +922,8 @@ function system_block_view($theme, $config = NULL) {
         }
       }
       $add = '<div id="admin_custom_add_form">';
-      $add .= t('system', '链接：').'<input type="text" id="custom_path" name="custom_path" value="'.$custom_path.'" />';
-      $add .= t('system', '标题：').'<input type="text" id="custom_title" name="custom_title" value="'.$custom_title.'" />';
+      $add .= t('system', '链接：').'<input type="text" id="custom_path" name="custom_path" value="' . $custom_path . '" />';
+      $add .= t('system', '标题：').'<input type="text" id="custom_title" name="custom_title" value="' . $custom_title . '" />';
       $add .= theme_get_element('dd_form_submit', array(
         '#type' => 'submit',
         '#attributes' => array('id' => 'admin_custom_add_submit'),

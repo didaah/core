@@ -17,7 +17,7 @@ function bootstrap($op, $inc = NULL) {
 
   date_default_timezone_set('Asia/Chongqing');
 
-  global $cookie_domain, $user, $database, $dbc, $db, $conf, $conf_dir, $log_dir, $installed, $free_update;
+  global $cookie_domain, $user, $database, $dbc, $db, $conf, $conf_dir, $log_dir, $installed, $free_update, $_DGET;
 
   $log_dir = DIDA_ROOT . '/sites/logs';
 
@@ -82,6 +82,15 @@ function bootstrap($op, $inc = NULL) {
       require_once DIDA_ROOT . '/includes/module.inc';
       require_once DIDA_ROOT . '/includes/menu.inc';
       require_once DIDA_ROOT . '/includes/pager.inc';
+
+      if (!empty($_GET)) {
+        foreach ($_GET as $key => $value) {
+          $_DGET[$key] = $value;
+          $_GET[$key] = menu_xss_filter($value);
+        }
+        $_SERVER['_REQUEST_URI'] = $_SERVER['REQUEST_URI'];
+        $_SERVER['REQUEST_URI'] = menu_xss_filter($_SERVER['REQUEST_URI']);
+      }
 
       //用户验证
       dd_user_validate();
@@ -473,8 +482,8 @@ function url($path = NULL, $options = array()) {
     $options['external'] = _l_external($path);
   }
 
-  if ($options['external']) {
-    return $path;
+  if (!empty($options['external'])) {
+    return menu_xss_filter($path);
   }
 
   if ($options['fragment']) {
@@ -511,10 +520,11 @@ function url($path = NULL, $options = array()) {
     if ($options['query']) {
       $path = $path .'&'. $options['query'];
     }
-
     $url = $base_path . $path .$options['fragment'];
   }
 
+  $url = menu_xss_filter($url);
+  
   if (!$options['absolute']) {
     return $url;
   } else {

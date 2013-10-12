@@ -5,6 +5,16 @@ define('MENU_NOT_FOUND', 1);//404错误
 define('MENU_ACCESS_DENIED', 2);//403错误
 define('MENU_ACCESS_OK', 5);//检查url权限
 
+// public menu_get_item($path = NULL) {{{ 
+/**
+ * menu_get_item
+ *  根据 path 获取内容，path 由 hook_menu() 定义
+ * 
+ * @param string $path 
+ *  默认为 $_GET['q']
+ * @access public
+ * @return void
+ */
 function menu_get_item($path = NULL) {
   global $user, $conf, $current_menu_data;
   static $access;
@@ -28,7 +38,7 @@ function menu_get_item($path = NULL) {
     if (substr($url, -1) == '/') {
       $url = substr($url, 0, -1);
     }
-    
+
     if (!$path && $conf['alias'] && ($alias = menu_get_alias_path($url, '*'))) {
     	dd_goto($alias, dd_query_string_encode($_REQUEST, array_merge(array('q'), array_keys($_COOKIE))));
     	exit;
@@ -220,16 +230,40 @@ function menu_get_item($path = NULL) {
       echo $output;
       exit;
     }
-
     return $output;
   } else {
     return MENU_NOT_FOUND;
   }
 }
+// }}}
+
+// public menu_xss_filter($value) {{{ 
+/**
+ * menu_xss_filter
+ *  过滤尖括号，防止页面注入
+ *  $_GET、$_SERVER['REQUEST_URI'] 默认将被过滤，若要获取未过滤的值，请访问全局变量 $_DGET
+ *  例如：$_GET['q'] => $_DGET['q'], $_SERVER['REQUEST_URI'] => $_SERVER['_REQUEST_URI']
+ * 
+ * @param string|array $value
+ * @access public
+ * @return string
+ */
+function menu_xss_filter($value) {
+  if (is_array($value)) {
+    foreach ($value as $key => $v) {
+      $value[$key] = menu_xss_filter($v);
+    }
+  } else {
+    $value = strtr($value, array('<' => '%3C', '>' => '%3E'));
+  }
+  return $value;
+}
+// }}}
 
 // 根据系统路径删除别名
 function menu_delete_path($path) {
-  if (db_exec('DELETE FROM {alias} WHERE path = ?', array($path)) && $alias = db_query('SELECT alias FROM {alias} WHERE path = ?', array($path), array('return' => 'column'))) {
+  if (db_exec('DELETE FROM {alias} WHERE path = ?', array($path)) && 
+  $alias = db_query('SELECT alias FROM {alias} WHERE path = ?', array($path), array('return' => 'column'))) {
     // 清除 menu 缓存
     cache_del('cid', md5($alias), 'cache_menu');
   }
