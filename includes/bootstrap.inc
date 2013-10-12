@@ -3408,6 +3408,29 @@ function check_url($uri) {
   return filter_xss_bad_protocol($uri, false);
 }
 
+// public menu_xss_filter($value) {{{ 
+/**
+ * menu_xss_filter
+ *  过滤尖括号，防止页面注入
+ *  $_GET、$_SERVER['REQUEST_URI'] 默认将被过滤，若要获取未过滤的值，请访问全局变量 $_DGET
+ *  例如：$_GET['q'] => $_DGET['q'], $_SERVER['REQUEST_URI'] => $_SERVER['_REQUEST_URI']
+ * 
+ * @param string|array $value
+ * @access public
+ * @return string
+ */
+function menu_xss_filter($value) {
+  if (is_array($value)) {
+    foreach ($value as $key => $v) {
+      $value[$key] = menu_xss_filter($v);
+    }
+  } else {
+    $value = strtr($value, array('<' => '%3C', '>' => '%3E'));
+  }
+  return $value;
+}
+// }}}
+
 /**
  * 检查 uri 协议是否合法
  * @param (string) $string
