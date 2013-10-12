@@ -1503,6 +1503,7 @@ function dd_storage_form($v = NULL, $info = NULL) {
     '#title' => t('system', '图片'),
     '#options' => array('image' => true)
   );
+
   if ($v->data['file']) {
     $form['fields']['data']['file'] = array(
       '#type' => 'hidden',
@@ -1510,21 +1511,25 @@ function dd_storage_form($v = NULL, $info = NULL) {
       '#constant' => 1
     );
   }
+
   $form['fields']['id'] = array(
     '#type' => 'hidden',
     '#default_value' => $v->id,
     '#constant' => 1
   );
+
   $form['fields']['ext_type2'] = array(
     '#type' => 'hidden',
     '#default_value' => $v->ext_type2,
     '#constant' => 1
   );
+
   $form['fields']['ext_type'] = array(
     '#type' => 'hidden',
     '#default_value' => $v->ext_type,
     '#constant' => 1
   );
+
   $form['fields']['ext_id'] = array(
     '#type' => 'hidden',
     '#default_value' => $v->ext_id ? $v->ext_id : 0,
@@ -1558,16 +1563,6 @@ function dd_storage_form($v = NULL, $info = NULL) {
 
 function dd_storage_form_validate(&$form, &$v) {
   if (!$t = module_invoke_all('dd_storage_validate', $v['_dida_values'], $form, $form['__data'])) {
-    $validate = NULL;
-    if (!empty($form['fields']['file']) && !empty($_FILES['file'])) {
-      if (is_array($form['fields']['file']['#options'])) {
-        $validate = $form['fields']['file']['#options'];
-      }
-      
-      $validate['no_insert'] = true;
-      $validate['savepath'] = 'storage';
-    }
-
     if (empty($v['_dida_values']->id)) {
       if (db_exec('INSERT INTO {storage} (ext_type, data) VALUES (?, 0)', array($v['_dida_values']->ext_type))) {
         $v['_dida_values']->id = db_last_insert_id();
@@ -1577,7 +1572,8 @@ function dd_storage_form_validate(&$form, &$v) {
       }
     }
     
-    if ($form['fields']['file'] && $_FILES['file']) {
+    $validate = NULL;
+    if (!empty($form['fields']['file']) && !empty($_FILES['file'])) {
       if (is_array($form['fields']['file']['#options'])) {
         $validate = $form['fields']['file']['#options'];
       }
@@ -1593,12 +1589,14 @@ function dd_storage_form_validate(&$form, &$v) {
       }
     }
     
+    module_invoke_all('dd_storage_before', $v['_dida_values'], $form, $form['__data']);
+    
     if (dd_storage_save($v['_dida_values'])) {
       module_invoke_all('dd_storage_save', $v['_dida_values'], $form, $form['__data']);
       dd_set_message(t('system', '操作成功'));
     }
-    
   }
+
   return $t;
 }
 
