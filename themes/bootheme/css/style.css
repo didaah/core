@@ -3,6 +3,11 @@ a:hover, a:active, a.active {
   color:#CC6600;
 }
 
+#header {
+  max-height: 50px;
+  overflow: hidden;
+}
+
 #header .brand {
   padding: 5px 0;
   margin: 0;
