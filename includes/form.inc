@@ -916,7 +916,7 @@ function _dd_form_element(&$form, $field, $value, $error) {
     }
   }
 
-  $field = form_field_element($field);
+  $field = form_field_element($field, $form);
 
   form_set_ahah($field);
 
@@ -924,19 +924,21 @@ function _dd_form_element(&$form, $field, $value, $error) {
 }
 // }}}
 
-// public form_field_element($field) {{{ 
+// public form_field_element($field, $form, $html) {{{ 
 /**
  * form_field_element
  * 将表单字段数据分解为可供主题使用的元素
  * 
  * @param array $field 
  *  表单的一个字段
+ * @param array $form
+ *  表单
  * @param bool $html
  *  返回整个字段或只返回 html
  * @access public
  * @return array|string
  */
-function form_field_element($field, $html = false) {
+function form_field_element($field, &$form, $html = false) {
   $types = form_get_type_info();
 
   $keys = array(
@@ -956,7 +958,7 @@ function form_field_element($field, $html = false) {
     $field['#element']['#content'] = theme_get_element($types[$field['#type']]['callback'], $field, $form);
   }
 
-  $field = theme_get_element('form_wrapper_element', $field);
+  $field = theme_get_element('form_wrapper_element', $field, $form);
   return !$html ? $field : $field['#html'];
 }
 // }}}
