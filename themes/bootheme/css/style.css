@@ -129,6 +129,11 @@ label {
   z-index: 1000;
 }
 
+.table_fixed_header_wrapper_clone table, 
+.table_fixed_header_wrapper table {
+  max-width: none;
+}
+
 .system_no_content {
   text-align: center;
 }
