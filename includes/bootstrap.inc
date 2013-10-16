@@ -3119,7 +3119,7 @@ function dd_get_js($scope = 'header', $js = NULL) {
    *   unset($css['modules/system/system.js']);
    * }
    */
-  module_alter($base_theme_name, 'alter_js', $js);
+  module_alter($base_theme_name, 'alter_js', $js, $scope);
 
   $js_path = array();
   $output = $inline = '';

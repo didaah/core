@@ -579,7 +579,7 @@ function module_alter($modules, $hook, &$data, &$value1 = NULL, &$value2 = NULL,
 function module_alter_all($hook, &$data, &$value1 = NULL, &$value2 = NULL, &$value3 = NULL) {
   global $conf;
   $return = array();
-  if ($GLOBALS['conf']['site_mode'] == 0) {
+  if ($conf['site_mode'] == 0) {
     if ($functions = module_hook_get_cache($hook)) {
       foreach ($functions as $function) {
         if (function_exists($function)) {
@@ -592,9 +592,9 @@ function module_alter_all($hook, &$data, &$value1 = NULL, &$value2 = NULL, &$val
         }
       }
     }
-  } else {
+  } else if (!empty($conf['modules'])) {
     // 开发模式
-    foreach ($GLOBALS['conf']['modules'] as $module => $info) {
+    foreach ($conf['modules'] as $module => $info) {
       $function = $module .'_'. $hook;
       if (function_exists($function)) {
        $result = $function($data, $value1, $value2, $value3);
@@ -647,12 +647,13 @@ function module_hook_set_cache() {
  *  返回值递归合并
  */
 function module_invoke_all() {
+  global $conf;
   $args = func_get_args();
   $hook = $args[0];
   unset($args[0]);
   $return = array();
   
-  if ($GLOBALS['conf']['site_mode'] == 0) {
+  if ($conf['site_mode'] == 0) {
     /**
      * 非开发模式，直接使用缓存中的 hook 实现列表。
      * 若有新的接口实现，应清除缓存，调用 module_hook_set_cache() 亦可
@@ -669,9 +670,9 @@ function module_invoke_all() {
         }
       }
     }
-  } else {
+  } else if (!empty($conf['modules'])) {
     // 开发模式
-    foreach ($GLOBALS['conf']['modules'] as $module => $info) {
+    foreach ($conf['modules'] as $module => $info) {
       $function = $module .'_'. $hook;
       if (function_exists($function)) {
         $result = call_user_func_array($function, $args);
@@ -696,7 +697,7 @@ function module_invoke_first() {
   $hook = $args[0];
   unset($args[0]);
   
-  if ($GLOBALS['conf']['site_mode'] == 0) {
+  if ($conf['site_mode'] == 0) {
     if ($functions = module_hook_get_cache($hook)) {
       foreach ($functions as $function) {
         if (function_exists($function)) {
@@ -707,8 +708,8 @@ function module_invoke_first() {
         }
       }
     }
-  } else {
-    foreach ($GLOBALS['conf']['modules'] as $module => $info) {
+  } else if (!empty($conf['modules'])) {
+    foreach ($conf['modules'] as $module => $info) {
       $function = $module .'_'. $hook;
       if (function_exists($function)) {
         $result = call_user_func_array($function, $args);
@@ -726,11 +727,12 @@ function module_invoke_first() {
  *  返回值按模块系统名称索引
  */
 function _module_invoke_all() {
+  global $conf;
   $args = func_get_args();
   $hook = $args[0];
   unset($args[0]);
   $return = array();
-  if ($GLOBALS['conf']['site_mode'] == 0) {
+  if ($conf['site_mode'] == 0) {
     if ($functions = module_hook_get_cache($hook)) {
       foreach ($functions as $module => $function) {
         if (function_exists($function)) {
@@ -740,9 +742,9 @@ function _module_invoke_all() {
         }
       }
     }
-  } else {
+  } else if (!empty($conf['modules'])) {
     // 开发模式
-    foreach ($GLOBALS['conf']['modules'] as $module => $info) {
+    foreach ($conf['modules'] as $module => $info) {
       $function = $module .'_'. $hook;
       if (function_exists($function)) {
         if ($result = call_user_func_array($function, $args)) {

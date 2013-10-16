@@ -75,6 +75,10 @@ if (is_file($custom_install)) {
   }
 }
 
+global $conf;
+
+$conf['site_mode'] = 1;
+
 $title = '检查安装环境';
 
 $is_env_ok = false;
@@ -238,8 +242,9 @@ function dida_setup_data_form() {
   }
   
   if ($fields = db_install_form($database['default'])) {
+    $_tmp = array();
     foreach ($fields as $field) {
-      $form .= '<div class="form_item">' . form_field_element($field, 1) . '</div>';
+      $form .= '<div class="form_item">' . form_field_element($field, $_tmp, 1) . '</div>';
     }
     return $form;
   }
