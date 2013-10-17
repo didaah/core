@@ -222,8 +222,6 @@ function _user_get_center_info($center) {
             $info['path'] = 'user/center/' . $type;
           }
 
-          //$info['data'] = l($info['title'], $info['path'], $info);
-
           $info['attributes']['id'] = 'user_center_link_menu_' . $type;
 
           $_menu[$type] = $info;
@@ -254,9 +252,11 @@ function _user_get_center_info($center) {
 
   foreach ($data['links'] as $type => $link) {
     $item = array();
-    foreach ($link['links'] as $info) {
-      $info['data'] = l($info['title'], $info['path'], $info);
-      $item[] = $info;
+    foreach ($link['links'] as $key => $info) {
+      $item[] = array(
+        'data' => l($info['title'], $info['path'], $info),
+        'id' => 'user_center_link_item_list_' . $type . '_' . $key
+      );
     }
     $center->links .= theme('item_list', $item, $link['list_title'], 'ul', array(
       'class' => 'user_center_link_item',
