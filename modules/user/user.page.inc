@@ -54,6 +54,7 @@ function user_user_center_info() {
     ),
     'default' => array(
       'title' => t('user', '个人中心'),
+      // 'page_title' => '我的个人中心', // 页面标题
       'link_hide' => true, // 不显示为链接
       'path' => 'user/center',
       'weight' => -1000
@@ -323,10 +324,16 @@ function user_page_center($type = 'default') {
     $center->type = 'default';
   }
 
-	module_invoke_all('user_center_view', $center);
+  if (!empty($center->menu[$center->type]['page_title'])) {
+    $title = $center->menu[$center->type]['page_title'];
+  } else {
+    $title = $center->menu[$center->type]['title'];
+  }
 
-	dd_set_title(array($center->menu[$center->type]['title'], t('user', '我的个人中心')));
-	dd_set_breadcrumb(array(l(t('user', '我的个人中心'), 'user/center'), $center->menu[$center->type]['title']));
+	dd_set_title(array($title, t('user', '我的个人中心')));
+	dd_set_breadcrumb(array(l(t('user', '我的个人中心'), 'user/center'), $title));
+  
+  module_invoke_all('user_center_view', $center);
   
   return theme('user_center', $center);
 
