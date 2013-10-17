@@ -325,7 +325,7 @@ function user_page_center($type = 'default') {
 
 	module_invoke_all('user_center_view', $center);
 
-	dd_set_title(array(t('user', '我的个人中心'), $center->menu[$center->type]['title']));
+	dd_set_title(array($center->menu[$center->type]['title'], t('user', '我的个人中心')));
 	dd_set_breadcrumb(array(l(t('user', '我的个人中心'), 'user/center'), $center->menu[$center->type]['title']));
   
   return theme('user_center', $center);
