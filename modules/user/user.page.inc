@@ -256,11 +256,11 @@ function _user_get_center_info($center) {
     foreach ($link['links'] as $key => $info) {
       $item[] = array(
         'data' => l($info['title'], $info['path'], $info),
-        'id' => 'user_center_link_item_list_' . $type . '_' . $key
+        'id' => 'user_center_link_item_list_' . $type . '_' . $key,
       );
     }
     $center->links .= theme('item_list', $item, $link['list_title'], 'ul', array(
-      'class' => 'user_center_link_item',
+      'class' => 'user_center_link_item user_center_link_item_wrapper_' . $type,
       'id' => 'user_center_link_item_' . $type
     ));
   }
@@ -336,7 +336,6 @@ function user_page_center($type = 'default') {
   module_invoke_all('user_center_view', $center);
   
   return theme('user_center', $center);
-
 }
 
 /**
