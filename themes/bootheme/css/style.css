@@ -145,6 +145,7 @@ li {
   list-style: none outside none;
 }
 
+span.form_error,
 #ajax_description,
 .error {
   color: #FF0000;
@@ -266,6 +267,12 @@ label.form_required {
   margin: 0 3px 0 6px;
 }
 
+span.form_error span {
+  padding: 0 3px;
+}
+
+span.form_error,
+span.form_error span,
 .form_item_textfield .error,
 .dd_label_value,
 .dd_label_select,

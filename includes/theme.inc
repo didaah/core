@@ -506,11 +506,11 @@ function theme_help($help) {
 
 function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attributes = NULL, $wrapper = 1) {
   if (isset($attributes['class'])) {
-    $class = ' item_'.$attributes['class'];
+    $class = ' item_' . $attributes['class'];
   }
   
   if ($wrapper) {
-    $output = '<div class="item-list'.$class.'">';
+    $output = '<div class="item-list' . $class . '">';
   }
   
   if (isset($title)) {
@@ -519,7 +519,7 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
   
   if (!empty($items)) {
     $items = array_filter($items);
-    $output .= "<$type". dd_attributes($attributes) .'>';
+    $output .= "<$type" . dd_attributes($attributes) . '>';
     $num_items = count($items);
     foreach ($items as $i => $item) {
       $attributes = array();

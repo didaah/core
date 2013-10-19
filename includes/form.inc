@@ -1007,7 +1007,12 @@ function form_wrapper_element($field, $form = array()) {
  */
 function dd_form_error($field) {
   if (is_array($field['#error']) && !empty($field['#error'][0])) {
-    return '<span class="form_error">' . implode('<br>', $field['#error']) . '</span>';
+    $output = '<span class="form_error">';
+    foreach ($field['#error'] as $error) {
+      $output .= '<span>' . $error . '</span>';
+    }
+    $output .= '</span>';
+    return $output;
   }
 }
 // }}}
