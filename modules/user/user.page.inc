@@ -250,6 +250,7 @@ function _user_get_center_info($center) {
 
   $center->menu = $data['menu'];
   $center->links = '';
+  $center->groups = $group;
 
   foreach ($data['links'] as $type => $link) {
     $item = array();
@@ -324,14 +325,21 @@ function user_page_center($type = 'default') {
     $center->type = 'default';
   }
 
-  if (!empty($center->menu[$center->type]['page_title'])) {
-    $title = $center->menu[$center->type]['page_title'];
-  } else {
-    $title = $center->menu[$center->type]['title'];
+  $title = array(t('user', '我的个人中心'));
+  $breadcrumb = array(l(t('user', '我的个人中心'), 'user/center'));
+
+  if (!empty($center->menu[$center->type]['group']) && !empty($center->groups['list_title'])) {
+    $title[] = $breadcrumb[] = $center->groups['list_title'][$center->menu[$center->type]['group']];
   }
 
-	dd_set_title(array($title, t('user', '我的个人中心')));
-	dd_set_breadcrumb(array(l(t('user', '我的个人中心'), 'user/center'), $title));
+  if (!empty($center->menu[$center->type]['page_title'])) {
+    $breadcrumb[] = $title[] = $center->menu[$center->type]['page_title'];
+  } else {
+    $breadcrumb[] = $title[] = $center->menu[$center->type]['title'];
+  }
+
+	dd_set_title(array_reverse($title));
+	dd_set_breadcrumb($breadcrumb);
   
   module_invoke_all('user_center_view', $center);
   
