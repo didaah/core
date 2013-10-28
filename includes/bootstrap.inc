@@ -2474,12 +2474,23 @@ function dd_get_footer() {
   }
 }
 
+// public dd_set_tabs($tab = NULL, $clear = false) {{{ 
 /**
- * 写入 tabs 导
- * @param (string or array) $item
+ * dd_set_tabs
+ *  设置 tabs
+ * 
+ * @param string|array $tab 
+ *  一个或多个 tab
+ * @param bool $clear 
+ *  清除 $tabs
+ * @access public
+ * @return void
  */
-function dd_set_tabs($tab = NULL) {
+function dd_set_tabs($tab = NULL, $clear = false) {
   static $tabs;
+  if (!empty($clear)) {
+    $tabs = NULL;
+  }
   if ($tab) {
     if (is_array($tab)) {
       foreach ($tab as $t) {
@@ -2492,11 +2503,12 @@ function dd_set_tabs($tab = NULL) {
     return $tabs;
   }
 }
+// }}}
 
 // public dd_element_sub_tabs($tabs) {{{ 
 /**
  * dd_element_sub_tabs
- * 格式式 sub tabs
+ * 格式化 sub tabs
  * 
  * @param array $tabs 
  * @access public
@@ -2517,12 +2529,23 @@ function dd_get_sub_tabs() {
   }
 }
 
+// public dd_set_sub_tabs($tab = NULL, $clear = false) {{{ 
 /**
- * 设置 sub tabs 导航
- * @param (string or array) $item
+ * dd_set_sub_tabs
+ *  设置 sub tabs 导航
+ * 
+ * @param string|array $tab 
+ *  一个或多个 tab
+ * @param bool $clear 
+ *  清除 $tabs
+ * @access public
+ * @return void
  */
-function dd_set_sub_tabs($tab = NULL) {
+function dd_set_sub_tabs($tab = NULL, $clear = false) {
   static $tabs;
+  if (!empty($clear)) {
+    $tabs = NULL;
+  }
   if ($tab) {
     if (is_array($tab)) {
       foreach ($tab as $t) {
@@ -2535,6 +2558,7 @@ function dd_set_sub_tabs($tab = NULL) {
     return $tabs;
   }
 }
+// }}}
 
 // public dd_get_tabs() {{{ 
 /**
