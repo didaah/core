@@ -882,17 +882,17 @@ function module_get_schema($table, $clear = NULL) {
       
       if ($modules = module_list('module', 'all')) {
         foreach ($modules as $module => $info) {
-          $install_filepath = DIDA_ROOT .'/'. $info['path'] .'/'. $module. '.install';
+          $install_filepath = DIDA_ROOT . '/' . $info['path'] . '/' . $module . '.install';
           if (is_file($install_filepath)) include_once $install_filepath;
           
-          $function = $module .'_alter_schema';
+          $function = $module . '_alter_schema';
           if (function_exists($function)) {
             $alter_schemas[$module] = $function;
           }
         }
         
         foreach ($modules as $module => $info) {
-          $function = $module .'_schema';
+          $function = $module . '_schema';
           if (function_exists($function)) {
             if ($ts = $function()) {
               if ($alter_schemas) {

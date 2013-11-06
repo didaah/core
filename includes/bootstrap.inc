@@ -1602,7 +1602,7 @@ function dd_set_ping($data, $service = array(), $method = 'weblogUpdates.extende
  *  $result->code：HTTP 响应代码，小于 0 则为请求失
  *  $result->data：返回内容
  */
-function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(), $retry = 3, $timeout = 15.0) {
+function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(), $retry = 3, $timeout = 15.0, array $opt = array()) {
   $result = new stdClass();
 
   $uri = parse_url($url);
@@ -1627,13 +1627,16 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     'timeout' => (float) $timeout,
     'context' => NULL,
   );
-  
+
+  if (!empty($opt)) {
+    $options = array_merge($options, $opt);
+  }
+
   switch ($uri['scheme']) {
     case 'http': case 'feed':
       $port = isset($uri['port']) ? $uri['port'] : 80;
       $socket = 'tcp://' . $uri['host'] . ':' . $port;
       $options['headers']['Host'] = $uri['host'] . ($port != 80 ? ':' . $port : '');
-      
     break;
     case 'https':
       // 须编译 openssl
@@ -1645,6 +1648,11 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
       $result->error = t('system','%string 协议不存在', array('%string' => $uri['scheme']));
       $result->code = -1003;
       return $result;
+  }
+
+  // 使用代理
+  if (!empty($options['proxy'])) {
+    $socket = $options['proxy'];
   }
 
   if (empty($options['context'])) {
@@ -1703,6 +1711,10 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     $options['headers']['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
   }
   
+  if (!empty($options['proxy'])) {
+    $path = $uri['scheme'] . '://' . $uri['host'] . ':' . $port . $path;
+  }
+
   $request = $options['method'] . ' ' . $path . " HTTP/1.0\r\n";
   foreach ($options['headers'] as $name => $value) {
     $request .= $name . ': ' . trim($value) . "\r\n";
