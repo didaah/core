@@ -1675,7 +1675,13 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
   if (is_array($data) || is_object($data)) {
     $options['data'] = '';
     foreach ($data as $key => $value) {
-      $options['data'] .= rawurlencode(trim($key)) .'=' . rawurlencode(trim($value)) . '&';
+      if (!is_array($value)) {
+        $options['data'] .= rawurlencode(trim($key)) .'=' . rawurlencode(trim($value)) . '&';
+      } else {
+        foreach ($value as $_k => $_v) {
+          $options['data'] .= rawurlencode(trim($key)) . '[' . $_k . ']' .'=' . rawurlencode(trim($_v)) . '&';
+        }
+      }
     }
     $options['data'] = substr($options['data'], 0, -1);
   } else {
