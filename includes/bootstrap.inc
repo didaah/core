@@ -15,7 +15,7 @@ function bootstrap($op, $inc = NULL) {
 
   if ($called) return;
 
-  date_default_timezone_set(date_default_timezone_get());
+  date_default_timezone_set('Asia/Chongqing');
 
   global $cookie_domain, $user, $database, $dbc, $db, $conf, $conf_dir, $log_dir, $installed, $free_update, $_DGET;
 
@@ -1106,7 +1106,9 @@ function dd_user_validate() {
     $user->timezone = var_get('default_timezone', 'Asia/Chongqing');
   }
 
-  date_default_timezone_set($user->timezone);
+  if ($user->timezone != 'Asia/Chongqing') {
+    date_default_timezone_set($user->timezone);
+  }
 
   // 管理员强制要求某个用户退出
   if ($user->uid && !empty($GLOBALS['conf']['dida_user_enforce_logout'])) {
