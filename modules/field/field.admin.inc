@@ -68,6 +68,7 @@ function _field_lists($module = NULL, $type = NULL, $filter_header = array()) {
   $header = array(
     'name' => array('data' => t('field', '名称'), 'field' => 'name'),
     'type' => array('data' => t('field', '类型'), 'field' => 'field_type'),
+    'index' => array('data' => t('field', '索引'), 'field' => 'field_key'),
     'groups' => array('data' => t('field', '分组'), 'field' => 'groups'),
     'required' => array('data' => t('field', '必需'), 'field' => 'required'),
     'weight' => array('data' => t('field', '权重'), 'field' => 'weight'),
@@ -119,6 +120,10 @@ function _field_lists($module = NULL, $type = NULL, $filter_header = array()) {
     
     if (!empty($header['type'])) {
       $rows[] = $types[$field->field_type]['title'];
+    }
+    
+    if (!empty($header['type'])) {
+      $rows[] = $field->field_key;
     }
      
     if (!empty($header['groups'])) {
