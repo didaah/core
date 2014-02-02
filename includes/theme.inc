@@ -404,7 +404,7 @@ function template_preprocess_page(&$var, $args) {
   }
 
   $var['user_login_status'] = user_is_login() ? 'user_is_login' : 'user_is_anonymous';
-  $var['menu'] = dd_get_menu();
+  $var['menu'] = theme_get_element('dd_get_menu');
   $var['lang_links'] = system_get_lang_change_link();
   $var['head_title'] = dd_get_title();
   $var['messages'] = dd_get_message();

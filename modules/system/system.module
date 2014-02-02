@@ -1797,7 +1797,7 @@ function system_cron($timestamp) {
 function system_get_lang_change_link($html = true) {
   global $conf, $user, $language_code; 
 
-  if (!empty($conf['languages']) && user_access('system lang change')) {
+  if (!empty($conf['languages']) && user_access('system lang change') && count($conf['languages'] > 1)) {
     $links = array();
     foreach ($conf['languages'] as $key => $name) {
       if ($key != $language_code) {

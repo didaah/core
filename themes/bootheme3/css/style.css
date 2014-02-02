@@ -10,15 +10,17 @@ ul.site_menu_children {
 #header .brand {
   padding: 5px 0;
   margin: 0;
+  float: left;
 }
 
 #header .logo img {
-  max-height: 30px;
-  _height: 30px;
+  _height: 40px;
+  *height: 40px;
+  max-height: 40px;
 }
 
 #main {
-  margin-top: 50px;
+  margin-top: 60px;
 }
 
 #footer {
@@ -94,6 +96,10 @@ td.table_submit {
 }
 
 /*misc*/
+#tabs {
+  margin-bottom: 8px;
+}
+
 .right {
   text-align: right;
 }

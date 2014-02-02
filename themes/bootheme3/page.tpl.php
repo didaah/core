@@ -11,9 +11,10 @@
 <body class="<?php echo $user_login_status;?> <?php echo $args_id;?>">
 
 <div id="header" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-  <div class="navbar-inner">
-    <div class="container">
-      <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target="#dida-site-menu-navbar-collapse">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#dida-site-menu-navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -21,23 +22,23 @@
       <a href="<?php echo $base_path?>" title="<?php echo $site_global->name; ?>" class="logo brand">
         <img src="<?php echo $site_global->logo; ?>" alt="<?php echo $site_global->slogan;?>" title="<?php echo $site_global->name; ?>" />
       </a>
-      <div class="nav-collapse collapse" id="dida-site-menu-navbar-collapse">
-        <?php echo $menu; ?>
-        <?php if (!empty($lang_links)) : ?>
-        <ul class="nav navbar-nav navbar-right pull-right">
-          <li class="dropdown">
-          <a data-toggle="dropdown" class="dropdown-toggle" role="button" href="#" title="<?php echo t('bootheme', '选择语言'); ?>">
+    </div>
+    <div class="navbar-collapse collapse" id="dida-site-menu-navbar-collapse">
+      <?php echo $menu; ?>
+      <?php if (!empty($lang_links)) : ?>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+        <a data-toggle="dropdown" class="dropdown-toggle" role="button" href="#" title="<?php echo t('bootheme', '选择语言'); ?>">
           <?php 
             global  $language_code, $conf;
             echo $conf['languages'][$language_code];
           ?>
-            <b class="caret"></b>
-          </a>
-          <?php echo $lang_links;?>
-          </li>
-        </ul>
-        <?php endif ;?>
-      </div>
+          <b class="caret"></b>
+        </a>
+        <?php echo $lang_links;?>
+        </li>
+      </ul>
+      <?php endif ;?>
     </div>
   </div>
 </div>
@@ -45,18 +46,18 @@
 <div id="main" class="container"> 
   <div class="row">
     <?php if ($left) : ?>
-    <div id="sidebar-left" class="sidebar span5">
+    <div id="sidebar-left" class="sidebar col-xs-5 col-md-5">
       <?php echo $left; ?>
     </div>
     <?php endif; ?>
 
 <?php
 if ($left && $right) {
-  $content_class = 'span14';
+  $content_class = 'col-xs-14 col-md-14';
 } else if ($left) {
-  $content_class = 'span19 last';
+  $content_class = 'col-xs-19 col-md-19 last';
 } else if ($right) {
-  $content_class = 'span19';
+  $content_class = 'col-xs-19 col-md-19';
 } else {
   $content_class = '';
 }
@@ -72,7 +73,7 @@ if ($left && $right) {
     </div>
 
     <?php if ($right) : ?>
-    <div id="sidebar-right" class="sidebar span5 last">
+    <div id="sidebar-right" class="sidebar col-xs-5 col-md-5 last">
       <?php echo $right; ?>
     </div>
     <?php endif; ?>

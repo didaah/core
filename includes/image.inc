@@ -21,7 +21,7 @@ function image_get_thumb($fid, $filepath, $size, $style = 'scale') {
       $filename = basename($filepath);
       $thumb_filepath = file_mkdir(str_replace($filename, $fid, $filepath)) . '/';
       $thumb_filepath .= $size . '_' . $style;
-
+      
       if (strpos($filename, '.') !== false) {
         $thumb_filepath .= '.' . end(explode('.', $filename));
       }

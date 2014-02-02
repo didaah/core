@@ -1,6 +1,5 @@
 // $Id$
 jQuery(function($) {
-  $('ul.site_menu_children').addClass('dropdown-menu');
   $('ul.site_menu > li > ul').each(function() {
     $(this).parent().addClass('dropdown');
     $(this).prev().addClass('dropdown-toggle').append('<b class="caret"></b>').attr('data-toggle', 'dropdown');

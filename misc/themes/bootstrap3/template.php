@@ -4,14 +4,14 @@
 /**
  * @Implement of hook_template_framework_x()
  */
-function bootstrap_template_framework_help($help) {
+function bootstrap3_template_framework_help($help) {
   return '<div class="alert alert-block help"><button type="button" class="close" data-dismiss="alert">&times;</button>' . implode('', $help) . '</div>';
 }
 
 /**
  * @Implement of hook_template_framework_x()
  */
-function bootstrap_template_framework_table(array $header, $rows = array(), array $attributes = array(), $caption = NULL, $sub_header = NULL) {
+function bootstrap3_template_framework_table(array $header, $rows = array(), array $attributes = array(), $caption = NULL, $sub_header = NULL) {
   if (!empty($attributes['class'])) {
     $attributes['class'] .= ' table table-bordered table-condensed';
   } else {
@@ -262,7 +262,11 @@ function framework_element_dd_element_message($messages) {
  * @Implement of framework_element_x()
  */
 function framework_element_dd_form_submit($field) {
-  $field['#attributes']['class'] = ' btn';
+  if (!empty($field['#attributes']['class'])) {
+    $field['#attributes']['class'] = ' btn';
+  } else {
+    $field['#attributes']['class'] = 'btn';
+  }
   $output = '<input type="submit" name="' . $field['#name'] . '" value="';
   $output .= ($field['#value'] ? $field['#value'] : t('system', '确认提交'));
   $output .= '"' . dd_attributes($field['#attributes']) . '/>';
