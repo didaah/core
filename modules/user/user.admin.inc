@@ -508,7 +508,15 @@ function user_admin_roles() {
         );
       }
     }
-    $output .= theme('table', array(t('user', '角色名称'), t('user', '权限'), t('user', '总人数'), t('user', '操作')), $table);
+    
+    $header = array(
+      array('data' => t('user', '角色名称'), 'class' => 'user_admin_roles_name'),
+      array('data' => t('user', '权限'), 'class' => 'user_admin_roles_perms'),
+      array('data' => t('user', '总人数'), 'class' => 'user_admin_roles_count'),
+      array('data' => t('user', '操作'), 'class' => 'user_admin_roles_op')
+    );
+
+    $output .= theme('table', $header, $table, array('id' => 'user_admin_roles_table'));
     $output .= pager_view();
     
     dd_jqedit(array('dom' => '.jqedit_text', 'limit' => 16, 'opt' => array('type' => 'charcounter', 'onblur' => 'ignore', 'width' => 80)));

@@ -130,13 +130,15 @@ function filter_user_format($ac = NULL) {
  
 function filter_form_field($format = NULL, $required = false, $title = NULL) {
   global $user, $conf;
+
   if (!isset($format) || !$conf['formats'][$format]) {
     $format = $conf['default_format'];
   }
+
   $option = filter_user_format();
   if (count($option) > 1) {
     $field = array(
-      '#fieldset_prefix' => 'asc',
+      '#fieldset_prefix' => 'desc',
       '#fieldset_legend' => $title ? $title : t('system', '输入格式'),
       '#type' => 'radio',
       '#required' => $required,

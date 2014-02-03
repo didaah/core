@@ -1,16 +1,24 @@
 /*$Id$*/
+body {
+  padding-top: 50px;
+  position: relative;
+}
+
 a:hover, a:active, a.active {
-  color:#CC6600;
+  color: #2A6496;
 }
 
 ul.site_menu_children {
   display: none;
 }
 
-#header .brand {
+.navbar-nav > li > a {
+  padding: 15px 10px;
+}
+
+#header .navbar-brand {
   padding: 5px 0;
   margin: 0;
-  float: left;
 }
 
 #header .logo img {
@@ -20,7 +28,7 @@ ul.site_menu_children {
 }
 
 #main {
-  margin-top: 60px;
+  margin-top: 10px;
 }
 
 #footer {
@@ -38,8 +46,22 @@ ul.site_menu_children {
 }
 
 /*table*/
+.table > thead > tr > th,
+.table > tbody > tr > th,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > tbody > tr > td,
+.table > tfoot > tr > td {
+  vertical-align: middle;
+}
 table select {
   margin-bottom: 0;
+}
+
+.table > caption + thead > tr:first-child > th,
+.table > colgroup + thead > tr:first-child > th,
+.table > thead:first-child > tr:first-child > th {
+  border-bottom: none;
 }
 
 .table th, .table td {
@@ -48,6 +70,29 @@ table select {
 
 .even, thead {
   background: #F9F9F9;
+}
+
+#user_admin_roles_table,
+#user_admin_roles_table th {
+  text-align: center;
+}
+
+th.user_admin_roles_name {
+  width: 80px;
+}
+
+th.user_admin_roles_count {
+  width: 60px;
+}
+
+th.user_admin_roles_op {
+  width: 100px;
+}
+
+#user_set_perm  td.user_admin_role_module {
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.2em;
 }
 
 .admin_themes_table th.path {
@@ -80,8 +125,12 @@ td.table_submit {
   width: 40%;
 }
 
-#system_cache_clear .form_checkbox_option {
+#system_cache_clear .checkbox_field_value {
   display: block;
+}
+
+#system_cache_clear .checkbox_field_value + .checkbox_field_value {
+  margin-left: 0;
 }
 
 #dd_database_debug .dd_database_debug_args2,
@@ -95,8 +144,12 @@ td.table_submit {
   margin: 0;
 }
 
+.pager li > a, .pager li > span {
+  padding: 3px 8px;
+}
+
 /*misc*/
-#tabs {
+#tabs, #sub_tabs {
   margin-bottom: 8px;
 }
 
@@ -144,7 +197,8 @@ label {
 }
 
 ul {
-  margin: 0 0 10px 5px
+  margin: 0 0 10px 5px;
+  padding: 0;
 }
 
 ul ul {
@@ -231,6 +285,14 @@ legend.asc {
 }
 
 /*form*/
+form .form_item {
+  margin: 5px 0;
+}
+
+.radio, .checkbox {
+  display: inline;
+}
+
 span.option_label,
 span.form_radio_text {
   cursor: pointer;
@@ -245,12 +307,70 @@ input.error:focus {
   border-color: #B94A48;
 }
 
-.form_value_textarea {
-  width: 65%;
+textarea,
+select,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"],
+.uneditable-input {
+  background-color: #FFFFFF;
+  background-image: none;
+  border: 1px solid #CCCCCC;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+  color: #555555;
+  font-size: 14px;
+  height: 34px;
+  line-height: 1.42857;
+  padding: 6px 12px;
+  transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+  vertical-align: middle;
 }
 
-.form_value_text {
-  min-width: 400px;
+input[type="file"] {
+  display: inline;
+}
+
+textarea {
+  min-height: 200px;
+  width: 98%;
+}
+
+.form_value_textarea {
+  width: 98%;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+input[type="time"]:focus,
+input[type="week"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="color"]:focus,
+select:focus,
+.uneditable-input:focus {
+  border-color: #66AFE9;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
+  outline: 0 none;
 }
 
 button, input, select, textarea {
@@ -271,14 +391,32 @@ label.form_required {
 
 .radio, .checkbox {
   min-height: inherit;
+  padding-left: 5px;
 }
 
-.form_radio_field .form_value_radio {
-  margin: 0 3px 0 6px;
+.form_description_format {
+  display: block;
+}
+
+.radio_field_format + .radio_field_format {
+  display: block;
+  margin-left: 0;
+}
+
+.form_value_textfield {
+  width: 260px;
 }
 
 span.form_error span {
   padding: 0 3px;
+}
+
+#form_admin_search {
+  margin: 5px 0;
+}
+
+#form_admin_search input {
+  margin: 0 3px;
 }
 
 span.form_error,
@@ -300,17 +438,9 @@ span.form_error span,
   padding: 0 4px;
 }
 
-.form_description_format {
-  display: block;
-}
-
 .add-on {
   padding: 0 3px;
   color: #777;
-}
-
-#system_cache_clear .inline {
-  margin-left: 0;
 }
 
 #user_admin_new_pass .dd_label,
@@ -362,12 +492,16 @@ span.form_error span,
   margin-left: 5px;
 }
 
+.block h3.block_title {
+  padding: 4px 0;
+}
+
 .block #user_login_form {
   padding: 8px 0;
 }
 
-.block #user_login_form .textfield,
-.block #user_login_form .password {
+#user_login_form .textfield,
+#user_login_form .password {
   width: 150px;
 }
 
@@ -392,6 +526,21 @@ span.form_error span,
   margin: 0 auto;
 
 }
+
+#user_login_form_submit {
+  padding-left: 42px;
+}
+
+#user_login_form_submit .checkbox_field_his {
+  margin-right: 10px;
+  line-height: 35px;
+  float: left;
+}
+
+#user_login_form_submit .checkbox_field_his input {
+  margin-top: 10px;
+}
+
 /*block*/
 .sidebar .block {
   border-radius: 4px;
@@ -461,6 +610,23 @@ span.form_error span,
   background-color: #0088CC;
 }
 
+#system_admin_menu_list_didaSystemCustom ul.admin_menus {
+  padding: 3px 0;
+  margin: 3px;
+}
+
+#system_admin_menu_list_didaSystemCustom ul.admin_menus li.last {
+  border-top: 1px solid #ccc;
+  margin: 3px 0;
+  padding: 3px 0;
+}
+
+#system_admin_menu_list_didaSystemCustom ul.admin_menus #admin_custom_add_form input {
+  display: block;
+  width: 100%;
+  margin: 3px 0;
+}
+
 #block_admin_form_submit,
 #block_admin_form .block_item {
   clear: both;
@@ -494,10 +660,19 @@ span.form_error span,
   border-bottom: 1px solid #DDDDDD;
 }
 
+.markItUp {
+  width: 100%;
+}
+
 /*comment*/
 #comment_form textarea, #comment_form .collapsible {
   width: 65%;
   padding: 5px;
+}
+
+#comment_form #weibo_tweet_form_type_tweet,
+#weibo_tweet_form_type_tweet {
+  width: 98%;
 }
 
 #comment_form_type_title {

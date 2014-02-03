@@ -10,7 +10,7 @@
 </head>
 <body class="<?php echo $user_login_status;?> <?php echo $args_id;?>">
 
-<div id="header" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<div id="header" class="navbar navbar-inverse navbar-fixed-top" role="banner">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#dida-site-menu-navbar-collapse">
@@ -19,11 +19,11 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a href="<?php echo $base_path?>" title="<?php echo $site_global->name; ?>" class="logo brand">
+      <a href="<?php echo $base_path?>" title="<?php echo $site_global->name; ?>" class="logo navbar-brand">
         <img src="<?php echo $site_global->logo; ?>" alt="<?php echo $site_global->slogan;?>" title="<?php echo $site_global->name; ?>" />
       </a>
     </div>
-    <div class="navbar-collapse collapse" id="dida-site-menu-navbar-collapse">
+    <div class="navbar-collapse collapse" id="dida-site-menu-navbar-collapse" role="navigation">
       <?php echo $menu; ?>
       <?php if (!empty($lang_links)) : ?>
       <ul class="nav navbar-nav navbar-right">
@@ -46,18 +46,18 @@
 <div id="main" class="container"> 
   <div class="row">
     <?php if ($left) : ?>
-    <div id="sidebar-left" class="sidebar col-xs-5 col-md-5">
+    <div id="sidebar-left" class="sidebar col-xs-8 col-md-5">
       <?php echo $left; ?>
     </div>
     <?php endif; ?>
 
 <?php
 if ($left && $right) {
-  $content_class = 'col-xs-14 col-md-14';
+  $content_class = 'col-xs-11 col-md-14';
 } else if ($left) {
-  $content_class = 'col-xs-19 col-md-19 last';
+  $content_class = 'col-xs-16 col-md-19 last';
 } else if ($right) {
-  $content_class = 'col-xs-19 col-md-19';
+  $content_class = 'col-xs-16 col-md-19';
 } else {
   $content_class = '';
 }

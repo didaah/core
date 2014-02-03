@@ -853,7 +853,7 @@ $(function() {
     $('.table_fixed_header').each(function(i) { 
       var id = '#table_fixed_header_wrapper_index_' + i + '_table';
       if (t > $(this).offset().top) {
-        $(id).css({top: 0}).show();
+        $(id).css({top: 50}).show();
       } else {
         $(id).hide();
       }

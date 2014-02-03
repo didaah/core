@@ -161,7 +161,7 @@ function framework_element_dd_get_menu($menus = NULL, $first = true) {
           $data = '';
           $data .= $lists['#data'];
           if ($lists['#childrens']) {
-            $data .= dd_get_menu($lists['#childrens'], 0);
+            $data .= framework_element_dd_get_menu($lists['#childrens'], 0);
           }
           $items[] = array(
             '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_' . $key),
@@ -174,7 +174,7 @@ function framework_element_dd_get_menu($menus = NULL, $first = true) {
                 $data = '';
                 $data .= $child['#data'];
                 if ($child['#childrens']) {
-                  $data .= dd_get_menu($child['#childrens'], 0);
+                  $data .= framework_element_dd_get_menu($child['#childrens'], 0);
                 }
                 $items[] = array(
                   '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_' . $k),

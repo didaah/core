@@ -101,7 +101,8 @@ function bootstrap3_template_framework_table(array $header, $rows = array(), arr
   }
 
   $output .= "</table>\n";
-  return $output;
+
+  return '<div class="table-responsive">' . $output . '</div>';
 }
 
 /**
@@ -161,7 +162,7 @@ function framework_element_dd_get_menu($menus = NULL, $first = true) {
           $data = '';
           $data .= $lists['#data'];
           if ($lists['#childrens']) {
-            $data .= dd_get_menu($lists['#childrens'], 0);
+            $data .= framework_element_dd_get_menu($lists['#childrens'], 0);
           }
           $items[] = array(
             '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_' . $key),
@@ -174,7 +175,7 @@ function framework_element_dd_get_menu($menus = NULL, $first = true) {
                 $data = '';
                 $data .= $child['#data'];
                 if ($child['#childrens']) {
-                  $data .= dd_get_menu($child['#childrens'], 0);
+                  $data .= framework_element_dd_get_menu($child['#childrens'], 0);
                 }
                 $items[] = array(
                   '#data' => array('data' => $data, 'class' => 'site_menu_list site_menu_list_' . $k),
@@ -261,11 +262,26 @@ function framework_element_dd_element_message($messages) {
 /**
  * @Implement of framework_element_x()
  */
+function framework_element_dd_form_button($field) {
+  if (!empty($field['#attributes']['class'])) {
+    $field['#attributes']['class'] = ' btn btn-default';
+  } else {
+    $field['#attributes']['class'] = 'btn btn-default';
+  }
+  $output = '<input type="submit" name="' . $field['#name'] . '" value="';
+  $output .= ($field['#value'] ? $field['#value'] : t('system', '确认提交'));
+  $output .= '"' . dd_attributes($field['#attributes']) . '/>';
+  return $output;
+}
+
+/**
+ * @Implement of framework_element_x()
+ */
 function framework_element_dd_form_submit($field) {
   if (!empty($field['#attributes']['class'])) {
-    $field['#attributes']['class'] = ' btn';
+    $field['#attributes']['class'] = ' btn btn-primary';
   } else {
-    $field['#attributes']['class'] = 'btn';
+    $field['#attributes']['class'] = 'btn btn-primary';
   }
   $output = '<input type="submit" name="' . $field['#name'] . '" value="';
   $output .= ($field['#value'] ? $field['#value'] : t('system', '确认提交'));
@@ -366,6 +382,7 @@ function framework_element_dd_form_checkbox($field, $form) {
     $field['#attributes']['class'] .= ' ' . $id;
 
     foreach ($field['#options'] as $key => $data) {
+      $output .= '<label class="checkbox-inline checkbox_field_' . $field['#name'] . '">';
       $output .= '<span class="checkbox inline form_checkbox_option" alt="' . $id . '"><input';
 
       if (is_array($field['#value']) && in_array($key, $field['#value'])) {
@@ -391,12 +408,61 @@ function framework_element_dd_form_checkbox($field, $form) {
 
       $output .= ' value="' . $key . '" name="' . $field['#name'] . '[' . $key . ']" type="checkbox"';
 
-      $output .= dd_attributes($att) . '/><span class="option_label">' . $text . '</span></span>';
+      $output .= dd_attributes($att) . '/><span class="option_label" title="' . strip_tags($text) . '">' . $text . '</span></span></label>';
     }
   } else {
-    $output .= '<input';
+    $output .= '<label class="checkbox-inline checkbox_field_' . $field['#name'] . '"><input';
     if ($field['#value']) $output .= ' checked="checked"';
-    $output .= ' value="1" name="' . $field['#name'] . '" type="checkbox"' . dd_attributes($field['#attributes']) . '/>';
+    $output .= ' value="1" name="' . $field['#name'] . '" type="checkbox"' . dd_attributes($field['#attributes']) . '/></label>';
+  }
+
+  return $output;
+}
+
+/**
+ * @Implement of framework_element_x()
+ */
+function framework_element_dd_form_radio($field, $form) {
+  $output = '';
+
+  if (is_array($field['#options'])) {
+    $id = $field['#attributes']['id'];
+
+    if (!empty($field['#attributes']['class'])) {
+      $field['#attributes']['class'] .= ' ' . $id;
+    } else {
+      $field['#attributes']['class'] = $id;
+    }
+
+    foreach ($field['#options'] as $key => $data) {
+      $field['#attributes']['id'] = $id . '_' . $key;
+      $att = $field['#attributes'];
+
+      if (is_array($data)) {
+        foreach ($data as $_key => $value) {
+          if ($_key == 'data' || $_key == 'name') {
+            $text = $value;
+          } else {
+            $att[$_key] = $value;
+          }
+        }
+      } else {
+        $text = $data;
+      }
+
+      $output .= '<label class="radio-inline radio_field_' . $field['#name'] . '"><span class="form_radio_field"><input';
+      
+      if ((string) $field['#value'] == (string) $key) $output .= ' checked="checked"';
+
+      $output .= ' value="' . $key . '" name="' . $field['#name'] . '" type="radio"';
+      $output .= dd_attributes($att) . '/>';
+      $output .= '<span class="form_radio_text" title="' . strip_tags($text) . '">' . $text . '</span></span></label>';
+    }
+  } else {
+    $output .= '<label class="radio-inline radio_field_' . $field['#name'] . '"><span class="form_radio_field"><input';
+    if ($field['#value']) $output .= ' checked="checked"';
+    $output .= ' value="1" name="'.$field['#name'] . '" type="radio"' . dd_attributes($field['#attributes']);
+    $output .= '/></span></label>';
   }
 
   return $output;
