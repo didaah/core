@@ -251,7 +251,7 @@ Crawl-delay: 10
 Disallow: /includes/
 Disallow: /misc/
 Disallow: /modules/
-Disallow: /sites/all/
+Disallow: /sites/logs/
 Disallow: /sites/cache/
 Disallow: /sites/themes/
 Disallow: /sites/modules/
