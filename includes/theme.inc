@@ -521,7 +521,8 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
     $items = array_filter($items);
     $output .= "<$type" . dd_attributes($attributes) . '>';
     $num_items = count($items);
-    foreach ($items as $i => $item) {
+    $i = 0;
+    foreach ($items as $item) {
       $attributes = array();
       $children = array();
       if (is_array($item)) {
@@ -556,6 +557,7 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
         case 'div':
           $output .= '<span'. dd_attributes($attributes) .'>'. $data ."</span>\n";
       }
+      $i++;
     }
     $output .= "</$type>\n";
   }

@@ -1108,13 +1108,15 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
 
     $content = array();
 
-    if (!$field->field_func) {
+    if (empty($field->field_func)) {
       $function = $field->field_module . '_' . $field->field_type . '_field_node_view';
       if (function_exists($function)) $content = $function($field, $node, $view_type);
     } else {
       $function = $field->field_func;
       $content = $function('view', $field, $node, $view_type);
     }
+
+    module_alter_all('field_node_view', $field, $node, $view_type, $content);
 
     if (!empty($content)) {
       if (empty($view_type)) {
@@ -1125,8 +1127,6 @@ function field_get_node_view($module, $type, &$node, $view_type = 0) {
         $node->field_view[$field->field_id] = $content;
       }
     }
-
-    module_alter_all('field_node_view', $field, $node, $view_type);
   }
 }
 

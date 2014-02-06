@@ -149,7 +149,7 @@ td.table_submit {
 }
 
 /*misc*/
-#tabs, #sub_tabs {
+ul.nav-tabs, ul#sub_tabs {
   margin-bottom: 8px;
 }
 
