@@ -377,6 +377,7 @@ function module_clear_cache() {
   cache_del('*', 'admin_menus_');
   cache_del('cid', 'schema');
   module_hook_set_cache();
+  field_set_cache_term();
   var_init();
   menu_set_item();
 }
