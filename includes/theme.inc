@@ -506,7 +506,7 @@ function theme_help($help) {
 
 function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attributes = NULL, $wrapper = 1) {
   if (isset($attributes['class'])) {
-    $class = ' item_' . $attributes['class'];
+    $class = ' item_' . str_replace(' ', ' item_', $attributes['class']);
   }
   
   if ($wrapper) {
