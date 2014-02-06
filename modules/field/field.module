@@ -208,7 +208,9 @@ function field_field_call_list() {
  * 传统型分类字段类型
  */
 function field_get_term_type() {
-  return array('tags', 'checkbox', 'select', 'radio', 'selects');
+  $term = array('tags', 'checkbox', 'select', 'radio', 'selects');
+  module_alter_all('field_get_term_type', $term);
+  return $term;
 }
 
 /**
