@@ -54,6 +54,7 @@ ul.site_menu_children {
 .table > tfoot > tr > td {
   vertical-align: middle;
 }
+
 table select {
   margin-bottom: 0;
 }
