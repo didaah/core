@@ -237,7 +237,7 @@ function framework_element_dd_element_message($messages) {
   $types = array(
     'notice' => 'alert-info',
     'success' => 'alert-success',
-    'error' => 'alert-error',
+    'error' => 'alert-error alert-danger',
     'warning' => 'alert-error',
   );
 
