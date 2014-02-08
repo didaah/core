@@ -169,7 +169,6 @@ Dida.dialog_inline = function(text, opt) {
 }
 
 Dida.dialog = function(opt) {
-  
   var o = {
     width: 700,
     height: 450,
@@ -300,28 +299,6 @@ Dida.dialog = function(opt) {
     $('#dialog_wrapper').dialog(o);
     
   }
-  
-  $("#dialog_wrapper").prev('.ui-widget-header').find(".ui-dialog-titlebar-close")
-  .before('<a href="#" title="' + Dida.t('system', '最小化') + '" class="ui-icon ui-icon-minusthick ui-icon-dialog-max-min"></a>');
-  
-  $(".ui-icon-dialog-max-min").click(function() {
-    var obj = $(this).parents(".ui-dialog").find("#dialog_wrapper");
-    if (obj.css('display') == 'none') {
-      obj.show();
-      $(this).attr('title', Dida.t('system', '最小化')).removeClass('ui-icon-plusthick').addClass('ui-icon-minusthick')
-      .parents(".ui-dialog").css('height', 'auto');
-      $('#dialog_wrapper').dialog("option", "position", 'center');
-    } else {
-      obj.hide();
-      
-      $(this).attr('title', Dida.t('system', '最大化')).removeClass('ui-icon-minusthick').addClass('ui-icon-plusthick')
-      .parents(".ui-dialog").css('height', '35px');
-      
-      $('#dialog_wrapper').dialog("option", "position", ['right', 'bottom']);
-    }
-    
-    return false;
-  });
   
   return false;
 };

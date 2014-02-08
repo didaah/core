@@ -12,6 +12,7 @@ function theme_init() {
   $base_theme_info = $conf['themes'][$base_theme_name];
 
   $conf['base_theme'] = $base_path . $base_theme_info['path'];
+  $conf['base_ui_theme'] = !empty($base_theme_info['ui_theme']) ? $base_theme_info['ui_theme'] : 'base';
   $conf['base_logo'] = $base_path . ($base_theme_info['logo'] ? $base_theme_info['logo'] : 'misc/images/logo.png');
   $conf['base_favicon'] = $base_path . ($base_theme_info['favicon'] ? $base_theme_info['favicon'] : 'misc/images/favicon.ico');
 

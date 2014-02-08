@@ -2267,16 +2267,30 @@ function dd_is_spider() {
 }
 
 /**
- * 载入 vjquery ui，
- * @param (string) $theme
+ * 载入 jquery ui，
+ * @param string $theme
  *  载入的主题
  */
-function dd_jqui($theme = 'ui-lightness') {
+// public dd_jqui($theme = NULL) {{{ 
+/**
+ * dd_jqui
+ *  载入 jquery ui
+ * 
+ * @param string $theme 
+ *  指定主题，若未指定，使用系统设置
+ * @access public
+ * @return void
+ */
+function dd_jqui($theme = NULL) {
+  if (empty($theme)) {
+    $theme = $GLOBALS['conf']['base_ui_theme'];
+  }
   dd_add_js('misc/jquery.bgiframe.js');
   dd_add_js('misc/ui/jquery-ui.js');
   dd_add_js('misc/ui/jquery-ui-i18n.js');
   dd_add_css('misc/ui/themes/' . $theme . '/jquery-ui.min.css');
 }
+// }}}
 
 /**
  * 载入 jqedit 插
@@ -3142,6 +3156,7 @@ function dd_get_js($scope = 'header', $js = NULL) {
     dd_add_js(array(
       'cache_css_and_js_timestamp' => $conf['cache_css_and_js_timestamp'],
       'base_theme' => $conf['base_theme'],
+      'base_ui_theme' => $conf['base_ui_theme'],
       'base_path' => $base_path,
       'language_code' => $language_code, 
       'clean_url' => $conf['clean_url'] ? true : false,

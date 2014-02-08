@@ -8,6 +8,6 @@ $info = array(
   ),
   'scripts' => array( // 加载的 js
     'scripts.js'
-  )
+  ),
 );
 

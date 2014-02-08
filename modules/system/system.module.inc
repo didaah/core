@@ -1,8 +1,13 @@
 <?php
 // $Id$
 
+// public system_modules_page() {{{ 
 /**
- * 模块管理
+ * system_modules_page
+ *  模块管理
+ * 
+ * @access public
+ * @return void
  */
 function system_modules_page() {
   switch (arg(2)) {
@@ -107,6 +112,7 @@ function system_modules_page() {
   
   return $form;
 }
+// }}}
 
 function system_modules_validate($form, $value) {
   global $conf;
@@ -410,7 +416,23 @@ function system_themes_setting($theme) {
     '#title' => t('system', 'icon图标'),
     '#description' => t('system', '请上传尺寸适合的图片，系统将不做任何处理'),
   );
-  
+
+  $options = array();
+  foreach (glob(DIDA_ROOT . '/misc/ui/themes/*') as $path) {
+    if (is_dir($path) && is_file($path . '/jquery-ui.min.css')) {
+      $dir = basename($path);
+      $options[$dir] = $dir;
+    }
+  }
+
+  $form['fields']['ui_theme'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => !empty($conf['themes'][$theme]['ui_theme']) ? $conf['themes'][$theme]['ui_theme'] : 'base',
+    '#title' => t('system', 'UI Theme'),
+    '#description' => t('system', '可指定网站全局所使用的 jQuery UI Theme'),
+  );
+   
   $form['fields']['submit'] = array(
     '#type' => 'submit',
     '#weight' => 1000

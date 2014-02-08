@@ -404,19 +404,17 @@ function module_set_enabled($list, $type, $modules = array()) {
       if ($info['dependencies']) {
         foreach ($info['dependencies'] as $key => $dependencies) {
           if (!$result[$dependencies] || $result[$dependencies]['status'] == 0) {
-            
             dd_set_message(t('system', '%name 依赖于 %module，请先启用 %module', array(
               '%name' => t($v['filename'], $result[$v['filename']]['info']['name']),
               '%module' => $dependencies)
             ));
-            
             return false;
           }
         }
       }
       
-      require_once DIDA_ROOT .'/'. $v['path'] .'/'. $v['filename'] .'.module';
-      $install_file = DIDA_ROOT .'/'.  $v['path'] .'/'. $v['filename'] .'.install';
+      require_once DIDA_ROOT . '/' . $v['path'] . '/' . $v['filename'] .'.module';
+      $install_file = DIDA_ROOT . '/' .  $v['path'] . '/' . $v['filename'] .'.install';
       
       if (is_file($install_file)) {
         require_once $install_file;
@@ -427,7 +425,10 @@ function module_set_enabled($list, $type, $modules = array()) {
         
         if ($success = module_set_install($v)) {
           if ($success == -1) {
-            dd_set_message(t('system', '无法升级或启用模块 %string ，请检查', array('%string' => t($v['filename'], $lists[$v['filename']]['info']['name']))), 'error');
+            dd_set_message(t('system', '无法升级或启用模块 %string ，请检查', array(
+              '%string' => t($v['filename'], $lists[$v['filename']]['info']['name']))), 
+              'error'
+            );
             return false;
           }
         } else {

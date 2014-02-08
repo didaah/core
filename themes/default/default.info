@@ -3,6 +3,7 @@
 $info = array(
   'name' => 'default',
   'ver' => '1.0',
+  'ui_theme' => 'base', // 设置 jquery ui 主题，若不设置，则为 base
   'language' => 'zh-hans', // 主题默认语言，可选
   'created' => mktime(21, 16, 0, 9, 8, 2009), // 创建时间，可选
   'updated' => mktime(10, 32, 0, 11, 18, 2009), // 更新时间，可选

@@ -901,7 +901,7 @@ function system_site_settings() {
 
   $form['fields']['front_view_type'] = array(
     '#type' => 'select',
-    '#title' => t('user', '网站首页'),
+    '#title' => t('system', '网站首页'),
     '#required' => 1,
     '#default_value' => var_get('front_view_type'),
     '#options' => array(t('system', '系统默认'), t('system', '自定义')),

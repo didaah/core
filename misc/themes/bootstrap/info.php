@@ -9,6 +9,6 @@ $info = array(
   'scripts' => array( // 加载的 js
     'js/bootstrap.min.js',
     'js/scripts.js'
-  )
+  ),
 );
 
