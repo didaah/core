@@ -97,11 +97,11 @@ function bootstrap($op, $inc = NULL) {
 
       dd_page_header();
 
-      //载入模块
-      module_init();
-
       //载入主题
       theme_init();
+
+      //载入模块
+      module_init();
 
       /**
        * 非其它渠道验证请求
