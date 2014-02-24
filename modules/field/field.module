@@ -408,11 +408,11 @@ function field_set_cache_term($module = NULL, $type = NULL) {
         $children = 1;
         continue;
       }
-      $key = $o->module.'_'.$o->type;
+      $key = $o->module . '_' . $o->type;
       $p[$key][$o->field_id][$o->tid] = $o;
     }
     foreach ($p as $k => $data) {
-      cache_set('field_term_'.$k, $data);
+      cache_set('field_term_' . $k, $data);
     }
     
     // 删除每个字段单独的缓存
@@ -438,7 +438,7 @@ function field_get_cache_term($module, $type) {
     if ($cache = cache_get($key)) {
       $term[$key] = $cache->data;
     } else if ($data = field_set_cache_term($module, $type)) {
-      $term[$key] = $data;
+      $term[$key] = $data[$module . '_' . $type];
     }
   }
   return $term[$key];
