@@ -153,19 +153,21 @@ function field_textfield_field_node_validate($field, $value, &$error, $form, $ac
           $showtime = 1;
         case 'date':
           static $start_or_end;
-          if (!$e = field_validate_date($value->fields[$field->field_key], $v['value_type'], $showtime)) {
-            if ($v['start_or_end'] && $v['field_key']) {
-              if (!isset($start_or_end[$v['field_key']])) {
-                $start_or_end[$field->field_key] = (float)preg_replace(array('/\s/', '/[^\w]/'), array('.', ''), $value->fields[$field->field_key]);
-              } else if ($v['start_or_end'] == 'start') {
-                // 开始字段
-                if (intval($value->fields[$field->field_key]) >= $start_or_end[$v['field_key']]) {
-                  $e = t('field', '开始日期不能大于结束日期');
-                }
-              } else {
-                // 结束字段
-                if ((float)preg_replace(array('/\s/', '/[^\w]/'), array('.', ''), $value->fields[$field->field_key]) <= $start_or_end[$v['field_key']]) {
-                  $e = t('field', '开始日期不能大于结束日期');
+          if (!empty($value->fields[$field->field_key])) {
+            if (!$e = field_validate_date($value->fields[$field->field_key], $v['value_type'], $showtime)) {
+              if ($v['start_or_end'] && $v['field_key']) {
+                if (!isset($start_or_end[$v['field_key']])) {
+                  $start_or_end[$field->field_key] = (float)preg_replace(array('/\s/', '/[^\w]/'), array('.', ''), $value->fields[$field->field_key]);
+                } else if ($v['start_or_end'] == 'start') {
+                  // 开始字段
+                  if (intval($value->fields[$field->field_key]) >= $start_or_end[$v['field_key']]) {
+                    $e = t('field', '开始日期不能大于结束日期');
+                  }
+                } else {
+                  // 结束字段
+                  if ((float)preg_replace(array('/\s/', '/[^\w]/'), array('.', ''), $value->fields[$field->field_key]) <= $start_or_end[$v['field_key']]) {
+                    $e = t('field', '开始日期不能大于结束日期');
+                  }
                 }
               }
             }
