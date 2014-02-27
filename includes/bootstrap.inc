@@ -1928,9 +1928,9 @@ function dd_error_msg($msg) {
  *  错误信息
  */
 function text_log($filename, $msg) {
-  $filepath = DIDA_ROOT . '/sites/logs/'.$_SERVER['HTTP_HOST'].'_'. $filename . '_'.date('Y') .'_'.date('m') . '.txt';
+  $filepath = DIDA_ROOT . '/sites/logs/' . $_SERVER['HTTP_HOST'] . '_' . $filename . '_' . date('Y_m_d') . '.php';
   $handle = fopen($filepath, 'ab');
-  fwrite($handle, $msg. "\n<!-- 分隔符 -->\n");
+  fwrite($handle, '<?php exit; ?>' . "\n" . $msg. "\n<!-- 分隔符 -->\n");
   fclose($handle);
 }
 
@@ -1941,7 +1941,7 @@ function text_log($filename, $msg) {
  * @return (string)
  */
 function dd_get_strong($text, $sufpix = '：') {
-  return '<strong>'.$text.$sufpix.'</strong>';
+  return '<strong>' . $text.$sufpix . '</strong>';
 }
 
 /**
