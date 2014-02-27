@@ -2,6 +2,37 @@
 // $Id$
 
 /**
+ * @Implement of hook_update_X()
+ *  修改文本日志类型，从 txt 改为 php，防止被下载
+ */
+function system_update_8() {
+  $ret = array(t('system', '修复日志文件安全问题'));
+
+  if ($fetch = glob(DIDA_ROOT . '/sites/logs/*')) {
+    $content = '<?php exit; ?>';
+    $strlen = strlen($content);
+    foreach ($fetch as $file) {
+      if (is_file($file)) {
+        $f = fopen($file, 'rb+');
+        if ($f !== false) {
+          fwrite($f, $content, $strlen); 
+          fclose($f); 
+          if (rename($file, $file . '.php')) {
+            $ret[] = t('system', '!file 修复完成', array('!file' => $file));
+            continue;
+          }
+        }
+        $ret[] = t('system', '!file 无法读写，请立即手动删除，以保障系统安全！', array('!file' => $file));
+      }
+    }
+  }
+  
+  $ret = array(t('system', '日志修复结束'));
+
+  return $ret;
+}
+
+/**
  * @Implement of hook_update_x()
  *  filters.delta 字段类型修改
  */
