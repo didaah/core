@@ -27,7 +27,7 @@ function system_update_8() {
     }
   }
   
-  $ret = array(t('system', '日志修复结束'));
+  $ret[] = t('system', '日志修复结束');
 
   return $ret;
 }
