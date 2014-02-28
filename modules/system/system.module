@@ -1836,7 +1836,7 @@ function system_field_call_group($type = NULL) {
       'sum' => 10, // 最多允许 10 个导航
       'disable_import' => true,
       'type' => array('select'), // 只允许下拉选择项
-    	'level' => 1, // 分类层级级数，0 则为不限制(实际最多 10 级)
+    	'level' => 3, // 分类层级级数，0 则为不限制(实际最多 10 级)
     )
   );
   return $type ? $groups[$type] : $groups;
@@ -1892,17 +1892,17 @@ function system_field_call_form(&$field, &$form) {
  */
 function system_field_call_term_form(&$form, &$field, &$term) {
   if ($field->module != 'system') return;
-  $form['fields']['_pid'] = array(
-    '#title' => t('system', '上级'),
-    '#weight' => -100,
-    '#value' => $form['fields']['pid']['#options'][0],
-  );
+ // $form['fields']['_pid'] = array(
+ //   '#title' => t('system', '上级'),
+ //   '#weight' => -100,
+ //   '#value' => $form['fields']['pid']['#options'][0],
+ // );
 
-  $form['fields']['pid'] = array(
-    '#type' => 'hidden',
-    '#default_value' => 0,
-    '#constant' => 1
-  );
+ // $form['fields']['pid'] = array(
+ //   '#type' => 'hidden',
+ //   '#default_value' => 0,
+ //   '#constant' => 1
+ // );
 
   $form['fields']['description'] = array('#weight' => -1);
 
@@ -1960,7 +1960,6 @@ function system_site_menu(&$menu) {
 
   // 子导航
   $term = field_get_cache_term('system', 'menu');
-
   foreach ($datas as $field) {
     if (field_access('view', $field)) {
       $att = array();
@@ -1979,6 +1978,7 @@ function system_site_menu(&$menu) {
 
       if (!empty($term[$field->field_id])) {
         $menu['system_' . $field->field_key]['#childrens'] = array();
+        $terms = field_get_cache_term_key('system', 'menu', $field->field_key);
         foreach ($term[$field->field_id] as $o) {
           $d = unserialize($o->description);
           if (!empty($d['description'])) {
@@ -1988,6 +1988,7 @@ function system_site_menu(&$menu) {
           }
           $menu['system_' . $field->field_key]['#childrens'][] = array(
             '#data' => l($o->name,  dd_get_token($d['path'], NULL, array('user', 'system')), $att),
+            '#childrens' => _system_get_custom_menu_childrens($o->tid, $terms),
             '#weight' => $o->weight
           );
         }
@@ -1995,6 +1996,39 @@ function system_site_menu(&$menu) {
     }
   }
 }
+
+// protected _system_get_custom_menu_childrens($tid, $terms) {{{ 
+/**
+ * _system_get_custom_menu_childrens
+ *  解析自定义主导航的子级
+ * 
+ * @param int $tid 
+ * @param object $terms 
+ * @access protected
+ * @return array
+ */
+function _system_get_custom_menu_childrens($tid, $terms) {
+  $data = array();
+
+  foreach ($terms as $o) {
+    if ($o->pid == $tid) {
+      $d = unserialize($o->description);
+      if (!empty($d['description'])) {
+        $att = array('attributes' => array('title' => $d['description']));
+      } else {
+        $att = array();
+      }
+      $data[] = array(
+        '#data' => l($o->name,  dd_get_token($d['path'], NULL, array('user', 'system')), $att),
+        '#weight' => $o->weight,
+        '#childrens' => _system_get_custom_menu_childrens($o->tid, $terms),
+      );
+    }
+  }
+
+  return $data;
+}
+// }}}
 
 /**
  * 文件删除、更新、浏览操作
