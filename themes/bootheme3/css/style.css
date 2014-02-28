@@ -286,6 +286,10 @@ legend.asc {
 }
 
 /*form*/
+input.form_textfield_name_title {
+  width: 550px;
+}
+
 form .form_item {
   margin: 5px 0;
 }

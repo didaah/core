@@ -48,14 +48,17 @@ $(function() {
   		return false;
   	}
   });
+
   $('span.option_label, span.form_radio_text').click(function() {
     if (!$(this).prev('input').attr('disabled')) {
   	  $(this).prev('input').attr('checked', !$(this).prev('input').attr('checked'));
     }
   });
+
   $('span.form_description').click(function() {
   	$(this).prev('input').focus();
   });
+
   $('label.dd_label').click(function() {
   	$(this).next().focus();
   });

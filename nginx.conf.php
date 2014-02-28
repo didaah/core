@@ -75,29 +75,16 @@ http {
             root   html;
         }
 
-        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
-        #
-        #location ~ \.php$ {
-        #    proxy_pass   http://127.0.0.1;
-        #}
-
         # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
-        # php 支持，视情况去除注释
-        #location ~ \.php$ {
-        #    root           html;
-        #    fastcgi_pass   127.0.0.1:9000;
-        #    fastcgi_index  index.php;
-        #    fastcgi_param  SCRIPT_FILENAME $document_root$real_script_name; 
-        #    include        fastcgi_params;
-        #}
+        # php 支持，视具体情况处理
+        location ~ \.php$ {
+            root           html;
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME $document_root$real_script_name; 
+            include        fastcgi_params;
+        }
 
-        # deny access to .htaccess files, if Apache's document root
-        # concurs with nginx's one
-        #
-        #location ~ /\.ht {
-        #    deny  all;
-        #}
-        
         # dida - 保护文件
         location ~ \.(htaccess|engine|inc|info|install|lang|module|profile|test|po|sh|.*sql|theme|tpl(\.php)?|xtmpl|svn-base)$|^(code-style\.pl|Entries.*|Repository|Root|Tag|Template|all-wcprops|entries|format)$ {
             # 当 hook_menu 定义的路径，含有以上后缀时，将发生冲突。
@@ -107,7 +94,12 @@ http {
             rewrite ^/(.*)$ /index.php?q=$1 last;
             break;
         }
-        
+
+        # 日志目录保护
+        location ^~ /sites/logs {
+          deny all;
+        }        
+
         # 文件缓存
         location ~* ^.+.(jpg|jpeg|gif|png|js|css|ico)$ {
           root   html;
@@ -117,42 +109,4 @@ http {
         }
 
     }
-
-
-    # another virtual host using mix of IP-, name-, and port-based configuration
-    #
-    #server {
-    #    listen       8000;
-    #    listen       somename:8080;
-    #    server_name  somename  alias  another.alias;
-
-    #    location / {
-    #        root   html;
-    #        index  index.html index.htm;
-    #    }
-    #}
-
-
-    # HTTPS server
-    #
-    #server {
-    #    listen       443;
-    #    server_name  localhost;
-
-    #    ssl                  on;
-    #    ssl_certificate      cert.pem;
-    #    ssl_certificate_key  cert.key;
-
-    #    ssl_session_timeout  5m;
-
-    #    ssl_protocols  SSLv2 SSLv3 TLSv1;
-    #    ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
-    #    ssl_prefer_server_ciphers   on;
-
-    #    location / {
-    #        root   html;
-    #        index  index.html index.htm;
-    #    }
-    #}
-
 }

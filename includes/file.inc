@@ -943,7 +943,7 @@ function file_delete_file($filepath, $fid = NULL) {
  */
 function file_delete_dir($dir, $recursive = 1) {
   if (is_dir($dir)) {
-    if ($objs = glob($dir.'/*')) {
+    if ($objs = glob($dir . '/*')) {
       foreach ($objs as $obj) {
         if (is_dir($obj)) {
           if ($recursive) file_delete_dir($obj, $recursive);
