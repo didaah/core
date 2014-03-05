@@ -517,15 +517,14 @@ $(function() {
       $(this).addClass('ja_loading');
       var $$ = $(this);
       var url = $$.attr('href');
-      if ($$.attr('method') != 'POST') {
-        $.get(url, {'timestamp': Dida.gettime()}, function(data) {
+      $.ajax({
+        url: url,
+        type: $$.attr('method') || 'GET',
+        data: {timestamp: Dida.gettime()},
+        success: function(data) {
           Dida.ajaxSuccess($$, data, 'a');
-        });
-      } else {
-        $.post(url, {'timestamp': Dida.gettime()}, function(data) {
-          Dida.ajaxSuccess($$, data, 'a');
-        });
-      }
+        }
+      });
     }
     return false;
   });
