@@ -65,17 +65,16 @@ function args($key = NULL, $argc = NULL, $argv = NULL) {
 
 /**
  * 输出到终端的提示信息 
- * @param string $text 
  * @access public
  * @return string
  */
-function message($text) {
-  if (is_object($text) || is_array($text)) {
-    ob_start();
-    var_dump($text);
-    $text = ob_get_contents();
-    ob_end_clean();
-  }
+function message() {
+  $args = func_get_args();
+
+  ob_start();
+  print_r($args);
+  $text = ob_get_contents();
+  ob_end_clean();
 
   if (empty($_SERVER['LANG']) || stripos($_SERVER['LANG'], 'utf') === false) {
     $text = iconv('UTF-8', 'GBK', $text);
