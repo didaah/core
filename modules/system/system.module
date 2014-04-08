@@ -295,11 +295,8 @@ function system_init() {
 
   // 全局允许 php code 输入格式
   $_filter_is_php_code = true;
-  
-  if (arg(0) == 'admin') {
-    $is_admin = true; // 当前为管理页面
-    system_is_admin();
-  }
+
+  system_is_admin();
   
   dd_add_js('modules/system/system.js');
 }
@@ -308,8 +305,14 @@ function system_init() {
  * 管理页面
  */
 function system_is_admin() {
-  global $user, $conf;
-  
+  if (arg(0) != 'admin') {
+    return false;
+  }
+ 
+  global $user, $conf, $is_admin;
+
+  $is_admin = true; // 当前为管理页面
+
   if ($conf['theme_admin'] && $conf['themes'][$conf['theme_admin']]) {
     $conf['default_theme'] = $conf['theme_admin'];
   }

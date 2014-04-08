@@ -3,6 +3,10 @@
 
 function theme_init() {
   global $conf, $base_path, $base_theme_name, $base_theme_info, $language_code, $user; 
+  
+  if (arg(0) == 'admin' && !empty($conf['theme_admin']) && $conf['themes'][$conf['theme_admin']]) {
+    $conf['default_theme'] = $conf['theme_admin'];
+  }
 
   // 用户界面语言
   _theme_get_language();
