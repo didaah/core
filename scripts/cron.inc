@@ -285,17 +285,19 @@ function _cron_jobs() {
               $is_command = true;
               $id = '#4';
             } else if ($data['hour'] == '*' || $data['hour'] == $hour) {
-              // 每分钟或当前分钟需执行，判断上次执行时间分钟数是否与当前相同，相同则表示已经执行过
-              // 通常情况不需要此判断，因为 cron.inc 的执行间隔不可能小于 1 分钟
-              if (($data['minute'] == '*' || $data['minute'] == $minute) && date('i', $timestamps[$command]) != $minute) {
+              if ($data['minute'] == '*' || $data['minute'] == $minute) {
+                // 每分钟或当前分钟需要执行
                 $is_command = true;
                 $id = '#5';
+              } else if (is_numeric($data['minute']) && $data['minute'] < $minute && $timestamps[$command] < (time()-3600)) {
+                // 上次执行在 1 小时之前，需立即执行
+                $is_command = true;
+                $id = '#7';
               } else if (strpos($data['minute'], '/') !== false && $timestamps[$command] < (time()-preg_replace('/[^0-9]/', '', $data['minute'])*60)) {
                 // */3 格式的参数，假如每 3 分钟执行一次，则判断上次执行时间是否为 3 分钟之前，若是，需立即执行
                 // 可能带来1分钟的误差，取决于 cron.inc 的执行间隔
                 $is_command = true;
                 $id = '#6';
-                print_r($data);
               } else if (is_numeric($data['minute']) && $data['minute'] < $minute && $timestamps[$command] < (time()-3600)) {
                 // 上次执行在 1 小时之前，需立即执行
                 $is_command = true;
