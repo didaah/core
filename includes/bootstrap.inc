@@ -1122,6 +1122,8 @@ function dd_user_validate() {
       $user = user_anonymous();
     }
   }
+
+  module_invoke_all('user_login_validate', ($user->uid > 0 ? 1 : 0));
 }
 
 /**
