@@ -2,6 +2,8 @@
 // $Id$
 
 /**
+ * @file 区块默认模板
+ * @param $block
  * 将按以下顺序加载模板文件：
  * block_{$block->module}_{$block->delta}.tpl.php
  * block_{$block->module}.tpl.php
