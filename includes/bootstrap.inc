@@ -1718,7 +1718,11 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
   }
   
   if (!empty($options['proxy'])) {
-    $path = $uri['scheme'] . '://' . $uri['host'] . ':' . $port . $path;
+    if ($port != '80') {
+      $path = $uri['scheme'] . '://' . $uri['host'] . ':' . $port . $path;
+    } else {
+      $path = $uri['scheme'] . '://' . $uri['host'] . $path;
+    }
   }
 
   $request = $options['method'] . ' ' . $path . " HTTP/1.0\r\n";
