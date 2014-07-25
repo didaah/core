@@ -190,6 +190,9 @@ function theme() {
      */
     $functions = array(
       'template_preprocess',
+      $theme['module'] . '_template_preprocess',
+      $base_theme_info['framework'] . '_preprocess_framework',
+      $temp['filename'] . '_preprocess',
       'template_preprocess_' . $hook,
       $theme['module'] . '_template_preprocess_' . $hook,
       $base_theme_info['framework'] . '_preprocess_framework_' . $hook,
