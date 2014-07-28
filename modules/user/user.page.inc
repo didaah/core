@@ -99,7 +99,7 @@ function user_user_center_view($center) {
 
           if (empty($row['#data'])) continue;
 
-          $row['#data'] = '<div class="user_center_default_view_' . $module . '>'.$row['#data'].'</div>';
+          $row['#data'] = '<div class="user_center_default_view_' . $module . '">' . $row['#data'] . '</div>';
           
           $contents[] = $row;
           ++$i;
@@ -272,7 +272,7 @@ function _user_get_center_info($center) {
  * @Implement of hook_user_page()
  */
 function user_user_center_default($center) {
-
+  $item = array();
   $item[] = dd_get_strong(t('user', '注册时间')) . format_date($center->user->created);
   
   if (!empty($ac->login)) {
@@ -284,15 +284,15 @@ function user_user_center_default($center) {
   if ($center->user->field_view) {
     foreach ($center->user->field_view as $key => $data) {
       if ($key != 'avatar') {
-        $item[] = array('data' => dd_get_strong($data['#name']) . $data['#content'], 'class' => 'user_field_view_'.$key);
+        $item[] = array('data' => dd_get_strong($data['#name']) . $data['#content'], 'class' => 'user_field_view_' . $key);
       } else {
         $contents .= '<div class="user_field_view_avatar">' . $data['#content'] . '</div>';
       }
     }
   }
-  
+
   $contents .= theme('item_list', $item, $center->user->name, 'ul', array('id' => 'user_center_default_view_fields'));
-  
+
   return array('#data' => $contents, '#weight' => -100);
 }
 
