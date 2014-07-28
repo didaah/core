@@ -100,6 +100,7 @@ set_time_limit(0);
 
 // 使用指定站点的配置文件，必须有这个参数
 $_SERVER['HTTP_HOST'] = $_args['host'];
+$_SERVER['SCRIPT_NAME'] = '/index.php';
 
 // url 参数，模拟为首页
 $_SERVER['REQUEST_URI'] = '/';
