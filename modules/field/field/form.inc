@@ -231,7 +231,7 @@ function field_tags_field_node_form($field, $node, &$form, $ac) {
   $field_value = '';
   if ($node->fields[$field->field_key]) {
     foreach ($node->fields[$field->field_key] as $o) {
-      $field_value .= $o->name.',';
+      $field_value .= str_replace(array(',', '，'), array('[-]', '[--]'), $o->name) . ',';
     }
   }
 

@@ -70,18 +70,21 @@ function  _field_system_tools_ajax($v, $g) {
 
             $prefix = implode(',', $arr) . ',';
           }
+          
+          $v = str_replace(array('[-]', '[--]'), array(',', '，'), $value);
 
-            if ($fetch = db_query('SELECT tid, name FROM {fields_term} WHERE field_id = ? AND name LIKE ? 
-            ORDER BY weight ASC, tid ASC', array($g['fid'], $value . '%'), array('limit' => 10))) {
-              foreach ($fetch as $o) {
-                if (empty($arr) || !in_array($o->name, $arr)) {
-                  $json['contents'][] = $prefix . $o->name;
-                }
+          if ($fetch = db_query('SELECT tid, name FROM {fields_term} WHERE field_id = ? AND name LIKE ? 
+          ORDER BY weight ASC, tid ASC', array($g['fid'], $v . '%'), array('limit' => 10))) {
+            foreach ($fetch as $o) {
+              $o->name = str_replace(array(',', '，'), array('[-]', '[--]'), $o->name);
+              if (empty($arr) || !in_array($o->name, $arr)) {
+                $json['contents'][] = $prefix . $o->name;
               }
             }
-
+          }
         }
       }
+    break;
 
     case 'auto': // 输入 ajax 验证
       if ($field = field_load($g['fid'])) {

@@ -1243,7 +1243,7 @@ function field_get_node_delete($module, $type, $node) {
 }
 
 /**
- * 字符串解析为标签，以“,”或“，”为分隔符
+ * 字符串解析为标签，以,或，为分隔符，若字符串本身包含[,]与[，]，以[-] [--]代替
  * @param string $text 
  * @access public
  * @return array
@@ -1258,12 +1258,12 @@ function field_get_string_tags($text) {
     if (strpos($text, ',') !== false) {
       foreach (explode(',', $text) as $tag) {
         if ($tag =  trim($tag)) {
-          $tags[$key][] = $tag;
+          $tags[$key][] = str_replace(array('[-]', '[--]'), array(',', '，'), $tag);
         }
       }
       $tags[$key] = array_unique($tags[$key]);
     } else if ($text = trim($text)) {
-      $tags[$key][] = $text;
+      $tags[$key][] = str_replace(array('[-]', '[--]'), array(',', '，'), $text);
     }
   }
 
