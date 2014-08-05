@@ -520,7 +520,7 @@ function url($path = NULL, $options = array()) {
     if ($options['query']) {
       $path = $path .'&'. $options['query'];
     }
-    $url = $base_path . $path .$options['fragment'];
+    $url = $base_path . $path . $options['fragment'];
   }
 
   $url = menu_xss_filter($url);
@@ -1296,7 +1296,7 @@ function conf_init() {
   } else {
     $base_path = '/';
   }
-  
+
   if (empty($cookie_domain)) {
     list( , $session_name) = explode('://', $base_url, 2);
     

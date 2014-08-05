@@ -31,8 +31,8 @@ function filter_view($text, $format = NULL, $type = NULL, $id = NULL) {
       if ($cached = cache_get($cache_id, 'cache_filter')) {
         
         // 代码高亮，加载 js
-        if (filter_is_filter($format, 'system', 'highlighter')) {
-          dd_get_highlighter();
+        if (filter_is_filter($format, 'editor', 'highlighter')) {
+          editor_get_highlighter();
         }
         
         return $cached->data;
@@ -127,7 +127,6 @@ function filter_user_format($ac = NULL) {
 /**
  * 输入格式
  */
- 
 function filter_form_field($format = NULL, $required = false, $title = NULL) {
   global $user, $conf;
 

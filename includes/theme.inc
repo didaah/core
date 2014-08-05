@@ -569,6 +569,7 @@ function theme_item_list($items = array(), $title = NULL, $type = 'ul', $attribu
     }
     $output .= "</$type>\n";
   }
+
   if ($wrapper) {
     $output .= "</div>\n";
   }
