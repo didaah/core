@@ -5,7 +5,7 @@
  * @Implement of hook_template_framework_x()
  */
 function bootstrap3_template_framework_help($help) {
-  return '<div class="alert alert-block help"><button type="button" class="close" data-dismiss="alert">&times;</button>' . implode('', $help) . '</div>';
+  return '<div class="alert alert-block alert-info help"><button type="button" class="close" data-dismiss="alert">&times;</button>' . implode('', $help) . '</div>';
 }
 
 /**
