@@ -103,7 +103,6 @@ function field_field_call_form($field, &$form) {
           '#options' => array(
             1 => t('field', '普通模式'),
             2 => t('field', '正则模式'),
-            3 => t('field', 'PHP 模式')
           )
         ),
         'values' => array(
@@ -126,7 +125,6 @@ function field_field_call_form($field, &$form) {
       }
 
       $custom_fields['values']['#description'] = theme('item_list', $item);
-
 
       // 字段值过滤条件
       $data_fields = array(
@@ -393,7 +391,6 @@ function field_field_call_form($field, &$form) {
           '#options' => array(
             1 => t('field', '普通模式'),
             2 => t('field', '正则模式'),
-            3 => t('field', 'PHP 模式')
           )
         ),
         'values' => array(
