@@ -1669,6 +1669,21 @@ function user_user_page($ac) {
  * @return object
  */
 function user_login($user, $history = true) {
+  if ($user->status != 1) {
+    switch ($user->status) {
+      case 0:
+        $t = t('user', '账号还未激活，<a href="!url">立即激活</a>', array('!url' => url('user/activation')));
+      break;
+      case 2:
+        $t = t('user', '账号已冻结');
+      break;
+      case 3:
+        $t = t('user', '账号已注销');
+    }
+    dd_set_message($t);
+    return false;
+  }
+ 
   user_session_reg($user);
   
   /**
