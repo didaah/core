@@ -236,6 +236,13 @@ function _cron_jobs() {
             continue;
           }
         }
+        
+        // 最大时间，与最小时间相反
+        if (!empty($data['maxHour'])) {
+          if ($hour > $data['maxHour']) {
+            continue;
+          }
+        }
 
         // 计划任务时间格式与 linux 系统一致，可使用具体数字，如：2012，也可使用 *，还可以使用 */3
         // 注意：年月不允许使用 */3 这种格式
