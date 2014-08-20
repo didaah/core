@@ -778,7 +778,7 @@ function system_site_settings() {
     '#type' => 'textfield',
     '#title' => t('system', '域名限制'),
     '#default_value' => var_get('default_host', ''),
-    '#description' => t('system', '若填写：didaah.org，则通过其它域名的访问，都将重定向')
+    '#description' => t('system', '若填写：didaah.org，则通过其它域名的访问，都将重定向，多个以半角逗号分隔')
   );
 
   $form['fields']['sql_info'] = array(

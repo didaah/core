@@ -53,8 +53,12 @@ function bootstrap($op, $inc = NULL) {
   }
 
   // 若限制了域名，则验证 HTTP_HOST
-  if (!empty($conf['default_host']) && $_SERVER['HTTP_HOST'] != $conf['default_host']) {
-    dd_goto('http://' . $conf['default_host'] . $_SERVER['REQUEST_URI']);
+  if (!empty($conf['default_host'])) {
+    if ($_hosts = explode(',', trim($conf['default_host']))) {
+      if (!in_array($_SERVER['HTTP_HOST'], $_hosts)) {
+        dd_goto('http://' . $_hosts[0] . $_SERVER['REQUEST_URI']);
+      }
+    }
   }
 
   set_error_handler('dd_php_error');
@@ -92,6 +96,9 @@ function bootstrap($op, $inc = NULL) {
         $_SERVER['REQUEST_URI'] = menu_xss_filter($_SERVER['REQUEST_URI']);
       }
 
+      // 载入模块主文件，将执行 hook_bootstrap()
+      module_bootstrap();
+
       //用户验证
       dd_user_validate();
 
@@ -100,7 +107,7 @@ function bootstrap($op, $inc = NULL) {
       //载入主题
       theme_init();
 
-      //载入模块
+      // 模块初始化
       module_init();
 
       /**
@@ -180,6 +187,9 @@ function bootstrap($op, $inc = NULL) {
           if (is_file($filepath)) require_once $filepath;
         }
       }
+
+      // 载入模块主文件，将执行 hook_bootstrap()
+      module_bootstrap();
 
       //用户验证
       dd_user_validate();
@@ -1283,12 +1293,13 @@ function user_anonymous($data = NULL) {
  * 获取域名、路径、cookie 作用域、session id
  */
 function conf_init() {
-  global $cookie_domain, $base_url, $base_root, $base_path, $is_front;
+  global $cookie_domain, $base_url, $base_root, $base_path, $is_front, $http_host;
 
   $is_front = dd_is_front();
 
   $base_root = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
   $base_url = $base_root .= '://'. $_SERVER['HTTP_HOST'];
+  $http_host = $_SERVER['HTTP_HOST'];
   if ($dir = trim(dirname($_SERVER['SCRIPT_NAME']), '\,/')) {
     $base_path = "/$dir";
     $base_url .= $base_path;

@@ -1,19 +1,32 @@
 <?php
 // $Id$
 
+
+// public module_bootstrap() {{{ 
 /**
- * 初始化载入已启用模块
+ * module_bootstrap
+ *  载入模块主文件
+ * 
+ * @access public
+ * @return void
  */
-function module_init() {
+function module_bootstrap() {
   global $conf;
   
   $conf['module_theme'] = array_merge($conf['modules'], $conf['themes']);
   
   foreach ($conf['modules'] as $module => $info) {
-    if (!module_load($module.'.module', $info['path'])) {
-      module_invoke($module, 'init');
-    }
+    module_load($module . '.module', $info['path']);
   }
+  module_invoke_all('bootstrap');
+}
+// }}}
+
+/**
+ * 初始化已启用模块
+ */
+function module_init() {
+  module_invoke_all('init');
 }
 
 /**
@@ -853,7 +866,7 @@ function _module_tree_list($type, $dir, &$modules = NULL) {
  * 载入文件
  */
 function module_load($filename, $path) {
-  $filepath = DIDA_ROOT .'/'. $path .'/'. $filename;
+  $filepath = DIDA_ROOT . '/' . $path .'/' . $filename;
   if (is_file($filepath)) {
     include_once $filepath;
     return false;
