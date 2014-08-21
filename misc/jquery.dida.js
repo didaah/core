@@ -158,13 +158,15 @@ jQuery.fn.extend({
 
   didaShow: function(o) {
     var opt = {
-      fadeOutTime: o.fadeOutTime || 500,
-      fadeInTime: o.fadeInTime || 500,
-      dom: o.dom,
-      direction: o.direction || 'y', //
-      isTab: o.isTab || true,
-      varyTime: o.varyTime || 4000
+      fadeOutTime: 500,
+      fadeInTime: 500,
+      dom: '',
+      direction: 'y', //
+      isTab: true,
+      varyTime: 4000
     }
+
+    $.extend(opt, o);
     
     var _data, _self, _dataBtn;
 
