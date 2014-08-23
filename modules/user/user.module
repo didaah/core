@@ -1602,8 +1602,15 @@ function user_view($account) {
   field_get_node_view('user', 'field', $account, 1);
   
   unset($account->field_view['avatar']);
+
+  $account->tabs = array(l(t('user', '主页'), $account->path));
   
+  module_alter_all('user_view_tabs', $account);
   module_alter_all('user_view', $account);
+
+  if (!empty($account->tabs)) {
+    dd_set_tabs($account->tabs);
+  }
   
   if (!var_get_key('user', 'custom_view', 0)) {
     global $user;
@@ -1619,7 +1626,7 @@ function user_view($account) {
           $row['#data'] = $content;
         }
         
-        $row['#data'] = '<div class="user_page_'.$module.'_view">'.$row['#data'].'</div>';
+        $row['#data'] = '<div class="user_page_' . $module . '_view">' . $row['#data'] . '</div>';
         
         $contents[] = $row;
         ++$i;

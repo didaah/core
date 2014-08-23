@@ -11,6 +11,8 @@ function user_page_view($ac) {
 
   if (empty($type)) return dd_get_access();
 
+  $ac->tabs = array();
+
   $info = module_invoke_all('user_page_info', $ac);
 
   if (empty($info[$type])) return dd_get_access();
