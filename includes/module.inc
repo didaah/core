@@ -17,8 +17,8 @@ function module_bootstrap() {
   
   foreach ($conf['modules'] as $module => $info) {
     module_load($module . '.module', $info['path']);
+    module_invoke($module, 'bootstrap');
   }
-  module_invoke_all('bootstrap');
 }
 // }}}
 

@@ -1712,7 +1712,7 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
   // 解析路径
   $path = isset($uri['path']) ? $uri['path'] : '/';
   if (isset($uri['query'])) {
-    $path .= '?'. $uri['query'];
+    $path .= '?' . $uri['query'];
   }
   
   if (isset($options['data']) && ($method == 'POST' || $method == 'PUT')) {
@@ -1757,7 +1757,7 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
   $info = stream_get_meta_data($fp);
   $alive = !$info['eof'];
   $response = '';
-  
+
   while ($alive) {
     $chunk = fread($fp, 1024);
     $response .= $chunk;
