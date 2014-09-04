@@ -394,7 +394,7 @@ function l($text, $path, $options = array()) {
   }
 
   if ($options['strlen'] && mb_strlen($text) > $options['strlen']) {
-    $text = mb_substr($text, 0, intval($options['strlen'])) . '...';
+    $text = mb_substr($text, 0, intval($options['strlen']));
   }
   
   if ($_GET['q'] == $path || $_GET['__q'] == $path) {

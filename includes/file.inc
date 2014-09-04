@@ -851,7 +851,7 @@ function file_get_path($ac = NULL) {
  * 文件系统根目录
  */
 function file_directory_path() {
-  return var_get('file_directory_path', $GLOBALS['conf_dir'].'/files');
+  return var_get('file_directory_path', $GLOBALS['conf_dir'] . '/files');
 }
 
 /**
