@@ -393,6 +393,7 @@ function field_set_cache_term($module = NULL, $type = NULL) {
     $fetch = db_query('SELECT t.*, f.module, f.type, f.field_type, f.field_key FROM {fields_term} 
     t INNER JOIN {fields} f ON t.field_id = f.field_id WHERE f.type = ? AND f.module = ? AND 
     f.field_type != ? ORDER BY t.weight ASC, t.tid ASC', array($type, $module, 'tags'));
+    cache_set('field_term_' . $module . '_' . $type, array());
   } else {
     $fetch = db_query('SELECT t.*, f.module, f.type, f.field_type, f.field_key FROM {fields_term} 
     t INNER JOIN {fields} f ON t.field_id = f.field_id WHERE f.field_type != ? 
@@ -411,6 +412,7 @@ function field_set_cache_term($module = NULL, $type = NULL) {
       $key = $o->module . '_' . $o->type;
       $p[$key][$o->field_id][$o->tid] = $o;
     }
+
     foreach ($p as $k => $data) {
       cache_set('field_term_' . $k, $data);
     }
