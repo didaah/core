@@ -26,7 +26,11 @@ function module_bootstrap() {
  * 初始化已启用模块
  */
 function module_init() {
-  module_invoke_all('init');
+  global $conf;
+  // hook_init() 不从缓存里读取，防止因缓存导致的意外
+  foreach ($conf['modules'] as $module => $info) {
+    module_invoke($module, 'init');
+  }
 }
 
 /**
