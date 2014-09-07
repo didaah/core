@@ -96,6 +96,7 @@ if (empty($_args['host'])) {
 // 设置工作目录
 define('DIDA_ROOT', dirname(dirname(__FILE__)));
 chdir(DIDA_ROOT);
+
 set_time_limit(0);
 
 // 使用指定站点的配置文件，必须有这个参数
