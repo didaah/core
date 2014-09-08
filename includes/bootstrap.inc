@@ -1544,10 +1544,11 @@ function dd_php_error($errno, $message, $filename, $line = NULL, $context = NULL
 
     text_log('php_error', dd_error_msg($msg));
 
-    if (empty($GLOBALS['conf']['debug'])) return;
-    if ($GLOBALS['conf']['debug'] == 2 && (empty($GLOBALS['user']) || $GLOBALS['user']->uid != 1)) return;
-
+    global $user, $conf;
+    if (empty($conf['debug'])) return;
+    if ($conf['debug'] == 2 && (empty($user->uid) || $user->uid != 1)) return;
     dd_set_message($msg, 'error');
+
   }
 }
 

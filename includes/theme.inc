@@ -170,6 +170,7 @@ function theme() {
    */
   if ($theme['tpl']) {
     $var = array();
+    $var['theme_config'] = new stdClass();
     if (is_array($theme['args'])) {
       foreach ($theme['args'] as $key => $val) {
         if ($val == 'theme_config') {

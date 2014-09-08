@@ -1043,6 +1043,7 @@ ul.admin_site_menu em {
   margin: 2px auto;
   display: block;
   text-align: left;
+  width: 98%;
 }
 
 .system_admin_block_link_remove {

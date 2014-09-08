@@ -1250,6 +1250,8 @@ function system_cache_settings() {
     l(t('system', '缓存管理'), 'admin/cache'),
     l(t('system', '缓存设置'), 'admin/cache/settings'),
   ));
+
+  $options = array();
   
   $options['/includes/cache.inc'] = t('system', '系统默认');
   
@@ -1258,7 +1260,7 @@ function system_cache_settings() {
       foreach ($objs as $obj) {
         if (strpos($obj, '.inc') !== false) {
           $name = basename($obj);
-          $options['/includes/cache/' . $name] = next(explode('.', $name, 3));
+          $options['/includes/cache/' . $name] = $name;
         }
       }
     }

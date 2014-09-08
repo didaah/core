@@ -63,7 +63,10 @@ if (cache_memcache_connect()) {
     $mem_table = '__table_' . $mem_prefix . $table . '_keys';
     
     if ($data = $mem->get(array($cid))) {
-      $cache->data = $data[$cid];
+      $cache = new stdClass();
+      if (isset($data[$cid])) {
+        $cache->data = $data[$cid];
+      }
       return $cache;
     }
 
