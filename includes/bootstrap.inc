@@ -1065,6 +1065,8 @@ function ip_address() {
  */
 function dd_user_validate() {
   global $user;
+
+  if (empty($user)) $user = new stdClass();
   
   if (!empty($_COOKIE[session_name()]) && !empty($_SESSION['user'])) {
     
@@ -1272,6 +1274,8 @@ function dd_get_referer($url) {
  */
 function user_anonymous($data = NULL) {
   global $cookie_domain, $conf;
+
+  $user = new stdClass();
 
   setcookie('time', '', -1, '/', $cookie_domain);
  
