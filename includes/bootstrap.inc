@@ -48,8 +48,15 @@ function bootstrap($op, $inc = NULL) {
 
   if (is_file(DIDA_ROOT . '/' . $conf_dir . '/cache/conf.php')) {
     require_once DIDA_ROOT . '/' . $conf_dir . '/cache/conf.php';
-  } else {
-    dd_to_install();
+  }
+
+  // 没有默认主题，通常是配置文件损坏，重新生成
+  if (empty($conf) || empty($conf['default_theme'])) {
+    require_once DIDA_ROOT . '/includes/database.inc';
+    //初始化默认数据库连接
+    db_connect('default');
+    var_init();
+    require_once DIDA_ROOT . '/' . $conf_dir . '/cache/conf.php';
   }
 
   // 若限制了域名，则验证 HTTP_HOST
