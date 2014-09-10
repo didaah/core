@@ -723,12 +723,13 @@ function custom_del($name) {
  * 更新配置缓存，无参数，无返回值
  */
 function var_init() {
+  global $conf;
   if ($fetch = db_query('SELECT * FROM {variable}')) {
     foreach ($fetch as $variable) {
-      $v[$variable->name] = unserialize($variable->value);
+      $conf[$variable->name] = unserialize($variable->value);
     }
   }
-  cache_system_set_file('conf.php', 'conf', $v);
+  cache_system_set_file('conf.php', 'conf', $conf);
 }
 
 /**
