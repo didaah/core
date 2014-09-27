@@ -14,3 +14,7 @@ div.dida-modal-wrapper-hidden {
   overflow: visible;
 }
 
+.item_pager ul.pager {
+  clear: both;
+  overflow: hidden;
+}
