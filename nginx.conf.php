@@ -47,7 +47,7 @@ http {
     gzip_comp_level 2;
 
     # 压缩类型
-    gzip_types  text/plain application/x-javascript text/css application/xml;
+    gzip_types  text/plain application/x-javascript text/css application/xml application/javascript;
 
     server {
         listen       80;
