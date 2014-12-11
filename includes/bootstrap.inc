@@ -1623,7 +1623,7 @@ function dd_set_ping($data, $service = array(), $method = 'weblogUpdates.extende
  * @return
  *  返回一个包含执行结果的对象
  *  $result->error：错误提示
- *  $result->code：HTTP 响应代码，小于 0 则为请求失
+ *  $result->code：HTTP 响应代码，小于 0 则为请求失效
  *  $result->data：返回内容
  */
 function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(), $retry = 3, $timeout = 15.0, array $opt = array()) {
@@ -1647,6 +1647,7 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     'headers' => empty($headers) ? array() : $headers,
     'method' => $method,
     'data' => NULL,
+    'history' => array(),
     'max_redirects' => $retry,
     'timeout' => (float) $timeout,
     'context' => NULL,
@@ -1875,7 +1876,12 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
       
       if ($retry) {
         $options['max_redirects']--;
-        $result = dd_http_request($location, $data, $method, $headers, $options['max_redirects']);
+        $headers['Referer'] = $url;
+        if (!empty($result->headers['set-cookie'])) {
+          $headers['Cookie'] = $result->headers['set-cookie'];
+        }
+        $opt['history'] = array($result);
+        $result = dd_http_request($location, $data, $method, $headers, $options['max_redirects'], $timeout, $opt);
         $result->redirect_code = $result->code;
       }
       
@@ -1883,6 +1889,12 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     break;
     default:
       $result->error = $status_message;
+  }
+
+  if (!empty($result->history)) {
+    $result->history[] = $options['history'];
+  } else {
+    $result->history = $options['history'];
   }
   
   return $result;
