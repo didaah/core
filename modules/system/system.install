@@ -3,6 +3,22 @@
 
 /**
  * @Implement of hook_update_X()
+ */
+function system_update_9() {
+  // 将 cron 上次执行时间戳从 cache 表中移入 custom，修复清除缓存后所有 cron 会重新执行的问题
+  if ($cache = cache_get('dida_cron_last_timestamps')) {
+    $data = $cache->data;
+  } else {
+    $data = array();
+  }
+
+  custom_set('dida_cron_last_timestamps', $data);
+
+  return array(t('system', '将 cron 上次执行时间记录到 custom 表成功'));
+}
+
+/**
+ * @Implement of hook_update_X()
  *  修改文本日志类型，从 txt 改为 php，防止被下载
  */
 function system_update_8() {
