@@ -181,11 +181,7 @@ function _cron_jobs() {
   }
 
   // 所有任务上一次的执行时间
-  if ($cache = cache_get('dida_cron_last_timestamps')) {
-    $timestamps = $cache->data;
-  } else {
-    $timestamps = array();
-  }
+  $timestamps = custom_get('dida_cron_last_timestamps', array());
 
   if (empty($cronjobs)) return false;
 
@@ -325,7 +321,7 @@ function _cron_jobs() {
   }
 
   // 写入所有任务上次执行的时间戳
-  cache_set('dida_cron_last_timestamps', $timestamps);
+  custom_set('dida_cron_last_timestamps', $timestamps);
 }
 // }}}
 
