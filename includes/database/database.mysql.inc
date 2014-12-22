@@ -61,13 +61,15 @@ function db_mysql_query($sql, $args = array(), $opt = array()) {
   
   if ($opt['limit']) {
     if (is_array($opt['limit'])) {
-      $sql .= ' LIMIT '.$opt['limit'][0].' , '.$opt['limit'][1];
-    } else {
-      $sql .= ' LIMIT 0, '.$opt['limit'];
+      if (is_numeric($opt['limit'][0]) && is_numeric($opt['limit'][0])) {
+        $sql .= ' LIMIT ' . $opt['limit'][0] . ' , ' . $opt['limit'][1];
+      }
+    } else if (is_numeric($opt['limit'])) {
+      $sql .= ' LIMIT 0, ' . $opt['limit'];
     }
   }
   
-  if ($args) {
+  if (!empty($args)) {
     if ($smt = $db[$opt['target']]->prepare($sql)) {
       $smt->execute($args);
     }
@@ -138,7 +140,7 @@ function db_mysql_replace($table, $args, array $opt = array()) {
     if (!isset($tables['fields'][$field_name])) {
       unset($args[$field_name]);
     } else {
-      $placeholder = ':'.$field_name;
+      $placeholder = ':' . $field_name;
       $fields[] = $field_name;
       $placeholders[] = $placeholder;
       if (empty($tables['fields'][$field_name]['serialize'])) {
@@ -149,12 +151,13 @@ function db_mysql_replace($table, $args, array $opt = array()) {
     }
   }
   
-  $sql = 'REPLACE INTO {'.$table.'} ';
-  $sql .= '('.implode(',', $fields).') VALUES ';
-  $sql .= '('.implode(',', $placeholders).')';
+  $sql = 'REPLACE INTO {' . $table . '} ';
+  $sql .= '(' . implode(',', $fields) . ') VALUES ';
+  $sql .= '(' . implode(',', $placeholders) . ')';
   
   return db_exec($sql, $sql_args, $opt);
 }
+
 /**
  * db_exec()
  * @example 写入一条
@@ -186,19 +189,19 @@ function db_mysql_exec($sql, $args = array(), $opt = array()) {
   global $db;
   static $transaction;
   
-  if ($opt['transaction']) {
+  if (!empty($opt['transaction'])) {
     switch ($opt['transaction']) {
       case 'start':
         $db[$opt['target']]->beginTransaction();
         $transaction = true;
         
-        if (!$sql) return true;
+        if (empty($sql)) return true;
       break;
       case 'end':
         $db[$opt['target']]->commit();
         $transaction = false;
         
-        if (!$sql) return true;
+        if (empty($sql)) return true;
       break;
       case 'back':
         $db[$opt['target']]->rollBack();
