@@ -1620,6 +1620,8 @@ function dd_set_ping($data, $service = array(), $method = 'weblogUpdates.extende
  *  重定向次数
  * @param (float) $timeout
  *  超时时间，默认 15 秒
+ * @param (array) $opt
+ *  其它配置参数
  * @return
  *  返回一个包含执行结果的对象
  *  $result->error：错误提示
@@ -1798,19 +1800,43 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
   $result->status_message = $status_message;
   
   $result->headers = array();
+  $result->headers['cookies'] = array();
   
   // 响应头
   while ($line = trim(array_shift($response))) {
     list($name, $value) = explode(':', $line, 2);
     $name = strtolower($name);
-    if (isset($result->headers[$name]) && $name == 'set-cookie') {
-      // Cookie: 以逗号分隔取得的 Cookie
-      $result->headers[$name] .= ',' . trim($value);
+    if ($name == 'set-cookie') {
+      if (isset($result->headers[$name])) {
+        // Cookie: 以逗号分隔取得的 Cookie
+        $result->headers[$name] .= ',' . trim($value);
+      } else {
+        $result->headers[$name] = trim($value);
+      }
+      foreach (explode(',', $value) as $_value) {
+        list($_n, $_d, $_t) = explode(';', $_value, 3);
+        if (!empty($_n) && !empty($_d)) {
+          $_array = explode('=', $_d, 2);
+          if (!empty($_array[1]) && $_array[0] == 'domain') {
+            if (!empty($result->headers['cookies'][$_array[1]])) {
+              $result->headers['cookies'][$_array[1]] .= $_n . ';';
+            } else {
+              $result->headers['cookies'][$_array[1]] = $_n . ';';
+            }
+          }
+        }
+      }
     } else {
       $result->headers[$name] = trim($value);
-    }
+    } 
   }
 
+  if (!empty($result->headers['cookies'])) {
+    foreach ($result->headers['cookies'] as $_k => $_v) {
+      $result->headers['cookies'][$_k] = rtrim($_v, ';');
+    }
+  }
+  
   $responses = array(
     100 => 'Continue',
     101 => 'Switching Protocols',
