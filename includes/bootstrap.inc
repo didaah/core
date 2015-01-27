@@ -1831,7 +1831,7 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     } 
   }
 
-  if (!empty($result->headers['cookies'])) {
+  if (!empty($result->headers['cookies']) && is_array($result->headers['cookies'])) {
     foreach ($result->headers['cookies'] as $_k => $_v) {
       $result->headers['cookies'][$_k] = rtrim($_v, ';');
     }
