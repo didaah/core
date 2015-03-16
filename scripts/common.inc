@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * 脚本开始运行时间
+ */
+define('DIDA_START_TIME', microtime(true));
+
+/**
  * @file 从命令行执行脚本
  *
  * 加载 bootstrap.inc

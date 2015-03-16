@@ -91,7 +91,7 @@ if (cache_memcache_connect()) {
   function cache_set($cid, $data, $table = 'cache', $expire = NULL) {
     global $mem, $mem_prefix;
     
-    if (!$expire) {
+    if (empty($expire) || $expire > 2592000) {
       $expire = 2592000;
     }
     
