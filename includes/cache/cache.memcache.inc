@@ -78,7 +78,9 @@ if (cache_memcache_connect()) {
       $expire = 2592000;
     }
     
-    $mem->set($key, $data, MEMCACHE_COMPRESSED, $expire);
+    $cid = $mem_prefix . $table . '_' . $cid;
+
+    $mem->set($cid, $data, $mem_compress, $expire);
   }
 
 } else {
