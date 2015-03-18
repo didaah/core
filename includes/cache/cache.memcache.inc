@@ -78,7 +78,7 @@ if (cache_memcache_connect()) {
       $expire = 2592000;
     }
     
-    $mem->set($key, $data, $mem_compress, $expire);
+    $mem->set($key, $data, MEMCACHE_COMPRESSED, $expire);
   }
 
 } else {
