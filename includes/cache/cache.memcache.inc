@@ -26,24 +26,15 @@ if (cache_memcache_connect()) {
         $mem->flush();
       break;
       case 'empty': // 清除表中所有数据
-        $mem->flush(); // @TODO 全部清除，非最佳处理方式
-        //if ($keys = $mem->get('__table_' . $mem_prefix . $table . '_keys')) {
-        //  foreach ($keys as $key => $k) {
-        //    $mem->delete($key, 0);
-        //  }
-        //  $mem->delete('__table_' . $mem_prefix . $table . '_keys', 0);
-        //}
-      break;
       case '*': // 模糊匹配
-        if ($keys = $mem->get('__table_' . $mem_prefix . $table . '_keys')) {
-          foreach ($keys as $key => $k) {
-            if (strpos($key, $cid) !== false) {
-              $mem->delete($key, 0);
-            }
-          }
-        }
+        /**
+         *  @TODO 全部清除，非最佳处理方式
+         *  当多个站点共用一个 memcache 实例时，会将其它站点缓存也清除掉
+         */
+        $mem->flush();
       break;
-      case 'table': // 清除表中已到过期缓存，memcache 会自动清除
+      case 'table':
+        // 清除表中已到过期缓存，memcache 会自动清除
     }
   }
 
@@ -59,8 +50,6 @@ if (cache_memcache_connect()) {
     global $mem, $mem_prefix;
 
     $cid = $mem_prefix . $table . '_' . $cid;
-
-    $mem_table = '__table_' . $mem_prefix . $table . '_keys';
     
     if ($data = $mem->get(array($cid))) {
       $cache = new stdClass();
@@ -69,12 +58,6 @@ if (cache_memcache_connect()) {
       }
       return $cache;
     }
-
-    // @TODO 若存入的是 0 false 等数据，将导致系统认为该条缓存不存在
-    //if ($data = $mem->get($cid)) {
-    //  $cache->data = $data;
-    //  return $cache;
-    //}
   }
 
   /**
@@ -89,25 +72,13 @@ if (cache_memcache_connect()) {
    * 	过期时间，从当前时间算起，以秒为单位
    */
   function cache_set($cid, $data, $table = 'cache', $expire = NULL) {
-    global $mem, $mem_prefix;
+    global $mem, $mem_prefix, $mem_compress;
     
     if (empty($expire) || $expire > 2592000) {
       $expire = 2592000;
     }
     
-    $key = $mem_prefix . $table . '_' . $cid;
-    $mem_table = '__table_' . $mem_prefix . $table . '_keys';
-    
-    if ($keys = $mem->get($mem_table)) {
-      if (empty($keys[$key])) {
-        $keys[$key] = 1;
-        $mem->set($mem_table, $keys, MEMCACHE_COMPRESSED, 2592000);
-      }
-    } else {
-      $mem->set($mem_table, array($key => 1), MEMCACHE_COMPRESSED, 2592000);
-    }
-    
-    $mem->set($key, $data, MEMCACHE_COMPRESSED, $expire);
+    $mem->set($key, $data, $mem_compress, $expire);
   }
 
 } else {
@@ -119,13 +90,18 @@ if (cache_memcache_connect()) {
  * memcache 连接
  */
 function cache_memcache_connect() {
-  global $mem, $mem_prefix;
+  global $mem, $mem_prefix, $mem_compress;
   
   if (!isset($mem)) {
     $mem = new Memcache;
     $mem_prefix = var_get('cache_memcache_prefix', '');
-    if ($mem->pconnect(var_get('cache_memcache_host', 'localhost'), var_get('cache_memcache_port', 11211))) {
-      $mem->setCompressThreshold(20000, 0.2);
+    $mem_compress = var_get('cache_memcache_compress', 0.2);
+    $host = var_get('cache_memcache_host', 'localhost');
+    $port = var_get('cache_memcache_port', 11211);
+    if ($mem->pconnect($host, $port)) {
+      if ($mem_compress) {
+        $mem->setCompressThreshold(20000, $mem_compress);
+      }
       return true;
     }
   }
@@ -144,12 +120,14 @@ function cache_settings_custom_form(&$form) {
     '#type' => 'textfield',
     '#required' => 1
   );
+
   $form['fields']['cache_memcache_port'] = array(
     '#title' => t('system', 'memcache 端口'),
     '#default_value' => var_get('cache_memcache_port', 11211),
     '#type' => 'textfield',
     '#required' => 1
   );
+
   $form['fields']['cache_memcache_prefix'] = array(
     '#title' => t('system', 'memcache 前缀'),
     '#default_value' => var_get('cache_memcache_prefix', str_replace('.', '', $_SERVER['HTTP_HOST'])),
@@ -157,4 +135,13 @@ function cache_settings_custom_form(&$form) {
     '#type' => 'textfield',
     '#required' => 1
   );
+
+  $form['fields']['cache_memcache_compress'] = array(
+    '#title' => t('system', 'memcache 压缩'),
+    '#default_value' => var_get('cache_memcache_compress', 0.2),
+    '#type' => 'textfield',
+    '#description' => t('system', '数值为压缩等级，0 为不压缩'),
+    '#required' => 1
+  ); 
 }
+
