@@ -95,10 +95,8 @@ function cache_set($cid, $data, $table = 'cache', $expire = NULL, $replace = 1) 
   if ($replace) {
     return db_replace($table, $cache);
   } else {
-    
     db_exec('DELETE FROM {'.$table.'} WHERE cid = ?', array($cache['cid']));
     return db_exec('INSERT INTO {'.$table.'} (cid, data, expire, created, serialized) VALUES (?, ?, ?, ?, ?)',
     array($cache['cid'], $cache['data'], $cache['expire'], $cache['created'], $cache['serialized']));
-    
   }
 }

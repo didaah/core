@@ -23,8 +23,6 @@ if (cache_memcache_connect()) {
         $mem->delete($mem_prefix . $table . '_' . $cid, 0);
       break;
       case 'all': // 全部清除
-        $mem->flush();
-      break;
       case 'empty': // 清除表中所有数据
       case '*': // 模糊匹配
         /**
@@ -80,7 +78,7 @@ if (cache_memcache_connect()) {
     
     $cid = $mem_prefix . $table . '_' . $cid;
 
-    $mem->set($cid, $data, $mem_compress, $expire);
+    return $mem->set($cid, $data, $mem_compress, $expire);
   }
 
 } else {
