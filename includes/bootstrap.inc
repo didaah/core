@@ -643,6 +643,7 @@ function var_set($name, $value, $clear = 1, $replace = 1) {
  * @return (bool)
  */
 function custom_set($name, $value) {
+  cache_del('cid', 'ctm_' . $name);
   return db_replace('custom', array('name' => $name, 'value' => $value));
 }
 
@@ -670,7 +671,10 @@ function var_get($name, $default = NULL) {
 function custom_get($name, $default = NULL) {
   static $custom;
   if (!isset($custom[$name])) {
-    if ($value = db_query('SELECT value FROM {custom} WHERE name = ?', array($name), array('return' => 'column'))) {
+    if ($cache = cache_get('ctm_' . $name)) {
+      $custom[$name] = $cache->data;
+    } else if ($value = db_query('SELECT value FROM {custom} WHERE name = ?',
+    array($name), array('return' => 'column'))) {
       $custom[$name] = unserialize($value);
     } else {
       $custom[$name] = $default;
