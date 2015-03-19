@@ -32,7 +32,7 @@ if (cache_memcache_connect()) {
         $mem->flush();
       break;
       case 'table':
-        $mem->flush();
+        // 清除表中已到过期缓存，memcache 会自动清除
     }
   }
 
