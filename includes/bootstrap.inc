@@ -673,11 +673,14 @@ function custom_get($name, $default = NULL) {
   if (!isset($custom[$name])) {
     if ($cache = cache_get('ctm_' . $name)) {
       $custom[$name] = $cache->data;
-    } else if ($value = db_query('SELECT value FROM {custom} WHERE name = ?',
-    array($name), array('return' => 'column'))) {
-      $custom[$name] = unserialize($value);
     } else {
-      $custom[$name] = $default;
+      if ($value = db_query('SELECT value FROM {custom} WHERE name = ?',
+      array($name), array('return' => 'column'))) {
+        $custom[$name] = unserialize($value);
+      } else {
+        $custom[$name] = $default;
+      }
+      cache_set('ctm_' . $name, $custom[$name]);
     }
   }
   return $custom[$name];
