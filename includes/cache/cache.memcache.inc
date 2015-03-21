@@ -22,14 +22,35 @@ if (cache_memcache_connect()) {
       case 'cid':
         $mem->delete($mem_prefix . $table . '_' . $cid, 0);
       break;
-      case 'all': // 全部清除
-      case 'empty': // 清除表中所有数据
-      case '*': // 模糊匹配
-        /**
-         *  @TODO 全部清除，非最佳处理方式
-         *  当多个站点共用一个 memcache 实例时，会将其它站点缓存也清除掉
-         */
+      case 'all':
+        // 全部清除
         $mem->flush();
+      case 'empty':
+        // 清除表中所有数据
+        $mem_table = '__table_' . $mem_prefix . $table . '_keys';
+        if ($keys = $mem->get($mem_table)) {
+          // @TODO 需观察效率
+          foreach ($keys as $key => $_i) {
+            $k = $mem_prefix . $table . '_' . $cid;
+            $mem->delete($k, 0);
+          }
+          $mem->delete($mem_table, 0);
+        }
+      break;
+      case '*':
+        // 模糊匹配
+        $mem_table = '__table_' . $mem_prefix . $table . '_keys';
+        if ($keys = $mem->get($mem_table)) {
+          // @TODO 需观察效率
+          foreach ($keys as $key => $_i) {
+            if (strpos($key, $cid) !== false) {
+              $k = $mem_prefix . $table . '_' . $cid;
+              $mem->delete($k, 0);
+              unset($keys[$key]);
+            }
+          }
+          $mem->set($mem_table, $keys);
+        }
       break;
       case 'table':
         // 清除表中已到过期缓存，memcache 会自动清除
@@ -75,7 +96,18 @@ if (cache_memcache_connect()) {
     if (empty($expire) || $expire > 2592000) {
       $expire = 2592000;
     }
-    
+
+    // 用于 cache_del()
+    $mem_table = '__table_' . $mem_prefix . $table . '_keys';
+    if ($keys = $mem->get($mem_table)) {
+      if (empty($keys[$cid])) {
+        $keys[$cid] = 1;
+        $mem->set($mem_table, $keys, MEMCACHE_COMPRESSED, 2592000);
+      }
+    } else {
+      $mem->set($mem_table, array($cid => 1), MEMCACHE_COMPRESSED, 2592000);
+    }
+
     $cid = $mem_prefix . $table . '_' . $cid;
 
     return $mem->set($cid, $data, $mem_compress, $expire);
