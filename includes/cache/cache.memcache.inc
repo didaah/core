@@ -31,8 +31,13 @@ if (cache_memcache_connect()) {
         if ($keys = $mem->get($mem_table)) {
           // @TODO 需观察效率
           foreach ($keys as $key => $_i) {
-            $k = $mem_prefix . $table . '_' . $cid;
-            $mem->delete($k, 0);
+            if ($k = $mem->get($key)) {
+              foreach ($k as $_k => $_j) {
+                $_k = $mem_prefix . $table . '_' . $_k;
+                $mem->delete($_k, 0);
+              }
+              $mem->delete($key, 0);
+            }
           }
           $mem->delete($mem_table, 0);
         }
@@ -43,13 +48,17 @@ if (cache_memcache_connect()) {
         if ($keys = $mem->get($mem_table)) {
           // @TODO 需观察效率
           foreach ($keys as $key => $_i) {
-            if (strpos($key, $cid) !== false) {
-              $k = $mem_prefix . $table . '_' . $cid;
-              $mem->delete($k, 0);
-              unset($keys[$key]);
+            if ($k = $mem->get($key)) {
+              foreach ($k as $_k => $_j) {
+                if (strpos($_k, $cid) !== false) {
+                  $_k = $mem_prefix . $table . '_' . $_k;
+                  $mem->delete($_k, 0);
+                  unset($k[$key]);
+                }
+              }
+              $mem->set($key, $k);
             }
           }
-          $mem->set($mem_table, $keys);
         }
       break;
       case 'table':
@@ -99,13 +108,24 @@ if (cache_memcache_connect()) {
 
     // 用于 cache_del()
     $mem_table = '__table_' . $mem_prefix . $table . '_keys';
+    $mt = $mem_table . substr($cid, 0, 4);
+
     if ($keys = $mem->get($mem_table)) {
-      if (empty($keys[$cid])) {
-        $keys[$cid] = 1;
+      if (empty($keys[$mt])) {
+        $keys[$mt] = 1;
         $mem->set($mem_table, $keys, MEMCACHE_COMPRESSED, 2592000);
       }
     } else {
-      $mem->set($mem_table, array($cid => 1), MEMCACHE_COMPRESSED, 2592000);
+      $mem->set($mem_table, array($mt => 1), MEMCACHE_COMPRESSED, 2592000);
+    }
+
+    if ($keys = $mem->get($mt)) {
+      if (empty($keys[$cid])) {
+        $keys[$cid] = 1;
+        $mem->set($mt, $keys, MEMCACHE_COMPRESSED, 2592000);
+      }
+    } else {
+      $mem->set($mt, array($cid => 1), MEMCACHE_COMPRESSED, 2592000);
     }
 
     $cid = $mem_prefix . $table . '_' . $cid;
