@@ -91,7 +91,7 @@ if (cache_memcache_connect()) {
    * 	过期时间，从当前时间算起，以秒为单位
    */
   function cache_set($cid, $data, $table = 'cache', $expire = NULL) {
-    global $mem, $mem_prefix, $mem_compress;
+    global $mem, $mem_prefix, $mem_compress, $_mem_compress;
     
     if (empty($expire) || $expire > 2592000) {
       $expire = 2592000;
@@ -110,7 +110,7 @@ if (cache_memcache_connect()) {
 
     $cid = $mem_prefix . $table . '_' . $cid;
 
-    return $mem->set($cid, $data, $mem_compress, $expire);
+    return $mem->set($cid, $data, $_mem_compress, $expire);
   }
 
 } else {
@@ -122,7 +122,7 @@ if (cache_memcache_connect()) {
  * memcache 连接
  */
 function cache_memcache_connect() {
-  global $mem, $mem_prefix, $mem_compress;
+  global $mem, $mem_prefix, $mem_compress, $_mem_compress;
   
   if (!isset($mem)) {
     $mem = new Memcache;
@@ -134,6 +134,7 @@ function cache_memcache_connect() {
       if ($mem_compress) {
         $mem->setCompressThreshold(20000, $mem_compress);
       }
+      $_mem_compress = MEMCACHE_COMPRESSED;
       return true;
     }
   }
