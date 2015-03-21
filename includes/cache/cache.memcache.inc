@@ -108,7 +108,7 @@ if (cache_memcache_connect()) {
 
     // 用于 cache_del()
     $mem_table = '__table_' . $mem_prefix . $table . '_keys';
-    $mt = $mem_table . substr($cid, 0, 2) . substr($cid, -2);
+    $mt = $mem_table . substr($cid, 0, 1) . substr($cid, -1);
 
     if ($keys = $mem->get($mem_table)) {
       if (empty($keys[$mt])) {
