@@ -1792,14 +1792,7 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
   
   // 解析响应
   list($response, $result->data) = explode("\r\n\r\n", $response, 2);
-  
-  /*
-  // http 1.1 分块输出，过滤 Transfer-Encoding 标识
-  if ($result->data && strpos($response, 'Transfer-Encoding: chunked') !== false) {
-    $result->data = dd_filter_unchunkHttp11($result->data);
-  }
-  */
-  
+ 
   $response = preg_split("/\r\n|\n|\r/", $response);
   
   list($protocol, $code, $status_message) = explode(' ', trim(array_shift($response)), 3);
@@ -1820,17 +1813,11 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
       } else {
         $result->headers[$name] = trim($value);
       }
-      foreach (explode(',', $value) as $_value) {
-        list($_n, $_d, $_t) = explode(';', $_value, 3);
-        if (!empty($_n) && !empty($_d)) {
-          $_array = explode('=', $_d, 2);
-          if (!empty($_array[1]) && $_array[0] == 'domain') {
-            if (!empty($result->headers['cookies'][$_array[1]])) {
-              $result->headers['cookies'][$_array[1]] .= $_n . ';';
-            } else {
-              $result->headers['cookies'][$_array[1]] = $_n . ';';
-            }
-          }
+      if (strpos($value, ';') !== false) {
+        $_c = explode(';', $value, 3);
+        if (strpos($_c[0], '=') !== false) {
+          list($_n, $_d) = explode('=', $_c[0], 2);
+          $result->headers['cookies'][$_n] = $_d;
         }
       }
     } else {
@@ -1838,11 +1825,12 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
     } 
   }
 
-  if (!empty($result->headers['cookies']) && is_array($result->headers['cookies'])) {
-    foreach ($result->headers['cookies'] as $_k => $_v) {
-      $result->headers['cookies'][$_k] = rtrim($_v, ';');
-    }
-  }
+  // http 1.1 分块输出，过滤 Transfer-Encoding 标识
+  // @TODO 不做处理
+  //if ($result->data && !empty($result->headers['transfer-encoding'])
+  //  && $result->headers['transfer-encoding'] == 'chunked') {
+  //  $result->data = dd_filter_unchunkHttp11($result->data);
+  //}
   
   $responses = array(
     100 => 'Continue',
