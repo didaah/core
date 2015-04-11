@@ -303,19 +303,18 @@ function image_gd_resize($source, $destination, $width, $height, $mark = NULL) {
       imagetruecolortopalette($res, TRUE, $number_colors);
     }
   }
+  
   imagecopyresampled($res, $im, 0, 0, 0, 0, $width, $height, $info['width'], $info['height']);
-  
-  // 添加水印
-  if (!empty($mark) || (!isset($mark) && var_get_key('file_image_watermark', 'default', 0))) {
-    if ($_res = image_gd_mark($source, array(), $res)) {
-      $res = $_res;
-    }
-  }
-  
+
   $result = image_gd_close($res, $destination, $info['extension']);
 
   imagedestroy($res);
   imagedestroy($im);
+
+  // 添加水印
+  if (!empty($mark) || ($mark !== false && var_get_key('file_image_watermark', 'default', 0))) {
+    image_gd_mark($destination, array());
+  }
 
   return $result;
 }
@@ -342,14 +341,6 @@ function image_gd_resize($source, $destination, $width, $height, $mark = NULL) {
  * @return (bool|resource)
  */
 function image_gd_mark($filepath, array $args = array(), $im = NULL) {
-  static $files;
-
-  if (isset($files[$filepath])) {
-    return !empty($im) ? $im : $files[$filepath];
-  }
-
-  $files[$filepath] = false;
-
   $opt = array_merge(var_get('file_image_watermark', array()), $args);
 
   if (empty($opt['file'])) {
@@ -366,9 +357,7 @@ function image_gd_mark($filepath, array $args = array(), $im = NULL) {
       $_im = $im;
     }
 
-    if (!$_im) {
-      return false;
-    }
+    if (!$_im) return false;
     
     if ($opt['garble'] && is_file($opt['garble_file'])) {
       $watermark = imagecreatefrompng($opt['garble_file']);
@@ -398,16 +387,16 @@ function image_gd_mark($filepath, array $args = array(), $im = NULL) {
 
     imagedestroy($watermark);
 
-    if ($im) {
-      return $_im;
-    }
+    if ($im) return $_im;
 
-    $files[$filepath] = $result = image_gd_close($_im, $filepath, $info['extension']);
+    $result = image_gd_close($_im, $filepath, $info['extension']);
+
     imagedestroy($_im);
     
     return $result;
   }
 }
+
 /**
  * 旋转图像
  */
