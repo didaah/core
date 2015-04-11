@@ -578,7 +578,7 @@ function system_site_files_validate($form, &$v) {
     
     if (!empty($files['file_image_watermark_Ufile'])) {
       if ($file = file_save_upload($files['file_image_watermark_Ufile'], $validate, 0)) {
-        if (!empty($v['file_image_watermark']['file'])) {
+        if (!empty($v['file_image_watermark']['file']) && $v['file_image_watermark']['file'] != $file->filepath) {
           @unlink($v['file_image_watermark']['file']);
         }
         $v['file_image_watermark']['file'] = $file->filepath;
@@ -587,7 +587,7 @@ function system_site_files_validate($form, &$v) {
 
     if (!empty($files['file_image_watermark_Ugarble_file'])) {
       if ($file = file_save_upload($files['file_image_watermark_Ugarble_file'], $validate, 0)) {
-        if (!empty($v['file_image_watermark']['garble_file'])) {
+        if (!empty($v['file_image_watermark']['garble_file']) && $v['file_image_watermark']['garble_file'] != $file->filepath) {
           @unlink($v['file_image_watermark']['garble_file']);
         }
         $v['file_image_watermark']['garble_file'] = $file->filepath;

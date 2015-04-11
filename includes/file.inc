@@ -470,7 +470,8 @@ function file_create_name(&$file, $validate = NULL, $rename = 1) {
   }
   
   if (empty($file->extension)) {
-    $file->extension = strtolower(end(explode('.', $file->filename)));
+    $_ext = explode('.', $file->filename);
+    $file->extension = strtolower(end($_ext));
   }
 
   // 指定扩展名，若与上传类型不符，则转换，因此，只有图片才能指定扩展名
