@@ -9,6 +9,7 @@ function _system_file_view($file) {
 
   dd_set_title(array($file->filename));
 
+  $file->path = url('files/' . $file->fid . '/view');
   $file->filebody = filter_view($file->filebody);
 
   module_invoke_all('file_view', $file);
