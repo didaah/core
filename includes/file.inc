@@ -90,12 +90,12 @@ function file_get_form($field) {
  * 读取数据库，并显示图片
  */
 function file_image_view($fid, $opt = array()) {
-  if ($file = db_query('SELECT filepath, filename FROM {files} WHERE fid = ?', array($fid), array('return' => 'one'))) {
-    
+  if ($file = db_query('SELECT filepath, filename FROM {files} WHERE fid = ?',
+  array($fid), array('return' => 'one'))) {
     $title = $opt['title'] ? $opt['title'] : $file->filename;
     $alt = $opt['alt'] ? $opt['alt'] : $title;
     
-    if ($opt['thumb']) {
+    if (!empty($opt['thumb'])) {
       $file->filepath = image_get_thumb($fid, $file->filepath, $opt['thumb']);
     }
     
@@ -887,8 +887,9 @@ function file_load($fid, $invoke = true) {
   static $files;
 
   if (!isset($files[$fid])) {
-    if ($files[$fid] = db_query('SELECT f.*, u.name FROM {files} f LEFT JOIN {users} u ON f.uid = u.uid WHERE f.fid = ?',
-    array($fid), array('return' => 'one'))) {
+    if ($files[$fid] = db_query('SELECT f.*, u.name FROM {files} f LEFT JOIN {users} u 
+    ON f.uid = u.uid WHERE f.fid = ?', array($fid), array('return' => 'one'))) {
+      $file->path = url('files/' . $fid . '/view');
       if ($invoke) module_invoke_all('file_load', $files[$fid]);
     }
   }
