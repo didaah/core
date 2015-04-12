@@ -1679,6 +1679,24 @@ function system_no_content($content = NULL) {
 }
 
 /**
+ * @Implement of hook_template_preprocess_x()
+ * 
+ * 区域模板文件加载顺序：
+ * block_{$block->module}_{$block->delta}.tpl.php
+ * block_{$block->module}.tpl.php
+ * block.tpl.php
+ * 
+ */
+function system_template_preprocess_file(&$var, $hook) {
+  if (!empty($var['file']->ext_type)) {
+    $var['theme_config']->tpl[] = 'file_' . $var['file']->ext_type . '.tpl.php';
+    if (!empty($var['file']->filemime)) {
+      $var['theme_config']->tpl[] = 'file_' . $var['file']->ext_type . '_' . preg_replace('/[^0-9a-z]/', '', $var['file']->filemime) . '.tpl.php';
+    }
+  }
+}
+
+/**
  * @Implement of hook_theme()
  */
 function system_theme() {
