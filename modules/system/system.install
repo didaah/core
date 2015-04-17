@@ -3,6 +3,21 @@
 
 /**
  * @Implement of hook_update_x()
+ *  filter_tags.delta 字段类型修改
+ */
+function system_update_11() {
+  // 将 delta 长度改为 32
+  return db_change_field('filter_tags', 'delta', 'delta', array(
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => '基于的过滤规则在其模块内部编号',
+  ));
+}
+
+/**
+ * @Implement of hook_update_x()
  *  filters.delta 字段类型修改
  */
 function system_update_10() {
@@ -101,7 +116,7 @@ function system_update_7() {
 
   if ($ret = db_change_field('filter_tags', 'delta', 'delta', array(
     'type' => 'varchar',
-    'length' => 12,
+    'length' => 32,
     'not null' => TRUE,
     'default' => '',
     'description' => '基于的过滤规则在其模块内部编号',
@@ -950,7 +965,7 @@ function system_schema() {
       ),
       'delta' => array(
         'type' => 'varchar',
-        'length' => 12,
+        'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => '基于的过滤规则在其模块内部编号',
