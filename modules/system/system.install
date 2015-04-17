@@ -2,6 +2,21 @@
 // $Id$
 
 /**
+ * @Implement of hook_update_x()
+ *  filters.delta 字段类型修改
+ */
+function system_update_10() {
+  // 将 delta 长度改为 32
+  return db_change_field('filters', 'delta', 'delta', array(
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => '过滤器在模块内部编号',
+  ));
+}
+
+/**
  * @Implement of hook_update_X()
  */
 function system_update_9() {
@@ -52,7 +67,7 @@ function system_update_8() {
  * @Implement of hook_update_x()
  *  filters.delta 字段类型修改
  */
-function system_update_7(){
+function system_update_7() {
   // 将 delta 由 int 改为 varchar，便于编码
 
   if ($ret = db_change_field('filters', 'delta', 'delta', array(
@@ -62,7 +77,6 @@ function system_update_7(){
     'default' => '',
     'description' => '过滤器在模块内部编号',
   ))) {
-
     // html 标签过滤器 delta 由 0 更改为 html
     db_exec('UPDATE {filters} SET delta = ? WHERE module = ? AND delta = 0',
     array('html', 'system'));
@@ -883,7 +897,7 @@ function system_schema() {
       ),
       'delta' => array(
         'type' => 'varchar',
-        'length' => 12,
+        'length' => 32,
         'not null' => TRUE,
         'default' => '',
         'description' => '过滤器模块内部编号',
