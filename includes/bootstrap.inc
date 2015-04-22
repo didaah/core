@@ -1813,11 +1813,11 @@ function dd_http_request($url, $data = NULL, $method = 'POST', $headers = array(
       } else {
         $result->headers[$name] = trim($value);
       }
-      if (strpos($value, ';') !== false) {
+      if (is_array($result->headers['cookies']) && strpos($value, ';') !== false) {
         $_c = explode(';', $value, 3);
         if (strpos($_c[0], '=') !== false) {
           list($_n, $_d) = explode('=', $_c[0], 2);
-          $result->headers['cookies'][$_n] = $_d;
+          $result->headers['cookies'][trim($_n)] = $_d;
         }
       }
     } else {
