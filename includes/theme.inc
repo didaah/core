@@ -69,6 +69,7 @@ function theme_init() {
   }
 
   dd_add_js('misc/jquery.js', 'core');
+  dd_add_js('misc/jquery/migrate.js', 'core');
   dd_add_js('misc/dida.js', 'core');
   dd_add_js('misc/jquery.dida.js', 'core');
 }

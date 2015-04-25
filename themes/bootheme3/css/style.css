@@ -197,15 +197,6 @@ label {
   text-align: center;
 }
 
-ul {
-  margin: 0 0 10px 5px;
-  padding: 0;
-}
-
-ul ul {
-  margin: 0 0 10px 10px
-}
-
 li {
   list-style: none outside none;
 }

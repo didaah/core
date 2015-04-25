@@ -1,6 +1,6 @@
 // $Id$
 $(function() {
-  $("input@[type='text'], input@[type='password']").hover(function() {
+  $("input[type='text'], input[type='password']").hover(function() {
     $(this).addClass('inputhover');
   },function() {
     $(this).removeClass('inputhover');

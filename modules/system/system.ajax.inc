@@ -9,10 +9,10 @@ function system_tools_ajax() {
   $module = !empty($_POST['module']) ? $_POST['module'] : $_GET['module'];
   
   if ($module && isset($GLOBALS['conf']['modules'][$module])) {
-    
+    module_include_file('system.ajax.inc', $module);
     // 传递 $_POST、$_GET
-    echo module_invoke($module, 'system_tools_ajax', $_POST, $_GET);
-    
+    $type = !empty($_POST['op']) ? $_POST['op'] : $_GET['op'];
+    echo module_invoke($module, 'system_tools_ajax', $_POST, $_GET, $type);
   }
   
   exit;
@@ -21,10 +21,7 @@ function system_tools_ajax() {
 /**
  * @Implement of hook_system_tools_ajax()
  */
-function system_system_tools_ajax($v, $g) {
-
-  $type = !empty($v['op']) ? $v['op'] : $g['op'];
-
+function system_system_tools_ajax($v, $g, $type) {
   switch ($type) {
     case 'admin_menu':
       if (is_array($v['system_admin_menu_list'])) {

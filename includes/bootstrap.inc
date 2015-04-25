@@ -2353,6 +2353,26 @@ function dd_jqui($theme = NULL) {
 }
 // }}}
 
+// public dd_load_jquery_plugin($name) {{{ 
+/**
+ * dd_load_jquery_plugin
+ *  加载 jquery 插件
+ * 
+ * @param string $name 
+ *  插件名称
+ * @access public
+ * @return void
+ */
+function dd_load_jquery_plugin($name) {
+  static $data;
+
+  if (empty($data[$name])) {
+    dd_add_js('misc/jquery/' . $name . '.js');
+    $data[$name] = 1;
+  }
+}
+// }}}
+
 /**
  * 载入 jqedit 插
  * @param (array) $v
