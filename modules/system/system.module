@@ -76,6 +76,14 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
+  $items['admin/sql'] = array(
+    'title' => '执行 SQL',
+    'access_arguments' => array('system admin sql'),
+    'page_callback' => 'dd_get_form',
+    'page_arguments' => array('system_admin_sql'),
+    'file' => 'system.admin.inc',
+  );
+
   $items['admin/modules'] = array(
     'title' => '模块管理',
     'access_arguments' => array('system admin module'),
@@ -270,6 +278,7 @@ function system_perm() {
     'system admin settings global' => t('system', '站点信息'),
     'system admin settings error' => t('system', '错误设置'),
     'system admin logs' => t('system', '系统日志'),
+    'system admin sql' => t('system', '执行 SQL(危险)'),
     //'system admin cron' => t('system', '计划任务'),
     'system admin settings captcha' => t('system', '验证码设置'),
     'system admin settings files' => t('system', '文件设置'),
@@ -588,6 +597,7 @@ function system_system_admin_menus() {
     array(t('system', '首页设置'), 'admin/front'),
     array(t('system', '别名管理'), 'admin/alias'),
     array(t('system', '系统日志'), 'admin/logs'),
+    array(t('system', '执行 SQL'), 'admin/sql'),
   ), t('system', '系统设置'));
 }
 

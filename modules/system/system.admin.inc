@@ -2012,8 +2012,6 @@ function system_admin_alias() {
         $output .= pager_view();
         
       }
-      
-      
   }
   
   dd_set_breadcrumb(array(l(t('system', '系统管理'), 'admin'), t('system', '别名管理')));
@@ -2081,6 +2079,118 @@ function system_admin_alias_form_submit($form, $v) {
   dd_set_message(t('system', '添加成功'));
   dd_goto('admin/alias');
 }
+
+// public system_admin_sql() {{{ 
+/**
+ * system_admin_sql
+ *  执行 SQL
+ * 
+ * @access public
+ * @return array
+ */
+function system_admin_sql() {
+  global $disable_admin_sql_update;
+
+  if (!empty($_GET['ajax'])) {
+    if (!empty($_POST['data'])) {
+      $_POST['data'] = trim($_POST['data']);
+
+      if (strpos($_POST['data'], ";\n") !== false) {
+        $query = explode(";\n", $_POST['data']);
+      } else {
+        $query = array($_POST['data']);
+      }
+
+      switch ($_POST['type']) {
+        case 1: case 2:
+          $item = array();
+          if (!empty($disable_admin_sql_update)) {
+            foreach ($query as $sql) {
+              $count = db_exec($sql);
+              $item[] = '<strong>' . $sql . '</strong>';
+              $item[] = t('system', '受影响的行 !count', array('!count' => $count));
+            }
+          } else {
+            $item[] = t('system', '要使用此功能，请在 setting.php 中加入如下代码：');
+            $item[] = '$disable_admin_sql_update = true;';
+          }
+          $output = theme('item_list', $item);
+        break;
+        default:
+          $output = '';
+          foreach ($query as $sql) {
+            // 若没有设置行数，默认限定为 100 条
+            if (stripos($sql, 'limit') === false) {
+              $sql = rtrim(trim($sql), ';') . ' LIMIT 0, 100';
+            }
+            if ($fetch = db_query($sql)) {
+              $header = array();
+              $output .= '<strong>' . $sql . '</strong>';
+              foreach ($fetch as $i => $o) {
+                $rows = array();
+                foreach ($o as $key => $v) {
+                  if ($i == 0) $header[] = $key;
+                  $rows[] = $v;
+                }
+                $table[] = $rows;
+              }
+              $output .= theme('table', $header, $table);
+            }
+          }
+      }
+      echo '$("#system_admin_sql_output_value").html("' . addslashes(str_replace("\n", '', $output)) . '");';
+    }
+    exit;
+  }
+
+  dd_set_breadcrumb(array(l(t('system', '系统管理'), 'admin'), t('system', '执行 SQL')));
+
+  $form = array(
+    'fields' => array(),
+    'settings' => array(
+      '#ajax_validate' => true,
+      '#ajax_submit' => array(
+        'options' => array(
+          'dataType' => 'script',
+          'url' => url('admin/sql', array('query' => array('ajax' => 1))),
+        ),
+      ),
+    )
+  );
+
+  $form['fields']['data'] = array(
+    '#title' => t('system', 'SQL 语句'),
+    '#type' => 'textarea',
+    '#description' => t('system', '多条以分号分隔'),
+    '#required' => 1,
+  );
+
+  $form['fields']['type'] = array(
+    '#title' => t('system', '语句类型'),
+    '#type' => 'radio',
+    '#required' => 1,
+    '#default_value' => 0,
+    '#description' => t('system', '系统不会过滤语句，该选项仅用于确认操作，请谨慎'),
+    '#options' => array(
+      t('system', '查询'),
+      t('system', '更新'),
+      t('system', '删除'),
+    )
+  );
+ 
+  $form['fields']['button'] = array(
+    '#type' => 'submit',
+  );
+ 
+  $form['fields']['output'] = array(
+    '#type' => 'value',
+    '#title' => t('system', '运行结果'),
+    '#value' => '<div id="system_admin_sql_output_value"></div>'
+  );
+
+  return $form;
+}
+// }}}
 
 /**
  * @reference
