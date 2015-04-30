@@ -2126,6 +2126,7 @@ function system_admin_sql() {
             if ($fetch = db_query($sql)) {
               $header = array();
               $output .= '<strong>' . $sql . '</strong>';
+              $table = array();
               foreach ($fetch as $i => $o) {
                 $rows = array();
                 foreach ($o as $key => $v) {
