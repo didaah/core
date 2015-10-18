@@ -2493,7 +2493,7 @@ function dd_set_message($message = NULL, $type = 'notice', $repeat = true) {
  * @return (string)
  */
 function dd_get_message() {
-  if ($_SESSION['messages']) {
+  if (!empty($_SESSION['messages']) && function_exists('theme_get_element')) {
     $output = theme_get_element('dd_element_message', $_SESSION['messages']);
     unset($_SESSION['messages']);
     return $output;
