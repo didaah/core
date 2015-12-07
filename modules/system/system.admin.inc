@@ -2112,6 +2112,7 @@ function system_admin_sql() {
             }
           } else {
             $item[] = t('system', '要使用此功能，请在 setting.php 中加入如下代码：');
+            $item[] = 'global $disable_admin_sql_update;';
             $item[] = '$disable_admin_sql_update = true;';
           }
           $output = theme('item_list', $item);
