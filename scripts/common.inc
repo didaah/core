@@ -54,9 +54,14 @@ function args($key = NULL, $argc = NULL, $argv = NULL) {
   }
   
   $args = array();
-  
   foreach ($_args as $_key => $v) {
-    if (count($v) == 1) {;
+    if (preg_match('/\[(.*?)\]/', $_key, $mat)) {
+      $k = str_replace('[' . $mat[1] . ']', '', $_key);
+      if (empty($args[$k]) || !is_array($args[$k])) {
+        $args[$k] = array();
+      }
+      $args[$k][$mat[1]] = is_array($v) && count($v) == 1 ? $v[0] : $v;
+    } else if (is_array($v) && count($v) == 1) {;
       $args[$_key] = $v[0];
     } else {
       $args[$_key] = $v;
