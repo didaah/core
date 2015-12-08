@@ -23,6 +23,8 @@ define('DIDA_START_TIME', microtime(true));
  * 将命令行参数解析为数组，约定使用 --
  * 如：php test.php --m test --k --p a -p b
  * 解析为 array('m' => 'test', 'k' => true, 'p' => array('a', 'b'));
+ * 如：php test.php --m test --test[a] 1 --test[b] 2
+ * 解析为 array('m' => 'test', 'test' => array('a' => 1, 'b' => 2));
  * 
  * @param string $key
  * 	获取指定参数
