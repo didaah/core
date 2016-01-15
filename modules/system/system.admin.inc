@@ -2089,11 +2089,16 @@ function system_admin_alias_form_submit($form, $v) {
  * @return array
  */
 function system_admin_sql() {
-  global $disable_admin_sql_update;
+  global $disable_admin_sql_update, $database;
 
   if (!empty($_GET['ajax'])) {
     if (!empty($_POST['data'])) {
       $_POST['data'] = trim($_POST['data']);
+      if (!empty($database[$_POST['target']])) {
+        $target = $_POST['target'];
+      } else {
+        $target = 'default';
+      }
 
       if (strpos($_POST['data'], ";\n") !== false) {
         $query = explode(";\n", $_POST['data']);
@@ -2106,7 +2111,7 @@ function system_admin_sql() {
           $item = array();
           if (!empty($disable_admin_sql_update)) {
             foreach ($query as $sql) {
-              $count = db_exec($sql);
+              $count = db_exec($sql, array(), array('target' => $target));
               $item[] = '<strong>' . $sql . '</strong>';
               $item[] = t('system', '受影响的行 !count', array('!count' => $count));
             }
@@ -2121,10 +2126,10 @@ function system_admin_sql() {
           $output = '';
           foreach ($query as $sql) {
             // 若没有设置行数，默认限定为 100 条
-            if (stripos($sql, 'limit') === false) {
+            if (stripos($sql, 'select') && stripos($sql, 'limit') === false) {
               $sql = rtrim(trim($sql), ';') . ' LIMIT 0, 100';
             }
-            if ($fetch = db_query($sql)) {
+            if ($fetch = db_query($sql, array(), array('target' => $target))) {
               $header = array();
               $output .= '<strong>' . $sql . '</strong>';
               $table = array();
@@ -2180,6 +2185,17 @@ function system_admin_sql() {
     )
   );
  
+  $keys = array_keys($database);
+
+  $form['fields']['target'] = array(
+    '#title' => t('system', '选择连接'),
+    '#type' => 'select',
+    '#required' => 1,
+    '#default_value' => 0,
+    '#description' => t('system', '选择一个数据库连接，通常使用 default'),
+    '#options' => array_combine($keys, $keys),
+  );
+
   $form['fields']['button'] = array(
     '#type' => 'submit',
   );
