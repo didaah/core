@@ -2126,7 +2126,7 @@ function system_admin_sql() {
           $output = '';
           foreach ($query as $sql) {
             // 若没有设置行数，默认限定为 100 条
-            if (stripos($sql, 'select') && stripos($sql, 'limit') === false) {
+            if (stripos($sql, 'select') !== true && stripos($sql, 'limit') === false) {
               $sql = rtrim(trim($sql), ';') . ' LIMIT 0, 100';
             }
             if ($fetch = db_query($sql, array(), array('target' => $target))) {
