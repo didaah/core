@@ -2137,7 +2137,7 @@ function system_admin_sql() {
                 $rows = array();
                 foreach ($o as $key => $v) {
                   if ($i == 0) $header[] = $key;
-                  $rows[] = $v;
+                  $rows[] = check_plain($v);
                 }
                 $table[] = $rows;
               }
@@ -2145,7 +2145,7 @@ function system_admin_sql() {
             }
           }
       }
-      echo '$("#system_admin_sql_output_value").html("' . addslashes(str_replace("\n", '', $output)) . '");';
+      echo '$("#system_admin_sql_output_value").html("' . addslashes(str_replace(array("\n", "\r"), '', $output)) . '");';
     }
     exit;
   }
