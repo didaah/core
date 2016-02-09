@@ -570,6 +570,7 @@ function user_admin_fields() {
   $args = arg();
   switch ($args[3]) {
   	case 'add':
+      $field = new stdClass();
       $field->type = 'field';
       $field->module = 'user';
       $field->redirect = url('admin/users/fields');
